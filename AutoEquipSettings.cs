@@ -2,17 +2,63 @@
 using System.IO;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
+using MarsSettingsGUI;
+using System.Configuration;
+using System.ComponentModel;
 
+[Serializable]
 public class AutoEquipSettings : robotManager.Helpful.Settings
 {
+    SettingsWindow settingWindow;
     public static AutoEquipSettings CurrentSettings { get; set; }
 
-    private AutoEquipSettings()
-    {
-        LastUpdateDate = 0;
-    }
+    // Bags
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Bags")]
+    [DisplayName("Equip Bags")]
+    [Description("Enable this setting to let the plugin handle bag equipment and upgrades")]
+    public bool AutoEquipBags { get; set; }
+
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Bags")]
+    [DisplayName("Equip Quiver")]
+    [Description("Enable this setting to let the plugin handle quiver equipment and upgrades for the Hunter. If disabled, you quiver will be replaced by a bag.")]
+    public bool AutoEquipQuiver { get; set; }
+
+    // Gear
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Gear")]
+    [DisplayName("Equip Gear")]
+    [Description("Enable this setting to let the plugin handle gear equipment")]
+    public bool AutoEquipGear { get; set; }
 
     public double LastUpdateDate { get; set; }
+
+    public AutoEquipSettings()
+    {
+        // Bags
+        AutoEquipQuiver = true;
+        AutoEquipBags = true;
+        LastUpdateDate = 0;
+
+        // Gear
+        AutoEquipGear = true;
+    }
+
+    public void ShowConfiguration()
+    {
+        settingWindow = new SettingsWindow(this, ObjectManager.Me.WowClass.ToString());
+        settingWindow.MaxWidth = 800;
+        settingWindow.MaxHeight = 800;
+        settingWindow.MinWidth = 400;
+        settingWindow.MinHeight = 400;
+        settingWindow.SaveWindowPosition = true;
+        settingWindow.Title = Main.PluginName + " Settings";
+        settingWindow.ShowDialog();
+    }
 
     public bool Save()
     {

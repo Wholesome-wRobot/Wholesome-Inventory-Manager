@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using wManager.Wow.Helpers;
-using wManager.Wow.ObjectManager;
 
 public class Container
 {
@@ -14,23 +13,42 @@ public class Container
     {
         Position = position;
         Capacity = GetContainerNbSlots();
-        for (int i = 1; i <= Capacity; i++)
+        string[] allItems = GetAllItemLinks(Capacity).Split('$');
+        for (int i = 0; i < allItems.Length; i++)
         {
-            string itemLink = GetContainerItemlink(i);
-            if (itemLink.Length > 0 )
+            Item item;
+            if (allItems[i] != "BAG")
             {
-                Item item = new Item(itemLink);
-                item.IsInBagSlot = i;
-                item.IsInBag = Position;
-                Slots.Add(new ContainerSlot(i, position, item));
-                Items.Add(item);
-                AllItemsInAllBags.Add(item);
+                if (allItems[i] != "null")
+                {
+                    item = new Item(allItems[i]);
+                    item.IsInBagSlot = i;
+                    item.IsInBag = Position;
+                    Slots.Add(new ContainerSlot(i, position, item));
+                    Items.Add(item);
+                    AllItemsInAllBags.Add(item);
+                }
+                else
+                {
+                    Slots.Add(new ContainerSlot(i, position, null));
+                }
+
             }
-            else
-            {
-                Slots.Add(new ContainerSlot(i, position, null));
-            }
+            //Logger.Log(i.ToString() + " - " + allItems[i]);
         }
+    }
+
+    private string GetAllItemLinks(int capacity)
+    {
+        string allItems = Lua.LuaDoString<string>($@"
+                                local allItems = ""BAG"";
+                                for i=1,{capacity} do
+                                    local item = GetContainerItemLink({Position}, i);
+                                    if item == nil then item = ""null"" end;
+                                    allItems = allItems .. ""$"" .. item
+                                end;
+                                return allItems;");
+        return allItems;
     }
 
     public string GetContainerName()

@@ -6,9 +6,11 @@ using wManager.Plugin;
 using wManager.Wow.Helpers;
 using System.Collections.Generic;
 using MoreLinq;
+using wManager.Wow;
 
 public class Main : IPlugin
 {
+    public static string PluginName = "Wholesome AutoEquip";
     public static bool isLaunched;
     private readonly BackgroundWorker detectionPulse = new BackgroundWorker();
 
@@ -42,7 +44,9 @@ public class Main : IPlugin
             {
                 DateTime dateBegin = DateTime.Now;
                 Logger.Log("Scanning bags...");
+                Memory.WowMemory.LockFrame();
                 ScanBags();
+                Memory.WowMemory.UnlockFrame();
                 Logger.Log($"Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
 
                 dateBegin = DateTime.Now;
@@ -61,7 +65,7 @@ public class Main : IPlugin
     public void Settings()
     {
         AutoEquipSettings.Load();
-        AutoEquipSettings.CurrentSettings.ToForm();
+        AutoEquipSettings.CurrentSettings.ShowConfiguration();
         AutoEquipSettings.CurrentSettings.Save();
     }
 
@@ -105,7 +109,7 @@ public class Main : IPlugin
             }
         }
 
-        // Bag equip to replace one for better capacity // should probably be done last because it fucks up the model
+        // Bag equip to replace one for better capacity // should probably be done last because it fucks up the cache model
         if (ListBags.Count >= maxAmountOfBags)
         {
             Container smallestEquippedBag = ListBags.OrderBy(bag => bag.Capacity).FirstOrDefault();
