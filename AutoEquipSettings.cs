@@ -23,7 +23,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     [Setting]
     [DefaultValue(true)]
     [Category("Bags")]
-    [DisplayName("Equip Quiver")]
+    [DisplayName("Ammo Container")]
     [Description("Enable this setting to let the plugin handle quiver equipment and upgrades for the Hunter. If disabled, you quiver will be replaced by a bag.")]
     public bool AutoEquipQuiver { get; set; }
 

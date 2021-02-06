@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -93,34 +94,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoEquipSettings.cs" />
-    <Compile Include="Inventory\Container.cs" />
-    <Compile Include="Inventory\ContainerSlot.cs" />
-    <Compile Include="Inventory\Item.cs" />
-    <Compile Include="Inventory\SessionItemDB.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Bags\WAEBagInventory.cs" />
+    <Compile Include="CharacterSheet\WAECharacterSheet.cs" />
+    <Compile Include="CharacterSheet\WAECharacterSheetSlot.cs" />
+    <Compile Include="Bags\WAEContainer.cs" />
+    <Compile Include="Bags\WAEContainerSlot.cs" />
+    <Compile Include="Helper\WAEEnums.cs" />
+    <Compile Include="Item\WAEItem.cs" />
+    <Compile Include="Item\WAEItemDB.cs" />
+    <Compile Include="Helper\Logger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Toolbox.cs" />
+    <Compile Include="Helper\Toolbox.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Compiled\Version.txt" />
-    <Content Include="Resources\Entypo-license.txt" />
-    <Content Include="Resources\WindowsIcons-license.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Resources\Entypo.ttf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="Resources\Icons.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Resources\IconsNonShared.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

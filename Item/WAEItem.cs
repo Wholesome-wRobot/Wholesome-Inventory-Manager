@@ -1,7 +1,8 @@
 ﻿using System.Threading;
 using wManager.Wow.Helpers;
+using static WAEEnums;
 
-public class Item
+public class WAEItem
 {
     public int ItemId { get; set; }
     public string Name { get; set; }
@@ -17,29 +18,31 @@ public class Item
     public int ItemSellPrice { get; set; }
     public int BagCapacity { get; set; }
     public int QuiverCapacity { get; set; }
-    public int IsInBagSlot { get; set; } = -1;
-    public int IsInBag { get; set; } = -1;
+    public int AmmoPouchCapacity { get; set; }
+    public int InBag { get; set; } = -1;
+    public int InBagSlot { get; set; } = -1;
     public int UniqueId { get; set; }
+    public float WeightScore { get; set; } = 0;
 
     private static int UniqueIdCounter = 0;
 
-    public Item(string itemLink)
+    public WAEItem(string itemLink)
     {
         ItemLink = itemLink;
         UniqueId = ++UniqueIdCounter;
-        
-        Item existingCopy = SessionItemDB.Get(ItemLink);
+
+        WAEItem existingCopy = WAEItemDB.Get(ItemLink);
         if (existingCopy != null)
             CloneFromDB(existingCopy);
         else
         {
             string iteminfo = Lua.LuaDoString<string>($@"
-                itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-                itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink}"");
+            itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+            itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink}"");
 
-                return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
-                '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
-                '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
+            return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
+            '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
+            '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
 
             string[] infoArray = iteminfo.Split('§');
 
@@ -56,11 +59,14 @@ public class Item
             ItemSellPrice = int.Parse(infoArray[10]);
 
             RecordToolTip();
-            SessionItemDB.Add(this);
+            WAEItemDB.Add(this);
         }
+
+        Logger.Log(Name);
+        Logger.Log(itemLink.ToString());
     }
 
-    private void CloneFromDB(Item existingCopy)
+    private void CloneFromDB(WAEItem existingCopy)
     {
         Name = existingCopy.Name;
         ItemLink = existingCopy.ItemLink;
@@ -75,13 +81,14 @@ public class Item
         ItemSellPrice = existingCopy.ItemSellPrice;
         BagCapacity = existingCopy.BagCapacity;
         QuiverCapacity = existingCopy.QuiverCapacity;
+        AmmoPouchCapacity = existingCopy.AmmoPouchCapacity;
     }
 
     public string GetItemStats()
     {
         string stats = Lua.LuaDoString<string>($@"local itemstats=GetItemStats(""{ItemLink}"") 
-                        local stats = """" for stat, value in pairs(itemstats) do stats = stats.._G[stat].."":""..value.."";"" end
-                        return stats");
+                    local stats = """" for stat, value in pairs(itemstats) do stats = stats.._G[stat].."":""..value.."";"" end
+                    return stats");
         return stats;
     }
 
@@ -92,40 +99,52 @@ public class Item
             WEquipTooltip:ClearLines()
             WEquipTooltip:SetHyperlink(""{ItemLink}"")
             return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
-        string[] allLines =  lines.Split('|');
-        foreach(string l in allLines)
+        string[] allLines = lines.Split('|');
+        foreach (string l in allLines)
         {
             if (l.Length > 0)
             {
+                // record specifics
                 if (l.Contains(" Slot Bag"))
                     BagCapacity = int.Parse(l.Replace(" Slot Bag", ""));
-                if (l.Contains(" Slot Quiver"))
+                else if (l.Contains(" Slot Quiver"))
                     QuiverCapacity = int.Parse(l.Replace(" Slot Quiver", ""));
+                else if (l.Contains(" Slot Ammo Pouch"))
+                    AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
             }
         }
     }
 
     public void Use()
     {
-        if (IsInBag < 0 || IsInBagSlot < 0)
+        if (InBag < 0 || InBagSlot < 0)
             Logger.LogError($"Item {Name} is not recorded as being in a bag. Can't use.");
         else
-            Lua.LuaDoString($"UseContainerItem({IsInBag}, {IsInBagSlot})");
+            Lua.LuaDoString($"UseContainerItem({InBag}, {InBagSlot})");
     }
 
     public void Pickup()
     {
-        Lua.LuaDoString($"ClearCursor(); PickupContainerItem({IsInBag}, {IsInBagSlot});");
+        Lua.LuaDoString($"ClearCursor(); PickupContainerItem({InBag}, {InBagSlot});");
     }
 
-    public bool DropInBag(int position, int slot)
+    public bool MoveToBag(int position, int slot)
     {
         Lua.LuaDoString($"PickupContainerItem({position}, {slot});"); // en fait un clique sur le slot de destination
         Thread.Sleep(200);
-        if (Main.ListBags.Find(bag => bag.Position == position).GetContainerItemlink(slot) == ItemLink)
+        if (WAEBagInventory.ListContainers.Find(bag => bag.Position == position).GetContainerItemlink(slot) == ItemLink)
             return true;
         Logger.LogError($"Couldn't move {Name} to bag {position} slot {slot}, retrying soon.");
         return false;
+    }
+
+    public void MoveToBag(int position)
+    {
+        Pickup();
+        Thread.Sleep(100);
+        int bagSlot = 19 + position;
+        Lua.LuaDoString($"PutItemInBag({bagSlot})");
+        Thread.Sleep(100);
     }
 
     public void LogItemInfo()
@@ -141,5 +160,8 @@ public class Item
         Logger.Log($"ItemEquipLoc : {ItemEquipLoc}");
         Logger.Log($"ItemTexture : {ItemTexture}");
         Logger.Log($"ItemSellPrice : {ItemSellPrice}");
+        Logger.Log($"QuiverCapacity : {QuiverCapacity}");
+        Logger.Log($"AmmoPouchCapacity : {AmmoPouchCapacity}");
+        Logger.Log($"BagCapacity : {BagCapacity}");
     }
 }

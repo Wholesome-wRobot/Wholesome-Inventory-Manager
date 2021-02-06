@@ -1,10 +1,10 @@
-﻿public class ContainerSlot
+﻿public class WAEContainerSlot
 {
     public int Slot { get; set; }
     public int BagPosition { get; set; }
-    public Item OccupiedBy { get; set; }
+    public WAEItem OccupiedBy { get; set; }
 
-    public ContainerSlot(int slot, int bag, Item occupiedBy)
+    public WAEContainerSlot(int slot, int bag, WAEItem occupiedBy)
     {
         Slot = slot;
         BagPosition = bag;
