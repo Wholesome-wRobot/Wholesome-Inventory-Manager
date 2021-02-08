@@ -1,0 +1,13 @@
+﻿for a warlock dmg stat is worth checking only for wands and not for other weapons like daggers, 
+staves etc. Same for let's say rogue - dmg for main hand and off hand weapon matters alot 
+but not for bows, crossbows, thrown weapons.
+
+some characters like shaman enhancement can wield 2h weapons (and should be) but 
+after lvl 40 he should switch to 2x 1hand and leave the 2h completely. 
+Same for fury warrior: untill lvl 60 you want to wield a 2h weapon or 2x 1h 
+weapons but after lvl 60 you should use only 2x 2h weapons
+
+
+Also shields for shamans - armor doesnt matter for them tbh but only intellect, 
+spirit, spell power etc... But for paladin prot it can be much more 
+different where the block and the armor can matters

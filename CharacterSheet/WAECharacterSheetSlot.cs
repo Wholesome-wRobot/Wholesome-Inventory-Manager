@@ -2,14 +2,17 @@
 {
     public WAEItem Item { get; set; }
     public int InventorySlotID { get; set; }
+    public string InvType { get; set; }
 
-    public WAECharacterSheetSlot(int inventorySlotID)
+    public WAECharacterSheetSlot(int inventorySlotID, string invType)
     {
+        InvType = invType;
         InventorySlotID = inventorySlotID;
+    }
+
+    public void RefreshItem()
+    {
         string itemLink = WAECharacterSheet.AllItemLinks[InventorySlotID];
-        if (itemLink != "null")
-        {
-            Item = new WAEItem(itemLink);
-        }
+        Item = itemLink != "null" ? new WAEItem(itemLink) : null;
     }
 }

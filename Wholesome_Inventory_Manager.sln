@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wholesome_Auto_Equip", "Wholesome_Auto_Equip.csproj", "{EB8B9FEB-CF48-4503-8F52-5E9D9EE759C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wholesome_Inventory_Manager", "Wholesome_Inventory_Manager.csproj", "{EB8B9FEB-CF48-4503-8F52-5E9D9EE759C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -81,7 +81,7 @@ public class WAEContainer
             {
                 WAEContainerSlot destination = freeSlots[i];
                 WAEItem smallBag = Items[i];
-                smallBag.Pickup();
+                smallBag.PickupFromBag();
                 Thread.Sleep(100);
                 smallBag.MoveToBag(destination.BagPosition, destination.Slot);
                 Thread.Sleep(100);

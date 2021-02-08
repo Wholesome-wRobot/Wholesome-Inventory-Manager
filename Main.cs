@@ -19,6 +19,11 @@ public class Main : IPlugin
         detectionPulse.DoWork += BackGroundPulse;
         detectionPulse.RunWorkerAsync();
 
+        foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
+        {
+            EventsLua.AttachEventLua(ev, ctx => Lua.LuaDoString($"ConfirmBindOnUse()"));
+        }
+
         Setup();
     }
 
@@ -36,20 +41,21 @@ public class Main : IPlugin
         {
             try
             {
-                Logger.Log("--------------------------------------");
+                Logger.LogDebug("--------------------------------------");
                 DateTime dateBegin = DateTime.Now;
 
                 WAECharacterSheet.Scan();
                 WAEBagInventory.Scan();
                 WAEBagInventory.BagEquip();
+                WAECharacterSheet.AutoEquip();
 
-                Logger.Log($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
             }
             catch (Exception arg)
             {
                 Logger.LogError(string.Concat(arg));
             }
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
         }
     }
 

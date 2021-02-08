@@ -3,7 +3,7 @@ using System.Drawing;
 
 public class Logger
 {
-    private static bool _debug = false;
+    private static bool _debug = true;
 
     public static void LogFight(string message)
     {
@@ -17,7 +17,7 @@ public class Logger
 
     public static void Log(string message)
     {
-        Logging.Write($"[{Main.PluginName}]: {message}", Logging.LogType.Normal, Color.DarkMagenta);
+        Logging.Write($"[{Main.PluginName}]: {message}", Logging.LogType.Normal, Color.DarkOliveGreen);
     }
 
     public static void Log(string message, Color c)
