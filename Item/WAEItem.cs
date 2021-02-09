@@ -4,6 +4,8 @@ using System.Linq;
 using wManager.Wow.Helpers;
 using System.Globalization;
 using wManager.Wow.ObjectManager;
+using wManager.Wow.Enums;
+using System;
 
 public class WAEItem
 {
@@ -62,20 +64,20 @@ public class WAEItem
         UniqueId = ++UniqueIdCounter;
 
         WAEItem existingCopy = WAEItemDB.Get(ItemLink);
+
         if (existingCopy != null)
             CloneFromDB(existingCopy);
         else
         {
             string iteminfo = Lua.LuaDoString<string>($@"
             itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-            itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink}"");
+            itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
 
             return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
             '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
             '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
-
+            
             string[] infoArray = iteminfo.Split('§');
-
             Name = infoArray[0];
             ItemLink = infoArray[1];
             ItemRarity = int.Parse(infoArray[2]);
@@ -120,7 +122,7 @@ public class WAEItem
         if (ItemType != "Armor" && ItemType != "Weapon")
             return;
 
-        string stats = Lua.LuaDoString<string>($@"local itemstats=GetItemStats(""{ItemLink}"") 
+        string stats = Lua.LuaDoString<string>($@"local itemstats=GetItemStats(""{ItemLink.Replace("\"", "\\\"")}"") 
                 local stats = """" 
                 for stat, value in pairs(itemstats) do 
                     stats = stats.._G[stat]..""§""..value..""$"" 
@@ -146,13 +148,13 @@ public class WAEItem
 
     private void RecordWeightScore()
     {
-        //Logger.Log(Name);
+        Logger.LogDebug(Name);
         foreach (KeyValuePair<string, float> entry in ItemStats)
         {
-            if (StatsWeights.ContainsKey(entry.Key) && StatsWeights[entry.Key] != 0)
+            if (StatsWeights.ContainsKey(entry.Key))
             {
                 WeightScore += entry.Value * StatsWeights[entry.Key];
-                //Logger.Log(entry.Key + " -> " + (entry.Value * StatsWeights[entry.Key]).ToString());
+                Logger.LogDebug(entry.Key + " -> " + (entry.Value * StatsWeights[entry.Key]).ToString());
             }
             else
             {
@@ -160,7 +162,7 @@ public class WAEItem
                     Logger.LogError("Can't detect : " + entry.Key);
             }
         }
-        //Logger.Log("Total : " + WeightScore.ToString()); ;
+        Logger.LogDebug("Total : " + WeightScore.ToString()); ;
     }
 
     public void RecordToolTip()
@@ -207,6 +209,7 @@ public class WAEItem
             DropInInventory(slotId);
             Thread.Sleep(100);
             Lua.LuaDoString($"EquipPendingItem(0);");
+            Lua.LuaDoString($"StaticPopup1Button1:Click()");
             Thread.Sleep(200);
             WAECharacterSheet.Scan();
             WAEBagInventory.Scan();
@@ -217,6 +220,7 @@ public class WAEItem
                 Lua.LuaDoString($"ClearCursor()");
                 return false;
             }
+            ItemEquipAttempts.RemoveAll(i => i == ItemLink);
             return true;
 
         }
@@ -240,8 +244,14 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        WoWLocalPlayer me = ObjectManager.Me;
-        return me.Level >= ItemMinLevel;
+        if (!WAECharacterSheet.ItemSkillsDictionary.ContainsKey(ItemSubType) && ItemSubType != "Miscellaneous")
+        {
+            Logger.LogError($"Item type unknown : {ItemSubType}");
+            return false;
+        }
+
+        bool skillCheckOK = ItemSubType == "Miscellaneous" || WAECharacterSheet.MySkills.Contains(WAECharacterSheet.ItemSkillsDictionary[ItemSubType]);
+        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK;
     }
 
     public bool MoveToBag(int position, int slot)

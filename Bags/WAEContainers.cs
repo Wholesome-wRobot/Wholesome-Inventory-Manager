@@ -104,14 +104,14 @@ public static class WAEBagInventory
 
         if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
         {
-            bool ImHunterAndNeedAmmoBag = ObjectManager.Me.WowClass == WoWClass.Hunter && AutoEquipSettings.CurrentSettings.AutoEquipQuiver;
+            bool ImHunterAndNeedAmmoBag = ObjectManager.Me.WowClass == WoWClass.Hunter && AutoEquipSettings.CurrentSettings.EquipQuiver;
             int maxAmountOfBags = ImHunterAndNeedAmmoBag ? 4 : 5;
             WAEContainer equippedQuiver = ListContainers.Find(bag => bag.IsQuiver);
             WAEContainer equippedAmmoPouch = ListContainers.Find(bag => bag.IsAmmoPouch);
             bool hasRangedWeaponEquipped = WAECharacterSheet.Ranged.Item != null;
             string equippedRanged = WAECharacterSheet.Ranged.Item?.ItemSubType;
 
-            if (AutoEquipSettings.CurrentSettings.AutoEquipQuiver)
+            if (AutoEquipSettings.CurrentSettings.EquipQuiver)
             {
                 // Move ammoContainer to position 4
                 if (equippedQuiver != null && equippedQuiver.Position != 4)

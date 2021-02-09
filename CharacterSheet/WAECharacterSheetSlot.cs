@@ -2,11 +2,11 @@
 {
     public WAEItem Item { get; set; }
     public int InventorySlotID { get; set; }
-    public string InvType { get; set; }
+    public string[] InvTypes { get; set; }
 
-    public WAECharacterSheetSlot(int inventorySlotID, string invType)
+    public WAECharacterSheetSlot(int inventorySlotID, string[] invTypes)
     {
-        InvType = invType;
+        InvTypes = invTypes;
         InventorySlotID = inventorySlotID;
     }
 

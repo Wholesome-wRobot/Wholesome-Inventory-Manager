@@ -96,7 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoEquipSettings.cs" />
-    <Compile Include="Bags\WAEBagInventory.cs" />
+    <Compile Include="AutoUpdater.cs" />
+    <Compile Include="Bags\WAEContainers.cs" />
     <Compile Include="CharacterSheet\WAECharacterSheet.cs" />
     <Compile Include="CharacterSheet\WAECharacterSheetSlot.cs" />
     <Compile Include="Bags\WAEContainer.cs" />
@@ -107,7 +108,7 @@
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Helper\Toolbox.cs" />
+    <Compile Include="Helper\ToolBox.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Compiled\Version.txt" />

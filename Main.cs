@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using wManager.Plugin;
@@ -10,20 +11,32 @@ public class Main : IPlugin
     public static bool isLaunched;
     private readonly BackgroundWorker detectionPulse = new BackgroundWorker();
 
+    public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
+
+    public static string version = "1.1.1"; // Must match version in Version.txt
+
     public void Initialize()
     {
         isLaunched = true;
 
         AutoEquipSettings.Load();
+        LoadWantedItemTypesList();
+
+        if (AutoUpdater.CheckUpdate(version))
+        {
+            Logger.Log("New version downloaded, restarting, please wait");
+            ToolBox.Restart();
+            return;
+        }
 
         detectionPulse.DoWork += BackGroundPulse;
         detectionPulse.RunWorkerAsync();
-
+        /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
         {
             EventsLua.AttachEventLua(ev, ctx => Lua.LuaDoString($"ConfirmBindOnUse()"));
         }
-
+        */
         Setup();
     }
 
@@ -46,8 +59,10 @@ public class Main : IPlugin
 
                 WAECharacterSheet.Scan();
                 WAEBagInventory.Scan();
-                WAEBagInventory.BagEquip();
-                WAECharacterSheet.AutoEquip();
+                if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
+                    WAEBagInventory.BagEquip();
+                if (AutoEquipSettings.CurrentSettings.AutoEquipGear)
+                    WAECharacterSheet.AutoEquip();
 
                 Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
             }
@@ -64,6 +79,15 @@ public class Main : IPlugin
         AutoEquipSettings.Load();
         AutoEquipSettings.CurrentSettings.ShowConfiguration();
         AutoEquipSettings.CurrentSettings.Save();
+    }
+
+    private void LoadWantedItemTypesList()
+    {
+        WantedItemType.Clear();
+        WantedItemType.Add("Bows", AutoEquipSettings.CurrentSettings.EquipBows);
+        WantedItemType.Add("Crossbows", AutoEquipSettings.CurrentSettings.EquipCrossbows);
+        WantedItemType.Add("Guns", AutoEquipSettings.CurrentSettings.EquipGuns);
+        WantedItemType.Add("Thrown", AutoEquipSettings.CurrentSettings.EquipThrown);
     }
 
     private void Setup()

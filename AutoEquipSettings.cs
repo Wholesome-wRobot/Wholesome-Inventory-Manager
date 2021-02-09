@@ -5,7 +5,6 @@ using wManager.Wow.ObjectManager;
 using MarsSettingsGUI;
 using System.Configuration;
 using System.ComponentModel;
-using System.Collections.Generic;
 
 [Serializable]
 public class AutoEquipSettings : robotManager.Helpful.Settings
@@ -186,7 +185,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     [Setting]
     [DefaultValue(true)]
     [Category("Bags")]
-    [DisplayName("Equip Bags")]
+    [DisplayName("Auto Equip Bags")]
     [Description("Enable this setting to let the plugin handle bag equipment and upgrades")]
     public bool AutoEquipBags { get; set; }
 
@@ -195,27 +194,59 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     [Category("Bags")]
     [DisplayName("Ammo Container")]
     [Description("Enable this setting to let the plugin handle quiver equipment and upgrades for the Hunter. If disabled, you quiver will be replaced by a bag.")]
-    public bool AutoEquipQuiver { get; set; }
+    public bool EquipQuiver { get; set; }
 
     // Gear
     [Setting]
     [DefaultValue(true)]
     [Category("Gear")]
-    [DisplayName("Equip Gear")]
+    [DisplayName("Auto Equip Gear")]
     [Description("Enable this setting to let the plugin handle gear equipment")]
     public bool AutoEquipGear { get; set; }
+
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Gear")]
+    [DisplayName("Thrown")]
+    [Description("Equip thrown weapons")]
+    public bool EquipThrown { get; set; }
+
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Gear")]
+    [DisplayName("Bows")]
+    [Description("Equip bows")]
+    public bool EquipBows { get; set; }
+
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Gear")]
+    [DisplayName("Crossbows")]
+    [Description("Equip crossbows")]
+    public bool EquipCrossbows { get; set; }
+
+    [Setting]
+    [DefaultValue(true)]
+    [Category("Gear")]
+    [DisplayName("Guns")]
+    [Description("Equip guns")]
+    public bool EquipGuns { get; set; }
 
     public double LastUpdateDate { get; set; }
 
     public AutoEquipSettings()
     {
         // Bags
-        AutoEquipQuiver = true;
+        EquipQuiver = true;
         AutoEquipBags = true;
         LastUpdateDate = 0;
 
         // Gear
         AutoEquipGear = true;
+        EquipThrown = true;
+        EquipBows = true;
+        EquipCrossbows = true;
+        EquipGuns = true;
 
         // Stats Weights
         AutoDetect = true;
@@ -248,8 +279,8 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         settingWindow = new SettingsWindow(this, ObjectManager.Me.WowClass.ToString());
         settingWindow.MaxWidth = 800;
         settingWindow.MaxHeight = 800;
-        settingWindow.MinWidth = 400;
-        settingWindow.MinHeight = 400;
+        settingWindow.MinWidth = 500;
+        settingWindow.MinHeight = 600;
         settingWindow.SaveWindowPosition = true;
         settingWindow.Title = Main.PluginName + " Settings";
         settingWindow.ShowDialog();
