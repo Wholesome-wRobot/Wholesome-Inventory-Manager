@@ -17,7 +17,7 @@ public class Logger
 
     public static void Log(string message)
     {
-        Logging.Write($"[{Main.PluginName}]: {message}", Logging.LogType.Normal, Color.DarkOliveGreen);
+        Logging.Write($"[{Main.PluginName}]: {message}", Logging.LogType.Normal, Color.DarkOrange);
     }
 
     public static void Log(string message, Color c)
