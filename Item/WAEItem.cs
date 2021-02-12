@@ -181,6 +181,9 @@ public class WAEItem
 
     public bool Equip(int slotId, bool log = false)
     {
+        if (ObjectManager.Me.InCombatFlagOnly)
+            return false;
+
         WAECharacterSheetSlot slot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
         if (slot.Item?.ItemLink == ItemLink)
             return true;

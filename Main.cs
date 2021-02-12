@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.04"; // Must match version in Version.txt
+    public static string version = "0.0.05"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -72,17 +72,20 @@ public class Main : IPlugin
         {
             try
             {
-                Logger.LogDebug("--------------------------------------");
-                DateTime dateBegin = DateTime.Now;
+                if (Conditions.InGameAndConnectedAndProductStartedNotInPause)
+                {
+                    Logger.LogDebug("--------------------------------------");
+                    DateTime dateBegin = DateTime.Now;
 
-                WAECharacterSheet.Scan();
-                WAEBagInventory.Scan();
-                if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
-                    WAEBagInventory.BagEquip();
-                if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
-                    WAECharacterSheet.AutoEquip();
+                    WAECharacterSheet.Scan();
+                    WAEBagInventory.Scan();
+                    if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
+                        WAEBagInventory.BagEquip();
+                    if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
+                        WAECharacterSheet.AutoEquip();
 
-                Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                    Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                }
             }
             catch (Exception arg)
             {

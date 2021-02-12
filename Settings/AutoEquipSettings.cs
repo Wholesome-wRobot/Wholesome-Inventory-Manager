@@ -39,7 +39,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
         // Bags
         EquipQuiver = false;
-        AutoEquipBags = false;
+        AutoEquipBags = true;
         LastUpdateDate = 0;
 
         // Gear
@@ -51,7 +51,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
         EquipOneHanders = true;
         EquipTwoHanders = true;
-        EquipShields = false;
+        EquipShields = true;
 
         StatWeights = new List<StatWeight>();
     }
