@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.05"; // Must match version in Version.txt
+    public static string version = "0.0.06"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -33,10 +33,10 @@ public class Main : IPlugin
 
         AutoDetectMyClassSpec();
 
-        AutoEquipSettings.CurrentSettings.FirstLaunch = true; // DEBUG
         if (AutoEquipSettings.CurrentSettings.FirstLaunch)
         {
             Logger.Log("First Launch");
+            SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);
             AutoEquipSettings.CurrentSettings.FirstLaunch = false;
             AutoEquipSettings.CurrentSettings.Save();
         }
