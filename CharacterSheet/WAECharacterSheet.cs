@@ -245,6 +245,7 @@ public static class WAECharacterSheet
             }
         }
     }
+    // tried to equip offhand weapon when notknowing dualwield
 
     private static void AutoEquipWeapons()
     {
@@ -289,17 +290,15 @@ public static class WAECharacterSheet
 
         // Get Second choice Main hand
         WAEItem secondChoiceMainhand = listAllMainHandWeapons
-            .Where(w => OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
-                || SuitableForTitansGrips(w))
+            .Where(w => OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]) || SuitableForTitansGrips(w))
             .Where(w => w != idealMainhand)
             .FirstOrDefault();
 
         // Get ideal OffHand
         WAEItem idealOffHand = listAllOffHandWeapons
-            .Where(w => (w.ItemSubType == "Miscellaneous" 
-                || DualWield.KnownSpell
-                || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
-                && (WeaponIsIdeal(w) || OffHand.Item == null))
+            .Where(w => w.ItemSubType == "Miscellaneous" || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
+            .Where(w => WeaponIsIdeal(w) || OffHand.Item == null)
+            .Where(w => DualWield.KnownSpell || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield)
             .Where(w => w != idealMainhand && w != ideal2H)
             .FirstOrDefault();
         
@@ -308,6 +307,7 @@ public static class WAECharacterSheet
             .Where(w => (w.ItemSubType == "Miscellaneous" || DualWield.KnownSpell)
                 || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
                 || SuitableForTitansGrips(w))
+            .Where(w => DualWield.KnownSpell || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield)
             .Where(w => w != secondChoiceMainhand)
             .FirstOrDefault();
         /*
