@@ -284,7 +284,7 @@ public static class WAECharacterSheet
         WAEItem idealMainhand = listAllMainHandWeapons
             .Where(w => OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
                 || SuitableForTitansGrips(w))
-            .Where(weapon => WeaponIsIdeal(weapon))
+            .Where(weapon => WeaponIsIdeal(weapon) || MainHand.Item == null)
             .FirstOrDefault();
 
         // Get Second choice Main hand
@@ -298,8 +298,8 @@ public static class WAECharacterSheet
         WAEItem idealOffHand = listAllOffHandWeapons
             .Where(w => (w.ItemSubType == "Miscellaneous" 
                 || DualWield.KnownSpell
-                || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]) && DualWield.KnownSpell)
-                && WeaponIsIdeal(w))
+                || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
+                && (WeaponIsIdeal(w) || OffHand.Item == null))
             .Where(w => w != idealMainhand && w != ideal2H)
             .FirstOrDefault();
         
@@ -310,7 +310,12 @@ public static class WAECharacterSheet
                 || SuitableForTitansGrips(w))
             .Where(w => w != secondChoiceMainhand)
             .FirstOrDefault();
-        
+        /*
+        secondChoiceMainhand = secondChoiceMainhand == null && idealMainhand != null ? idealMainhand : secondChoiceMainhand;
+        secondChoiceOffhand = secondChoiceOffhand == null && idealOffHand != null ? idealOffHand : secondChoiceOffhand;
+        idealMainhand = idealMainhand == null && secondChoiceMainhand != null ? secondChoiceMainhand : idealMainhand;
+        idealOffHand = idealOffHand == null && secondChoiceOffhand != null ? secondChoiceOffhand : idealOffHand;
+        */
         float scoreIdealMainHand = idealMainhand == null ? 0 : idealMainhand.WeightScore;
         float scoreIdealOffhand = idealOffHand == null ? 0 : idealOffHand.GetOffHandWeightScore();
 
@@ -386,7 +391,7 @@ public static class WAECharacterSheet
             return false;
 
         if (AutoEquipSettings.CurrentSettings.EquipShields
-            && weapon.ItemSubType == "Shields")
+            && ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Shield)
             return true;
 
         if (AutoEquipSettings.CurrentSettings.EquipTwoHanders
@@ -394,6 +399,7 @@ public static class WAECharacterSheet
             return true;
 
         if (AutoEquipSettings.CurrentSettings.EquipOneHanders
+            && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Shield
             && OneHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
             return true;
 
