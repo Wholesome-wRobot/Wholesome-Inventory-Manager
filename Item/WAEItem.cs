@@ -4,8 +4,7 @@ using System.Linq;
 using wManager.Wow.Helpers;
 using System.Globalization;
 using wManager.Wow.ObjectManager;
-using wManager.Wow.Enums;
-using System;
+using static WAEEnums;
 
 public class WAEItem
 {
@@ -29,32 +28,7 @@ public class WAEItem
     public int InBagSlot { get; set; } = -1;
     public double UniqueId { get; set; }
     public float WeightScore { get; set; } = 0;
-    private Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
-    public static Dictionary<string, int> StatsWeights { get; set; } = new Dictionary<string, int>() {
-        {"Stamina", AutoEquipSettings.CurrentSettings.StaminaWeight},
-        {"Intellect", AutoEquipSettings.CurrentSettings.IntellectWeight},
-        {"Agility", AutoEquipSettings.CurrentSettings.AgilityWeight},
-        {"Strength", AutoEquipSettings.CurrentSettings.StrengthWeight},
-        {"Spirit", AutoEquipSettings.CurrentSettings.SpiritWeight},
-        {"Armor", AutoEquipSettings.CurrentSettings.ArmorWeight},
-        {"Attack Power", AutoEquipSettings.CurrentSettings.AttackPowerWeight},
-        {"Hit Rating", AutoEquipSettings.CurrentSettings.HitRatingWeight},
-        {"Mana Per 5 Sec.", AutoEquipSettings.CurrentSettings.Mana5Weight},
-        {"Damage Per Second", AutoEquipSettings.CurrentSettings.DPSWeight},
-        {"Block Value", AutoEquipSettings.CurrentSettings.ShieldBlockWeight},
-        {"Block Rating", AutoEquipSettings.CurrentSettings.ShieldBlockRatingWeight},
-        {"Defense Rating", AutoEquipSettings.CurrentSettings.DefenseRatingWeight},
-        {"Spell Power", AutoEquipSettings.CurrentSettings.SpellPowerWeight},
-        {"Dodge Rating", AutoEquipSettings.CurrentSettings.DodgeRatingWeight},
-        {"Critical Strike Rating", AutoEquipSettings.CurrentSettings.CritRatingWeight},
-        {"Expertise Rating", AutoEquipSettings.CurrentSettings.ExpertiseRatingWeight},
-        {"Haste Rating", AutoEquipSettings.CurrentSettings.HasteRatingWeight},
-        {"Armor Penetration Rating", AutoEquipSettings.CurrentSettings.ArmorPenetrationWeight},
-        {"Parry Rating", AutoEquipSettings.CurrentSettings.ParryRatingWeight},
-        {"Resilience Rating", AutoEquipSettings.CurrentSettings.ResilienceWeight},
-        {"Spell Penetration", AutoEquipSettings.CurrentSettings.SpellPenetrationWeight},
-        {"Attack Power In Forms", AutoEquipSettings.CurrentSettings.FeralAttackPower}
-    };
+    public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
 
     private static int UniqueIdCounter = 0;
 
@@ -92,6 +66,7 @@ public class WAEItem
 
             RecordToolTip();
             RecordStats();
+            LogItemInfo();
             WAEItemDB.Add(this);
         }
     }
@@ -151,10 +126,11 @@ public class WAEItem
         Logger.LogDebug(Name);
         foreach (KeyValuePair<string, float> entry in ItemStats)
         {
-            if (StatsWeights.ContainsKey(entry.Key))
+            if (StatEnums.ContainsKey(entry.Key))
             {
-                WeightScore += entry.Value * StatsWeights[entry.Key];
-                Logger.LogDebug(entry.Key + " -> " + (entry.Value * StatsWeights[entry.Key]).ToString());
+                CharStat statEnum = StatEnums[entry.Key];
+                WeightScore += entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum);
+                Logger.LogDebug(entry.Key + " -> " + (entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum)).ToString());
             }
             else
             {
@@ -163,6 +139,13 @@ public class WAEItem
             }
         }
         Logger.LogDebug("Total : " + WeightScore.ToString()); ;
+    }
+
+    public float GetOffHandWeightScore()
+    {
+        if (ItemStats.ContainsKey("Damage Per Second"))
+            return WeightScore - (ItemStats["Damage Per Second"] * AutoEquipSettings.CurrentSettings.GetStat(CharStat.DamagePerSecond)) / 2;
+        return WeightScore;
     }
 
     public void RecordToolTip()
@@ -196,14 +179,20 @@ public class WAEItem
             Lua.LuaDoString($"UseContainerItem({InBag}, {InBagSlot})");
     }
 
-    public bool Equip(int slotId)
+    public bool Equip(int slotId, bool log = false)
     {
+        WAECharacterSheetSlot slot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
+        if (slot.Item?.ItemLink == ItemLink)
+            return true;
+
         if (InBag < 0 || InBagSlot < 0)
         {
             Logger.LogError($"Item {Name} is not recorded as being in a bag. Can't use.");
         }
         else
         {
+            if (log)
+                Logger.Log($"Equipping {Name} ({WeightScore})");
             ItemEquipAttempts.Add(ItemLink);
             PickupFromBag();
             DropInInventory(slotId);
@@ -213,8 +202,8 @@ public class WAEItem
             Thread.Sleep(200);
             WAECharacterSheet.Scan();
             WAEBagInventory.Scan();
-            WAECharacterSheetSlot slot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
-            if (slot.Item == null || slot.Item.ItemLink != ItemLink)
+            WAECharacterSheetSlot updatedSlot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
+            if (updatedSlot.Item == null || updatedSlot.Item.ItemLink != ItemLink)
             {
                 Logger.LogError($"Failed to equip {Name}. Retrying soon ({GetNbEquipAttempts()}).");
                 Lua.LuaDoString($"ClearCursor()");
@@ -244,14 +233,16 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        if (!WAECharacterSheet.ItemSkillsDictionary.ContainsKey(ItemSubType) && ItemSubType != "Miscellaneous")
+        Logger.LogDebug($"Item type {Name} : {ItemSubType}");
+        if (!ItemSkillsDictionary.ContainsKey(ItemSubType) 
+            && ItemSubType != "Miscellaneous")
         {
-            Logger.LogError($"Item type unknown : {ItemSubType}");
+            Logger.LogDebug($"Item type unknown {Name} : {ItemSubType}");
             return false;
         }
 
-        bool skillCheckOK = ItemSubType == "Miscellaneous" || WAECharacterSheet.MySkills.Contains(WAECharacterSheet.ItemSkillsDictionary[ItemSubType]);
-        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK;
+        bool skillCheckOK = ItemSubType == "Miscellaneous" || WAECharacterSheet.MySkills.Contains(ItemSkillsDictionary[ItemSubType]);
+        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 3;
     }
 
     public bool MoveToBag(int position, int slot)
@@ -275,20 +266,22 @@ public class WAEItem
 
     public void LogItemInfo()
     {
-        Logger.Log($"Name : {Name}");
-        Logger.Log($"ItemLink : {ItemLink}");
-        Logger.Log($"ItemRarity : {ItemRarity}");
-        Logger.Log($"ItemLevel : {ItemLevel}");
-        Logger.Log($"ItemMinLevel : {ItemMinLevel}");
-        Logger.Log($"ItemType : {ItemType}");
-        Logger.Log($"ItemSubType : {ItemSubType}");
-        Logger.Log($"ItemStackCount : {ItemStackCount}");
-        Logger.Log($"ItemEquipLoc : {ItemEquipLoc}");
-        Logger.Log($"ItemTexture : {ItemTexture}");
-        Logger.Log($"ItemSellPrice : {ItemSellPrice}");
-        Logger.Log($"QuiverCapacity : {QuiverCapacity}");
-        Logger.Log($"AmmoPouchCapacity : {AmmoPouchCapacity}");
-        Logger.Log($"BagCapacity : {BagCapacity}");
-        Logger.Log($"UniqueId : {UniqueId}");
+        Logger.LogDebug($"**************************************");
+        Logger.LogDebug($"Name : {Name}");
+        Logger.LogDebug($"ItemLink : {ItemLink}");
+        Logger.LogDebug($"ItemRarity : {ItemRarity}");
+        Logger.LogDebug($"ItemLevel : {ItemLevel}");
+        Logger.LogDebug($"ItemMinLevel : {ItemMinLevel}");
+        Logger.LogDebug($"ItemType : {ItemType}");
+        Logger.LogDebug($"ItemSubType : {ItemSubType}");
+        Logger.LogDebug($"ItemStackCount : {ItemStackCount}");
+        Logger.LogDebug($"ItemEquipLoc : {ItemEquipLoc}");
+        Logger.LogDebug($"ItemTexture : {ItemTexture}");
+        Logger.LogDebug($"ItemSellPrice : {ItemSellPrice}");
+        Logger.LogDebug($"QuiverCapacity : {QuiverCapacity}");
+        Logger.LogDebug($"AmmoPouchCapacity : {AmmoPouchCapacity}");
+        Logger.LogDebug($"BagCapacity : {BagCapacity}");
+        Logger.LogDebug($"UniqueId : {UniqueId}");
+        Logger.LogDebug($"WEIGHT SCORE : {WeightScore}");
     }
 }

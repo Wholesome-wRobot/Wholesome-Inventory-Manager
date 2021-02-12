@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using wManager.Plugin;
+using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
+using wManager.Wow.ObjectManager;
+using static WAEEnums;
 
 public class Main : IPlugin
 {
@@ -13,14 +16,13 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.02"; // Must match version in Version.txt
+    public static string version = "0.0.03"; // Must match version in Version.txt
 
     public void Initialize()
     {
         isLaunched = true;
 
         AutoEquipSettings.Load();
-        LoadWantedItemTypesList();
 
         if (AutoUpdater.CheckUpdate(version))
         {
@@ -29,8 +31,24 @@ public class Main : IPlugin
             return;
         }
 
+        AutoDetectMyClassSpec();
+
+        AutoEquipSettings.CurrentSettings.FirstLaunch = true; // DEBUG
+        if (AutoEquipSettings.CurrentSettings.FirstLaunch)
+        {
+            Logger.Log("First Launch");
+            AutoEquipSettings.CurrentSettings.FirstLaunch = false;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        LoadWantedItemTypesList();
+
+        Logger.Log($"Launching version {version} on client {ToolBox.GetWoWVersion()}");
+
         detectionPulse.DoWork += BackGroundPulse;
         detectionPulse.RunWorkerAsync();
+
+        EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
         /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
         {
@@ -61,7 +79,7 @@ public class Main : IPlugin
                 WAEBagInventory.Scan();
                 if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
                     WAEBagInventory.BagEquip();
-                if (AutoEquipSettings.CurrentSettings.AutoEquipGear)
+                if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
                     WAECharacterSheet.AutoEquip();
 
                 Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
@@ -73,7 +91,7 @@ public class Main : IPlugin
             Thread.Sleep(5000);
         }
     }
-
+    
     public void Settings()
     {
         AutoEquipSettings.Load();
@@ -117,5 +135,122 @@ public class Main : IPlugin
             end
             return result
         end");
+    }
+
+    public static void AutoDetectMyClassSpec()
+    {
+        ClassSpec currentSpec = WAECharacterSheet.ClassSpec;
+
+        switch (ObjectManager.Me.WowClass)
+        {
+            case (WoWClass.Warlock):
+                if (ToolBox.GetSpec() == 2)
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockDemonology;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockDestruction;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockAffliction;
+                break;
+
+            case (WoWClass.DeathKnight):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightBloodDPS;
+                else if (ToolBox.GetSpec() == 2)
+                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightFrostDPS;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightUnholy;
+                break;
+
+            case (WoWClass.Druid):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.DruidBalance;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.DruidRestoration;
+                else
+                {
+                    if (ToolBox.GetTalentRank(2, 5) > 2 // Thick Hide
+                        || ToolBox.GetTalentRank(2, 16) > 0 // Natural Reaction
+                        || ToolBox.GetTalentRank(2, 22) > 0) // Protector of the Pack
+                        WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
+                    else
+                        WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
+                }
+                break;
+
+            case (WoWClass.Hunter):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.HunterBeastMastery;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.HunterSurvival;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.HunterMarksman;
+                break;
+
+            case (WoWClass.Mage):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.MageArcane;
+                else if (ToolBox.GetSpec() == 2)
+                    WAECharacterSheet.ClassSpec = ClassSpec.MageFire;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.MageFrost;
+                break;
+
+            case (WoWClass.Paladin):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinHoly;
+                else if (ToolBox.GetSpec() == 2)
+                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinProtection;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinRetribution;
+                break;
+
+            case (WoWClass.Priest):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.PriestDiscipline;
+                else if (ToolBox.GetSpec() == 2)
+                    WAECharacterSheet.ClassSpec = ClassSpec.PriestHoly;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.PriestShadow;
+                break;
+
+            case (WoWClass.Rogue):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.RogueAssassination;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.RogueSubtelty;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.RogueCombat;
+                break;
+
+            case (WoWClass.Shaman):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanElemental;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanRestoration;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanEnhancement;
+                break;
+
+            case (WoWClass.Warrior):
+                if (ToolBox.GetSpec() == 1)
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorArms;
+                else if (ToolBox.GetSpec() == 3)
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorTank;
+                else
+                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorFury;
+                break;
+
+            default:
+                WAECharacterSheet.ClassSpec = ClassSpec.None;
+                break;
+        }
+
+        if (AutoEquipSettings.CurrentSettings.AutoDetectStatWeights && currentSpec != WAECharacterSheet.ClassSpec)
+            SettingsPresets.ChangeStatsWeightSettings(WAECharacterSheet.ClassSpec);
+
+        if (AutoEquipSettings.CurrentSettings.FirstLaunch && currentSpec != WAECharacterSheet.ClassSpec)
+            SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);
+
+        AutoEquipSettings.CurrentSettings.SpecSelectedByUser = WAECharacterSheet.ClassSpec;
     }
 }
