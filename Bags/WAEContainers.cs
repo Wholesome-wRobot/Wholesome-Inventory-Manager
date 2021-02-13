@@ -7,7 +7,7 @@ using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
 
-public static class WAEBagInventory
+public static class WAEContainers
 {
     public static List<WAEContainer> ListContainers = new List<WAEContainer>();
     public static List<WAEItem> AllItems = new List<WAEItem>();
@@ -40,7 +40,7 @@ public static class WAEBagInventory
     {
         Thread.Sleep(200);
         DateTime dateBegin = DateTime.Now;
-        Logger.LogDebug("*** Scanning bags...");
+        //Logger.LogDebug("*** Scanning bags...");
 
         ListContainers.Clear();
         AllItems.Clear();
@@ -52,7 +52,7 @@ public static class WAEBagInventory
                 ListContainers.Add(new WAEContainer(i));
         }
 
-        Logger.LogDebug($"Bag Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        //Logger.LogDebug($"Bag Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     private static int GetNbBagEquipped()
@@ -99,7 +99,7 @@ public static class WAEBagInventory
 
     public static void BagEquip()
     {
-        Logger.LogDebug("*** Bag equip...");
+        //Logger.LogDebug("*** Bag equip...");
         DateTime dateBegin = DateTime.Now;
 
         if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
@@ -222,6 +222,6 @@ public static class WAEBagInventory
             }
         }
 
-        Logger.LogDebug($"Bag Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        //Logger.LogDebug($"Bag Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 }

@@ -28,7 +28,7 @@ public static class WAECharacterSheet
     public static WAECharacterSheetSlot OffHand { get; set; } = new WAECharacterSheetSlot(17, new string[] { "INVTYPE_WEAPON", "INVTYPE_SHIELD", "INVTYPE_HOLDABLE", "INVTYPE_WEAPONOFFHAND" });
     public static WAECharacterSheetSlot Ranged { get; set; } = new WAECharacterSheetSlot(18, new string[] { "INVTYPE_RANGEDRIGHT", "INVTYPE_RANGED", "INVTYPE_THROWN" });
     public static List<string> AllItemLinks { get; set; } = new List<string>();
-    public static List<SkillLine> MySkills { get; set; } = new List<SkillLine>();
+    public static Dictionary<string, int> MySkills { get; set; } = new Dictionary<string, int>();
     public static ClassSpec ClassSpec { get; set; }
 
     // Spells
@@ -37,10 +37,10 @@ public static class WAECharacterSheet
 
     public static void Scan()
     {
-        Logger.LogDebug("*** Scanning character sheet...");
+        //Logger.LogDebug("*** Scanning character sheet...");
         DateTime dateBegin = DateTime.Now;
 
-        RecordKnownSkills();
+        RecordKnownSpecialSkills();
 
         AllItemLinks.Clear();
         AllItemLinks = Lua.LuaDoString<string>($@"
@@ -56,16 +56,16 @@ public static class WAECharacterSheet
         foreach (WAECharacterSheetSlot slot in AllSlots)
             slot.RefreshItem();
 
-        Logger.LogDebug($"CharSheet Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        //Logger.LogDebug($"CharSheet Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     private static void AutoEquipAmor()
     {
         foreach (WAECharacterSheetSlot armorSlot in ArmorSlots)
         {
-            Logger.LogDebug($"{armorSlot.InventorySlotID} -> {armorSlot.InvTypes} -> {armorSlot.Item?.Name} ({armorSlot.Item?.WeightScore})");
+            //Logger.LogDebug($"{armorSlot.InventorySlotID} -> {armorSlot.InvTypes} -> {armorSlot.Item?.Name} ({armorSlot.Item?.WeightScore})");
             // List potential replacement for this slot
-            List<WAEItem> potentialArmors = WAEBagInventory.AllItems
+            List<WAEItem> potentialArmors = WAEContainers.AllItems
                 .FindAll(i =>
                     armorSlot.InvTypes.Contains(i.ItemEquipLoc)
                     && i.CanEquip())
@@ -74,7 +74,7 @@ public static class WAECharacterSheet
 
             foreach (WAEItem item in potentialArmors)
             {
-                Logger.LogDebug($"Potential item: {item.Name} ({item.WeightScore})");
+                //Logger.LogDebug($"Potential item: {item.Name} ({item.WeightScore})");
                 if (armorSlot.Item == null || armorSlot.Item.WeightScore < item.WeightScore)
                 {
                     if (armorSlot.Item == null)
@@ -96,7 +96,7 @@ public static class WAECharacterSheet
         WAECharacterSheetSlot lowestScoreFingerSlot = ring1Score <= ring2Score ? Finger1 : Finger2;
 
         // List potential replacement for this slot
-        List<WAEItem> potentialRings = WAEBagInventory.AllItems
+        List<WAEItem> potentialRings = WAEContainers.AllItems
             .FindAll(i =>
                 i.ItemEquipLoc == "INVTYPE_FINGER"
                 && i.CanEquip())
@@ -105,7 +105,7 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialRings)
         {
-            Logger.LogDebug($"Potential Ring: {item.Name} ({item.WeightScore})");
+            //Logger.LogDebug($"Potential Ring: {item.Name} ({item.WeightScore})");
             if (lowestScoreFingerSlot.Item == null
                 || lowestScoreFingerSlot.Item.WeightScore < item.WeightScore)
             {
@@ -127,7 +127,7 @@ public static class WAECharacterSheet
         WAECharacterSheetSlot lowestScoreTrinketSlot = trinket1Score <= trinket2Score ? Trinket1 : Trinket2;
 
         // List potential replacement for this slot
-        List<WAEItem> potentialTrinkets = WAEBagInventory.AllItems
+        List<WAEItem> potentialTrinkets = WAEContainers.AllItems
             .FindAll(i =>
                 i.ItemEquipLoc == "INVTYPE_TRINKET"
                 && i.CanEquip())
@@ -136,7 +136,7 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialTrinkets)
         {
-            Logger.LogDebug($"Potential Trinket: {item.Name} ({item.WeightScore})");
+            //Logger.LogDebug($"Potential Trinket: {item.Name} ({item.WeightScore})");
             if (lowestScoreTrinketSlot.Item == null
                 || lowestScoreTrinketSlot.Item.WeightScore < item.WeightScore)
             {
@@ -153,11 +153,11 @@ public static class WAECharacterSheet
 
     private static void AutoEquipRanged()
     {
-        bool haveBulletsInBags = WAEBagInventory.AllItems.Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
-        bool haveArrowsInBags = WAEBagInventory.AllItems.Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
+        bool haveBulletsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
+        bool haveArrowsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
 
         // List potential replacement for this slot
-        List<WAEItem> potentialRanged = WAEBagInventory.AllItems
+        List<WAEItem> potentialRanged = WAEContainers.AllItems
             .FindAll(i =>
                 Ranged.InvTypes.Contains(i.ItemEquipLoc)
                 && i.CanEquip())
@@ -171,7 +171,7 @@ public static class WAECharacterSheet
             if ((item.ItemSubType == "Crossbows" || item.ItemSubType == "Bows") && !haveArrowsInBags)
                 continue;
 
-            Logger.LogDebug($"Potential Ranged: {item.Name} ({item.ItemMinLevel})");
+            //Logger.LogDebug($"Potential Ranged: {item.Name} ({item.ItemMinLevel})");
 
             bool itemTypeIsBanned = Main.WantedItemType.ContainsKey(item.ItemSubType) && !Main.WantedItemType[item.ItemSubType];
             bool equippedItemIsBanned = Ranged.Item != null
@@ -218,7 +218,7 @@ public static class WAECharacterSheet
                 typeAmmo = "Bullet";
 
             // List potential replacement for this slot
-            List<WAEItem> potentialAmmo = WAEBagInventory.AllItems
+            List<WAEItem> potentialAmmo = WAEContainers.AllItems
                 .FindAll(i =>
                     i.ItemSubType == typeAmmo
                     && ObjectManager.Me.Level >= i.ItemMinLevel)
@@ -227,12 +227,12 @@ public static class WAECharacterSheet
 
             foreach (WAEItem item in potentialAmmo)
             {
-                Logger.LogDebug($"Potential ammo: {item.Name} ({item.ItemMinLevel})");
+                //Logger.LogDebug($"Potential ammo: {item.Name} ({item.ItemMinLevel})");
 
                 if (Ammo.Item == null
                     || Ammo.Item.ItemMinLevel < item.ItemMinLevel
                     || Ammo.Item.ItemSubType != item.ItemSubType
-                    || !WAEBagInventory.AllItems.Exists(i => i.ItemId == item.ItemId))
+                    || !WAEContainers.AllItems.Exists(i => i.ItemId == item.ItemId))
                 {
                     if (Ammo.Item == null)
                         Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
@@ -245,11 +245,10 @@ public static class WAECharacterSheet
             }
         }
     }
-    // tried to equip offhand weapon when notknowing dualwield
 
     private static void AutoEquipWeapons()
     {
-        Logger.LogDebug($"************ Weapon scan debug *****************");
+        //Logger.LogDebug($"************ Weapon scan debug *****************");
         bool currentWeaponsAreIdeal = WeaponIsIdeal(MainHand.Item) && WeaponIsIdeal(OffHand.Item)
             || WeaponIsIdeal(MainHand.Item) && OffHand.Item == null && AutoEquipSettings.CurrentSettings.EquipTwoHanders && !AutoEquipSettings.CurrentSettings.EquipOneHanders;
         float unIdealDebuff = 0.6f;
@@ -261,20 +260,21 @@ public static class WAECharacterSheet
             currentCombinedWeaponsScore = currentCombinedWeaponsScore * unIdealDebuff;
         
         // Equip restricted to what we allow
-        List<WAEItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(MainHand);
+        List<WAEItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(MainHand); 
+
         if (MainHand.Item != null) listAllMainHandWeapons.Add(MainHand.Item);
         List<WAEItem> listAllOffHandWeapons = GetEquipableWeaponsFromBags(OffHand);
         if (OffHand.Item != null) listAllOffHandWeapons.Add(OffHand.Item);
         
         listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
         listAllOffHandWeapons = listAllOffHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
-        
+
         // Get ideal Two Hand
         WAEItem ideal2H = listAllMainHandWeapons
                 .Where(w => TwoHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
                 .Where(weapon => WeaponIsIdeal(weapon))
                 .FirstOrDefault();
-        
+
         // Get second choice Two Hand
         WAEItem secondChoice2H = listAllMainHandWeapons
                 .Where(w => TwoHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
@@ -310,12 +310,7 @@ public static class WAECharacterSheet
             .Where(w => DualWield.KnownSpell || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield)
             .Where(w => w != secondChoiceMainhand)
             .FirstOrDefault();
-        /*
-        secondChoiceMainhand = secondChoiceMainhand == null && idealMainhand != null ? idealMainhand : secondChoiceMainhand;
-        secondChoiceOffhand = secondChoiceOffhand == null && idealOffHand != null ? idealOffHand : secondChoiceOffhand;
-        idealMainhand = idealMainhand == null && secondChoiceMainhand != null ? secondChoiceMainhand : idealMainhand;
-        idealOffHand = idealOffHand == null && secondChoiceOffhand != null ? secondChoiceOffhand : idealOffHand;
-        */
+
         float scoreIdealMainHand = idealMainhand == null ? 0 : idealMainhand.WeightScore;
         float scoreIdealOffhand = idealOffHand == null ? 0 : idealOffHand.GetOffHandWeightScore();
 
@@ -328,16 +323,11 @@ public static class WAECharacterSheet
         float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
         float finalScoreSecondChoice2hands = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
 
-        Logger.LogDebug("Current weapons are ideal : " + currentWeaponsAreIdeal);
-        Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hands})");
-        Logger.LogDebug($"2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hands})");
-        Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand})");
-        Logger.LogDebug($"1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
-        Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand})");
-        Logger.LogDebug($"OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
-        Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield})");
-        Logger.LogDebug($"COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
-        Logger.LogDebug($"CURRENT COMBINED ({currentCombinedWeaponsScore})");
+        Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
+        Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hands}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hands})");
+        Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
+        Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
+        Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
 
 
         if (finalScoreDualWield > currentCombinedWeaponsScore 
@@ -351,9 +341,12 @@ public static class WAECharacterSheet
             }
             else
             {
-                idealMainhand?.Equip(MainHand.InventorySlotID, true);
-                idealOffHand?.Equip(OffHand.InventorySlotID, true);
-                return;
+                if (idealMainhand != null)
+                {
+                    idealMainhand?.Equip(MainHand.InventorySlotID, true);
+                    idealOffHand?.Equip(OffHand.InventorySlotID, true);
+                    return;
+                }
             }
         }
 
@@ -368,9 +361,12 @@ public static class WAECharacterSheet
             }
             else
             {
-                secondChoiceMainhand?.Equip(MainHand.InventorySlotID, true);
-                secondChoiceOffhand?.Equip(OffHand.InventorySlotID, true);
-                return;
+                if (secondChoiceMainhand != null)
+                {
+                    secondChoiceMainhand?.Equip(MainHand.InventorySlotID, true);
+                    secondChoiceOffhand?.Equip(OffHand.InventorySlotID, true);
+                    return;
+                }
             }
         }
     }
@@ -416,7 +412,7 @@ public static class WAECharacterSheet
 
     private static List<WAEItem> GetEquipableWeaponsFromBags(WAECharacterSheetSlot slot)
     {
-        return WAEBagInventory.AllItems
+        return WAEContainers.AllItems
             .FindAll(i =>
                 i.CanEquip()
                 && slot.InvTypes.Contains(i.ItemEquipLoc))
@@ -425,7 +421,7 @@ public static class WAECharacterSheet
 
     public static void AutoEquip()
     {
-        Logger.LogDebug("*** Auto equip...");
+        //Logger.LogDebug("*** Auto equip...");
         DateTime dateBegin = DateTime.Now;
 
         AutoEquipAmor();
@@ -435,22 +431,47 @@ public static class WAECharacterSheet
         AutoEquipRanged();
         AutoEquipAmmo();
 
-        Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
-    public static void RecordKnownSkills()
+    public static void RecordKnownSpecialSkills()
     {
         // TODO Delay
         if (DualWield == null)
             DualWield = new Spell("Dual Wield");
 
-        if (ObjectManager.Me.WowClass == WoWClass.Warrior)
+        if (!KnowTitansGrip && ClassSpec == ClassSpec.WarriorFury)
             KnowTitansGrip = ToolBox.GetTalentRank(2, 27) > 0;
+    }
 
-        foreach (KeyValuePair<string, SkillLine> skill in ItemSkillsDictionary)
+    public static void RecordKnownSkills()
+    {
+        MySkills.Clear();
+
+        string luaListAllSkills = Lua.LuaDoString<string>($@"
+                    local result = ""$"";
+                    for i = 1, GetNumSkillLines() do
+                        local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier,
+                            skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType,
+                            skillDescription = GetSkillLineInfo(i)
+                        result = result..skillName..""|""..skillRank..""$""
+                    end
+                    return result");
+
+        List<string> skills = luaListAllSkills.Split('$').ToList();
+        foreach(string skill in skills)
         {
-            if (Skill.Has(skill.Value) && !MySkills.Contains(skill.Value))
-                MySkills.Add(skill.Value);
+            if (skill.Length > 0)
+            {
+                string[] skillPair = skill.Split('|');
+                string skillName = skillPair[0]
+                    .Replace("Shield", "Shields")
+                    .Replace("Plate Mail", "Plate");
+                if (skillName == "Axes" || skillName == "Swords" || skillName == "Maces")
+                    skillName = "One-Handed " + skillName; 
+                //Logger.Log($"Adding {skillName} to known skills {int.Parse(skillPair[1])}");
+                MySkills.Add(skillName, int.Parse(skillPair[1]));
+            }
         }
     }
 

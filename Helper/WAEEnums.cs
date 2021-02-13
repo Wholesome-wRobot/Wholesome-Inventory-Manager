@@ -121,6 +121,7 @@ public class WAEEnums
 
     public static Dictionary<string, SkillLine> ItemSkillsDictionary { get; set; } = new Dictionary<string, SkillLine>
     {
+        { "Miscellaneous", SkillLine.Unarmed },
         { "Shields", SkillLine.Shield },
         { "Fist Weapons", SkillLine.FistWeapons },
         { "Daggers", SkillLine.Daggers },

@@ -204,7 +204,7 @@ public class WAEItem
             Lua.LuaDoString($"StaticPopup1Button1:Click()");
             Thread.Sleep(200);
             WAECharacterSheet.Scan();
-            WAEBagInventory.Scan();
+            WAEContainers.Scan();
             WAECharacterSheetSlot updatedSlot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
             if (updatedSlot.Item == null || updatedSlot.Item.ItemLink != ItemLink)
             {
@@ -236,23 +236,21 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        Logger.LogDebug($"Item type {Name} : {ItemSubType}");
-        if (!ItemSkillsDictionary.ContainsKey(ItemSubType) 
+        if (!ItemSkillsDictionary.ContainsKey(ItemSubType)
             && ItemSubType != "Miscellaneous")
-        {
-            Logger.LogDebug($"Item type unknown {Name} : {ItemSubType}");
             return false;
-        }
 
-        bool skillCheckOK = ItemSubType == "Miscellaneous" || WAECharacterSheet.MySkills.Contains(ItemSkillsDictionary[ItemSubType]);
-        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 3;
+        bool skillCheckOK = ItemSubType == "Miscellaneous" 
+            || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
+            || ItemSubType == "Fist Weapons" && Skill.Has(wManager.Wow.Enums.SkillLine.FistWeapons);
+        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 5;
     }
 
     public bool MoveToBag(int position, int slot)
     {
         Lua.LuaDoString($"PickupContainerItem({position}, {slot});"); // en fait un clique sur le slot de destination
         Thread.Sleep(200);
-        if (WAEBagInventory.ListContainers.Find(bag => bag.Position == position).GetContainerItemlink(slot) == ItemLink)
+        if (WAEContainers.ListContainers.Find(bag => bag.Position == position).GetContainerItemlink(slot) == ItemLink)
             return true;
         Logger.LogError($"Couldn't move {Name} to bag {position} slot {slot}, retrying soon.");
         return false;
@@ -269,22 +267,9 @@ public class WAEItem
 
     public void LogItemInfo()
     {
-        Logger.LogDebug($"**************************************");
-        Logger.LogDebug($"Name : {Name}");
-        Logger.LogDebug($"ItemLink : {ItemLink}");
-        Logger.LogDebug($"ItemRarity : {ItemRarity}");
-        Logger.LogDebug($"ItemLevel : {ItemLevel}");
-        Logger.LogDebug($"ItemMinLevel : {ItemMinLevel}");
-        Logger.LogDebug($"ItemType : {ItemType}");
-        Logger.LogDebug($"ItemSubType : {ItemSubType}");
-        Logger.LogDebug($"ItemStackCount : {ItemStackCount}");
-        Logger.LogDebug($"ItemEquipLoc : {ItemEquipLoc}");
-        Logger.LogDebug($"ItemTexture : {ItemTexture}");
-        Logger.LogDebug($"ItemSellPrice : {ItemSellPrice}");
-        Logger.LogDebug($"QuiverCapacity : {QuiverCapacity}");
-        Logger.LogDebug($"AmmoPouchCapacity : {AmmoPouchCapacity}");
-        Logger.LogDebug($"BagCapacity : {BagCapacity}");
-        Logger.LogDebug($"UniqueId : {UniqueId}");
-        Logger.LogDebug($"WEIGHT SCORE : {WeightScore}");
+        Logger.LogDebug($@"Name : {Name} | ItemLink : {ItemLink} | ItemRarity : {ItemRarity} | ItemLevel : {ItemLevel} | ItemMinLevel : {ItemMinLevel}
+                    | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
+                    | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
+                    | BagCapacity : {BagCapacity} | UniqueId : {UniqueId} | WEIGHT SCORE : {WeightScore}");
     }
 }

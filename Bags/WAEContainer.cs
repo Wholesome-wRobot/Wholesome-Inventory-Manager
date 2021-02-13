@@ -43,7 +43,7 @@ public class WAEContainer
                     item.InBag = Position;
                     Slots.Add(new WAEContainerSlot(i, position, item));
                     Items.Add(item);
-                    WAEBagInventory.AllItems.Add(item);
+                    WAEContainers.AllItems.Add(item);
                 }
                 else
                 {
@@ -59,7 +59,7 @@ public class WAEContainer
         Thread.Sleep(50);
         Lua.LuaDoString($"PutItemInBag({position + 19});");
         Thread.Sleep(50);
-        WAEBagInventory.Scan();
+        WAEContainers.Scan();
     }
 
     public bool EmptyBagInOtherBags()
@@ -67,7 +67,7 @@ public class WAEContainer
         List<WAEContainerSlot> freeSlots = new List<WAEContainerSlot>();
 
         // record free slots
-        foreach (WAEContainer container in WAEBagInventory.ListContainers.Where(b => b.IsOriginalBackpack || !b.IsAmmoPouch && !b.IsQuiver))
+        foreach (WAEContainer container in WAEContainers.ListContainers.Where(b => b.IsOriginalBackpack || !b.IsAmmoPouch && !b.IsQuiver))
         {
             if (container != this)
                 freeSlots.AddRange(container.Slots.Where(slot => slot.OccupiedBy == null));
@@ -88,7 +88,7 @@ public class WAEContainer
             }
         }
 
-        WAEBagInventory.Scan();
+        WAEContainers.Scan();
 
         // Check if bag to move is actually empty
         if (GetContainerNbFreeSlots() == GetContainerNbSlots())

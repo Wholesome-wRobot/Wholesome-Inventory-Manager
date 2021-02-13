@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.07"; // Must match version in Version.txt
+    public static string version = "0.0.08"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -31,6 +31,8 @@ public class Main : IPlugin
             return;
         }
 
+        Logger.Log($"Launching version {version} on client {ToolBox.GetWoWVersion()}");
+
         AutoDetectMyClassSpec();
 
         if (AutoEquipSettings.CurrentSettings.FirstLaunch)
@@ -42,13 +44,13 @@ public class Main : IPlugin
         }
 
         LoadWantedItemTypesList();
-
-        Logger.Log($"Launching version {version} on client {ToolBox.GetWoWVersion()}");
+        WAECharacterSheet.RecordKnownSkills();
 
         detectionPulse.DoWork += BackGroundPulse;
         detectionPulse.RunWorkerAsync();
 
         EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
+        EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => WAECharacterSheet.RecordKnownSkills());
         /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
         {
@@ -74,13 +76,13 @@ public class Main : IPlugin
             {
                 if (Conditions.InGameAndConnectedAndProductStartedNotInPause)
                 {
-                    Logger.LogDebug("--------------------------------------");
+                    //Logger.LogDebug("--------------------------------------");
                     DateTime dateBegin = DateTime.Now;
 
                     WAECharacterSheet.Scan();
-                    WAEBagInventory.Scan();
+                    WAEContainers.Scan();
                     if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
-                        WAEBagInventory.BagEquip();
+                        WAEContainers.BagEquip();
                     if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
                         WAECharacterSheet.AutoEquip();
 
