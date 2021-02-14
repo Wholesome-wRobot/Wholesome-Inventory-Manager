@@ -89,6 +89,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bags\WAELootFilter.cs" />
     <Compile Include="Settings\AutoEquipSettings.cs" />
     <Compile Include="AutoUpdater.cs" />
     <Compile Include="Bags\WAEContainers.cs" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <Content Include="Compiled\Version.txt" />
     <Content Include="Compiled\Wholesome_Inventory_Manager.dll" />
+    <Resource Include="Resources\discord-logo.png" />
     <Content Include="Notes.txt" />
   </ItemGroup>
   <ItemGroup>

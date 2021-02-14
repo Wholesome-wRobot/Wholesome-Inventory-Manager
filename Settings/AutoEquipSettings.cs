@@ -30,12 +30,57 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public bool AutoEquipBags { get; set; }
     public bool EquipQuiver { get; set; }
 
+    // LootFilter
+    public bool LootFilterActivated { get; set; }
+    // Value
+    public int DeleteGoldValue { get; set; }
+    public int DeleteSilverValue { get; set; }
+    public int DeleteCopperValue { get; set; }
+    public bool DeleteItemWithNoValue { get; set; }
+    // Quality
+    public bool DeleteGray { get; set; }
+    public bool AnyGray { get; set; }
+    public bool KeepGray { get; set; }
+    public bool DeleteWhite { get; set; }
+    public bool AnyWhite { get; set; }
+    public bool KeepWhite { get; set; }
+    public bool DeleteGreen { get; set; }
+    public bool AnyGreen { get; set; }
+    public bool KeepGreen { get; set; }
+    public bool DeleteBlue { get; set; }
+    public bool AnyBlue { get; set; }
+    public bool KeepBlue { get; set; }
+
     public double LastUpdateDate { get; set; }
 
     public AutoEquipSettings()
     {
         FirstLaunch = true;
         AutoDetectStatWeights = true;
+
+        // Filter Loot
+        LootFilterActivated = false;
+
+        DeleteGoldValue = 0;
+        DeleteSilverValue = 0;
+        DeleteCopperValue = 0;
+        DeleteItemWithNoValue = false;
+
+        DeleteGray = false;
+        AnyGray = true;
+        KeepGray = false;
+
+        DeleteWhite = false;
+        AnyWhite = true;
+        KeepWhite = false;
+
+        DeleteGreen = false;
+        AnyGreen = true;
+        KeepGreen = false;
+
+        DeleteBlue = false;
+        AnyBlue = true;
+        KeepBlue = false;
 
         // Bags
         EquipQuiver = false;
@@ -59,10 +104,10 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public void ShowConfiguration()
     {
         PluginSettingsControl settingsWindow = new PluginSettingsControl();
-        settingsWindow.MaxWidth = 600;
-        settingsWindow.MaxHeight = 820;
-        settingsWindow.MinWidth = 600;
-        settingsWindow.MinHeight = 820;
+        settingsWindow.MaxWidth = 520;
+        settingsWindow.MaxHeight = 650;
+        settingsWindow.MinWidth = 520;
+        settingsWindow.MinHeight = 650;
         settingsWindow.ResizeMode = System.Windows.ResizeMode.CanResize;
         settingsWindow.Title = Main.PluginName;
         settingsWindow.SaveWindowPosition = true;

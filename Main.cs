@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.08"; // Must match version in Version.txt
+    public static string version = "0.0.09"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -80,11 +80,16 @@ public class Main : IPlugin
                     DateTime dateBegin = DateTime.Now;
 
                     WAECharacterSheet.Scan();
+
                     WAEContainers.Scan();
+
                     if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
                         WAEContainers.BagEquip();
+
                     if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
                         WAECharacterSheet.AutoEquip();
+
+                    WAELootFilter.FilterLoot();
 
                     Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
                 }
@@ -251,7 +256,10 @@ public class Main : IPlugin
         }
 
         if (AutoEquipSettings.CurrentSettings.AutoDetectStatWeights && currentSpec != WAECharacterSheet.ClassSpec)
+        {
+            WAEItemDB.ItemDb.Clear(); // Rescan all items
             SettingsPresets.ChangeStatsWeightSettings(WAECharacterSheet.ClassSpec);
+        }
 
         if (AutoEquipSettings.CurrentSettings.FirstLaunch && currentSpec != WAECharacterSheet.ClassSpec)
             SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);

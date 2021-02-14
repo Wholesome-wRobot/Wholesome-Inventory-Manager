@@ -6,8 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     x:Class="Wholesome_Inventory_Manager.Settings.PluginSettingsControl" 
     mc:Ignorable="d" 
-    d:DesignHeight="800" d:DesignWidth="500"
-    VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    d:DesignHeight="800" d:DesignWidth="520"
+    VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="#FF252525">
 
 
     <mah:MetroWindow.Resources>
@@ -18,12 +18,11 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
                 <!-- Accent and AppTheme setting -->
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Cyan.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseDark.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </mah:MetroWindow.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -38,308 +37,44 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" 
-                               Grid.Column="0" 
-                               Margin="10" 
-                               Grid.ColumnSpan="4" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"  
-                               Text="WHOLESOME INVENTORY MANAGER" 
-                               FontSize="25"  />
+        <TextBlock Margin="0,13,13,0" 
+                   Grid.ColumnSpan="4"
+                   HorizontalAlignment="Right"
+                   ToolTip="Join us on Discord" >
+            <Hyperlink NavigateUri="https://discord.gg/Hb6Cn5x3"
+                       TextDecorations="None"
+                       Name="DiscordLink">
+                <Image Width="25"
+                   Source="/Wholesome_Inventory_Manager;component/Resources/discord-logo.png"/>
+            </Hyperlink>
+        </TextBlock>
 
-        <TabControl Grid.Row="1"
+        <TextBlock Grid.Row="0" 
+                    Grid.Column="0" 
+                    Margin="15,0,0,0" 
+                    Grid.ColumnSpan="4" 
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Center"  
+                    Text="WHOLESOME INVENTORY MANAGER" 
+                    FontSize="25" Foreground="#FFC3C3C3" TextDecorations="{x:Null}" FontFamily="Microsoft YaHei UI"  />
+
+        <Separator  Grid.Row="0" 
+                    Grid.Column="0"
+                    Grid.ColumnSpan="4"
+                    Margin="0,50,0,0" />
+
+        <TabControl
                     Grid.ColumnSpan="4"
                     HorizontalAlignment="Center" 
                     VerticalAlignment="Center"
                     Margin="10" 
-                    Width="472">
+                    Width="500" Grid.Row="1" Panel.ZIndex="-2">
             <!-- TAB AUTO EQUIP -->
-            <TabItem Header="AutoEquip" >
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <!-- ACTIVATE -->
-                    <TextBlock Grid.Row="0" 
-                               Grid.Column="1" 
-                               Margin="5,0,5,0" 
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Activate" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="0" 
-                                       Grid.Column="2"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"  
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="AutoEquipGearChanged" 
-                                       x:Name="AutoEquipGear" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <Separator  Grid.Row="1" 
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="4"
-                                       Margin="5,10,0,10" />
-
-                    <!-- BAGS -->
-                    <TextBlock Grid.Row="3" 
-                               Grid.Column="0" 
-                               Grid.ColumnSpan="4"
-                               Margin="0,0,0,0" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Bottom"  
-                               Text="Bags" 
-                               FontSize="20"  />
-
-                    <TextBlock Grid.Row="4" 
-                               Grid.Column="0" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Bags" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="4" 
-                                       Grid.Column="1"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"  
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="AutoEquipBagsChanged" 
-                                       x:Name="AutoEquipBags" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="4" 
-                               Grid.Column="2" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Ammo Container" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="4" 
-                                       Grid.Column="3"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"  
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipQuiverChanged" 
-                                       x:Name="EquipQuiver" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-                    
-                    <Separator  Grid.Row="5" 
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="4"
-                                       Margin="5,10,0,10" />
-
-                    <!-- RANGED -->
-                    <TextBlock Grid.Row="6" 
-                               Grid.Column="0" 
-                               Grid.ColumnSpan="4"
-                               Margin="0,0,0,0" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Bottom"  
-                               Text="Ranged" 
-                               FontSize="20"  />
-
-                    <TextBlock Grid.Row="7" 
-                               Grid.Column="0" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Thrown" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="7" 
-                                       Grid.Column="1"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"  
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipThrownChanged" 
-                                       x:Name="EquipThrown" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="7" 
-                               Grid.Column="2" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Bows" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="7" 
-                                       Grid.Column="3"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"  
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipBowsChanged" 
-                                       x:Name="EquipBows" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="8" 
-                               Grid.Column="0" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Guns" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="8" 
-                                       Grid.Column="1"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipGunsChanged" 
-                                       x:Name="EquipGuns" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="8" 
-                               Grid.Column="2" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Crossbows" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="8" 
-                                       Grid.Column="3"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipCrossbowsChanged" 
-                                       x:Name="EquipCrossbows" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <Separator  Grid.Row="9" 
-                                       Grid.Column="0"
-                                       Grid.ColumnSpan="4"
-                                       Margin="5,10,0,10" />
-
-                    <!-- RANGED -->
-                    <TextBlock Grid.Row="10" 
-                               Grid.Column="0" 
-                               Grid.ColumnSpan="4"
-                               Margin="0,0,0,0" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Bottom"  
-                               Text="Weapons" 
-                               FontSize="20"  />
-
-                    <TextBlock Grid.Row="11" 
-                               Grid.Column="0" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="1H Weapons" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="11" 
-                                       Grid.Column="1"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipOneHandersChanged" 
-                                       x:Name="EquipOneHanders" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="11" 
-                               Grid.Column="2" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="2H Weapons" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="11" 
-                                       Grid.Column="3"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipTwoHandersChanged" 
-                                       x:Name="EquipTwoHanders" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                    <TextBlock Grid.Row="12" 
-                               Grid.Column="0" 
-                               Margin="5,0,5,0"
-                               HorizontalAlignment="Right" 
-                               VerticalAlignment="Center"  
-                               Text="Shields" 
-                               FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="12" 
-                                       Grid.Column="1"  
-                                       Margin="0,10,0,10"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" 
-                                       IsChecked="True" 
-                                       Click="EquipShieldsChanged" 
-                                       x:Name="EquipShields" 
-                                       OnLabel="" 
-                                       OffLabel=""/>
-
-                </Grid>
-            </TabItem>
-
-            <TabItem Header="StatsWeight">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" 
-                                   Grid.Column="1" 
-                                   Margin="0,19,70,0" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Top"  
-                                   Text="Auto detect" 
-                                   FontSize="13"  />
-                    <mah:ToggleSwitch  Grid.Row="0" 
-                                           Grid.Column="0"  
-                                           Margin="77,10,0,10"
-                                           HorizontalAlignment="Center"  
-                                           VerticalAlignment="Top" 
-                                           IsChecked="True" 
-                                           Click="AutoDetectStatWeightsChanged" 
-                                           x:Name="AutoDetectStatWeights" 
-                                           OnLabel="" 
-                                           OffLabel=""/>
-                    <Grid
-                        Margin="0,50,0,0"
-                        Name="GroupStats">                        
+            <TabItem Header="AutoEquip" HorizontalAlignment="Center" Margin="10,0,-12,0" Width="152" >
+                <ScrollViewer 
+                        Height="500"
+                        VerticalScrollBarVisibility="Visible">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
@@ -365,31 +100,320 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                    
-                        <!-- AU DETECT STATS -->
 
-                        <!-- Liste déroulante -->
-                        <ComboBox Name="StatsPreset"
+                        <!-- ACTIVATE -->
+                        <TextBlock Grid.Row="0" 
+                               Grid.Column="1" 
+                               Margin="5,0,5,0" 
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Activate" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="0" 
+                                       Grid.Column="2"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="AutoEquipGearChanged" 
+                                       x:Name="AutoEquipGear" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <Separator  Grid.Row="1" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                        <!-- BAGS -->
+                        <TextBlock Grid.Row="3" 
+                               Grid.Column="0" 
+                               Grid.ColumnSpan="4"
+                               Margin="0,0,0,0" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Bottom"  
+                               Text="Bags" 
+                               FontSize="20" Foreground="#FFC9C9C9"  />
+
+                        <TextBlock Grid.Row="4" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Bags" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="4" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="AutoEquipBagsChanged" 
+                                       x:Name="AutoEquipBags" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="4" 
+                               Grid.Column="2" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Ammo Container" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="4" 
+                                       Grid.Column="3"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipQuiverChanged" 
+                                       x:Name="EquipQuiver" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <Separator  Grid.Row="5" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                        <!-- RANGED -->
+                        <TextBlock Grid.Row="6" 
+                               Grid.Column="0" 
+                               Grid.ColumnSpan="4"
+                               Margin="0,0,0,0" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Bottom"  
+                               Text="Ranged" 
+                               FontSize="20" Foreground="#FFC9C9C9"  />
+
+                        <TextBlock Grid.Row="7" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Thrown" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="7" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipThrownChanged" 
+                                       x:Name="EquipThrown" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="7" 
+                               Grid.Column="2" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Bows" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="7" 
+                                       Grid.Column="3"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipBowsChanged" 
+                                       x:Name="EquipBows" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="8" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Guns" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="8" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipGunsChanged" 
+                                       x:Name="EquipGuns" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="8" 
+                               Grid.Column="2" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Crossbows" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="8" 
+                                       Grid.Column="3"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipCrossbowsChanged" 
+                                       x:Name="EquipCrossbows" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <Separator  Grid.Row="9" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                        <!-- RANGED -->
+                        <TextBlock Grid.Row="10" 
+                               Grid.Column="0" 
+                               Grid.ColumnSpan="4"
+                               Margin="0,0,0,0" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Bottom"  
+                               Text="Weapons" 
+                               FontSize="20" Foreground="#FFC9C9C9"  />
+
+                        <TextBlock Grid.Row="11" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="1H Weapons" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="11" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipOneHandersChanged" 
+                                       x:Name="EquipOneHanders" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="11" 
+                               Grid.Column="2" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="2H Weapons" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="11" 
+                                       Grid.Column="3"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipTwoHandersChanged" 
+                                       x:Name="EquipTwoHanders" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="12" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Shields" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="12" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="EquipShieldsChanged" 
+                                       x:Name="EquipShields" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="StatsWeight" HorizontalAlignment="Center" Margin="31,0,-34,0" Width="155">
+                <ScrollViewer 
+                        Height="500"
+                        VerticalScrollBarVisibility="Visible">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" 
+                                   Grid.Column="1" 
+                                   Margin="0,19,70,0" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Top"  
+                                   Text="Auto detect" 
+                                   FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="0" 
+                                           Grid.Column="0"  
+                                           Margin="73,10,0,10"
+                                           HorizontalAlignment="Center"  
+                                           VerticalAlignment="Top" 
+                                           IsChecked="True" 
+                                           Click="AutoDetectStatWeightsChanged" 
+                                           x:Name="AutoDetectStatWeights" 
+                                           OnLabel="" 
+                                           OffLabel=""/>
+                        <Grid
+                        Margin="0,50,0,0"
+                        Name="GroupStats">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="117*" />
+                                <ColumnDefinition Width="117*" />
+                                <ColumnDefinition Width="41*" />
+                                <ColumnDefinition Width="75*"/>
+                                <ColumnDefinition Width="116*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- AU DETECT STATS -->
+
+                            <!-- Liste déroulante -->
+                            <ComboBox Name="StatsPreset"
                                   Margin="10"
                                   Grid.Row="1" 
                                   Grid.Column="0" 
-                                  Grid.ColumnSpan="4"
+                                  Grid.ColumnSpan="5"
                                   SelectionChanged="AutoDetectStatsPresetChanged">
-                            <ComboBox.ItemsSource>
-                                <CompositeCollection>
-                                    <ComboBoxItem IsEnabled="False" Foreground="Black">Select Item</ComboBoxItem>
-                                </CompositeCollection>
-                            </ComboBox.ItemsSource>
-                        </ComboBox>
+                                <ComboBox.ItemsSource>
+                                    <CompositeCollection>
+                                        <ComboBoxItem IsEnabled="False" Foreground="Black">Select Item</ComboBoxItem>
+                                    </CompositeCollection>
+                                </ComboBox.ItemsSource>
+                            </ComboBox>
 
-                        <TextBlock Grid.Row="4" 
+                            <TextBlock Grid.Row="4" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Stamina" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="4" 
+                            <mah:NumericUpDown  Grid.Row="4" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -399,30 +423,30 @@
                                            x:Name="StaminaWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="4" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="4" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Strength" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="4" 
+                            <mah:NumericUpDown  Grid.Row="4" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="StrengthWeightChanged" 
                                            x:Name="StrengthWeight" Width="100" />
 
-                        <TextBlock Grid.Row="5" 
+                            <TextBlock Grid.Row="5" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Intellect" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="5" 
+                            <mah:NumericUpDown  Grid.Row="5" 
                                            Grid.Column="1"  
                                             Minimum="0"
                                            Margin="5,10,0,10"
@@ -432,30 +456,30 @@
                                            x:Name="IntellectWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="5" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="5" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Spirit" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="5" 
+                            <mah:NumericUpDown  Grid.Row="5" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="SpiritWeightChanged" 
                                            x:Name="SpiritWeight" Width="100" />
 
-                        <TextBlock Grid.Row="6" 
+                            <TextBlock Grid.Row="6" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Agility" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="6" 
+                            <mah:NumericUpDown  Grid.Row="6" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -465,35 +489,35 @@
                                            x:Name="AgilityWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="6" 
+                            <TextBlock Grid.Row="6" 
                                    Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Weapon DPS" 
-                                   FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="6" 
+                                   FontSize="13" Grid.ColumnSpan="2"  />
+                            <mah:NumericUpDown  Grid.Row="6" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="DPSWeightChanged" 
                                            x:Name="DPSWeight" Width="100" />
-                    
-                        <Separator  Grid.Row="7" 
+
+                            <Separator  Grid.Row="7" 
                                            Grid.Column="0"
-                                           Grid.ColumnSpan="4"
+                                           Grid.ColumnSpan="5"
                                            Margin="5,10,0,10" />
 
-                        <TextBlock Grid.Row="8" 
+                            <TextBlock Grid.Row="8" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Attack Power" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="8" 
+                            <mah:NumericUpDown  Grid.Row="8" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -503,30 +527,30 @@
                                            x:Name="AttackPowerWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="8" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="8" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Spell Power" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="8" 
+                            <mah:NumericUpDown  Grid.Row="8" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="SpellPowerWeightChanged" 
                                            x:Name="SpellPowerWeight" Width="100" />
 
-                        <TextBlock Grid.Row="9" 
+                            <TextBlock Grid.Row="9" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Critical Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="9" 
+                            <mah:NumericUpDown  Grid.Row="9" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -536,30 +560,30 @@
                                            x:Name="CritRatingWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="9" 
+                            <TextBlock Grid.Row="9" 
                                    Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Haste Rating" 
-                                   FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="9" 
+                                   FontSize="13" Grid.ColumnSpan="2"  />
+                            <mah:NumericUpDown  Grid.Row="9" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="HasteRatingWeightChanged" 
                                            x:Name="HasteRatingWeight" Width="100" />
 
-                        <TextBlock Grid.Row="10" 
+                            <TextBlock Grid.Row="10" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Hit Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="10" 
+                            <mah:NumericUpDown  Grid.Row="10" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -569,35 +593,35 @@
                                            x:Name="HitRatingWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="10" 
+                            <TextBlock Grid.Row="10" 
                                    Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Expertise Rating" 
-                                   FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="10" 
+                                   FontSize="13" Grid.ColumnSpan="2"  />
+                            <mah:NumericUpDown  Grid.Row="10" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="ExpertiseRatingWeightChanged" 
                                            x:Name="ExpertiseRatingWeight" Width="100" />
 
-                        <Separator  Grid.Row="11" 
+                            <Separator  Grid.Row="11" 
                                            Grid.Column="0"
-                                           Grid.ColumnSpan="4"
+                                           Grid.ColumnSpan="5"
                                            Margin="5,10,0,10" />
 
-                        <TextBlock Grid.Row="12" 
+                            <TextBlock Grid.Row="12" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Armor Penetration" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="12" 
+                            <mah:NumericUpDown  Grid.Row="12" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -607,30 +631,30 @@
                                            x:Name="ArmorPenetrationWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="12" 
+                            <TextBlock Grid.Row="12" 
                                    Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Spell Penetration" 
-                                   FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="12" 
+                                   FontSize="13" Grid.ColumnSpan="2"  />
+                            <mah:NumericUpDown  Grid.Row="12" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="SpellPenetrationWeightChanged" 
                                            x:Name="SpellPenetrationWeight" Width="100" />
 
-                        <TextBlock Grid.Row="13" 
+                            <TextBlock Grid.Row="13" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Sh. Block Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="13" 
+                            <mah:NumericUpDown  Grid.Row="13" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -640,30 +664,30 @@
                                            x:Name="ShieldBlockRatingWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="13" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="13" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Shield Block" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="13" 
+                            <mah:NumericUpDown  Grid.Row="13" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="ShieldBlockWeightChanged" 
                                            x:Name="ShieldBlockWeight" Width="100" />
 
-                        <TextBlock Grid.Row="14" 
+                            <TextBlock Grid.Row="14" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Defense Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="14" 
+                            <mah:NumericUpDown  Grid.Row="14" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -673,30 +697,30 @@
                                            x:Name="DefenseRatingWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="14" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="14" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Parry Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="14" 
+                            <mah:NumericUpDown  Grid.Row="14" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="ParryRatingWeightChanged" 
                                            x:Name="ParryRatingWeight" Width="100" />
 
-                        <TextBlock Grid.Row="15" 
+                            <TextBlock Grid.Row="15" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Dodge Rating" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="15" 
+                            <mah:NumericUpDown  Grid.Row="15" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -706,30 +730,30 @@
                                            x:Name="DodgeRatingWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="15" 
-                                   Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                            <TextBlock Grid.Row="15" 
+                                   Grid.Column="3" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Resilience" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="15" 
+                            <mah:NumericUpDown  Grid.Row="15" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="ResilienceWeightChanged" 
                                            x:Name="ResilienceWeight" Width="100" />
 
-                        <TextBlock Grid.Row="16" 
+                            <TextBlock Grid.Row="16" 
                                    Grid.Column="0" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,4,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Armor" 
                                    FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="16" 
+                            <mah:NumericUpDown  Grid.Row="16" 
                                             Minimum="0"
                                            Grid.Column="1"  
                                            Margin="5,10,0,10"
@@ -739,24 +763,173 @@
                                            x:Name="ArmorWeight" 
                                             Width="100" />
 
-                        <TextBlock Grid.Row="16" 
+                            <TextBlock Grid.Row="16" 
                                    Grid.Column="2" 
-                                   Margin="5,0,5,0" 
+                                   Margin="0,14,5,14" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
                                    Text="Mana Per 5s." 
-                                   FontSize="13"  />
-                        <mah:NumericUpDown  Grid.Row="16" 
+                                   FontSize="13" Grid.ColumnSpan="2"  />
+                            <mah:NumericUpDown  Grid.Row="16" 
                                             Minimum="0"
-                                           Grid.Column="3"
+                                           Grid.Column="4"
                                            Margin="5,10,0,10"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center" 
                                            ValueChanged="Mana5WeightChanged" 
                                            x:Name="Mana5Weight" Width="100" />
 
+                        </Grid>
                     </Grid>
-                </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- LOOT FILTER -->
+            <TabItem Header="LootFilter" HorizontalAlignment="Center" Margin="51,0,-45,0" Width="132">
+                <ScrollViewer 
+                        Height="500"
+                        VerticalScrollBarVisibility="Visible">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" 
+                                   Grid.Column="1" 
+                                   Margin="0,19,70,0" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Top"  
+                                   Text="Activate" 
+                                   FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="0" 
+                                           Grid.Column="0"  
+                                           Margin="73,10,0,10"
+                                           HorizontalAlignment="Center"  
+                                           VerticalAlignment="Top" 
+                                           IsChecked="True" 
+                                           Click="LootFilterActivatedChanged" 
+                                           x:Name="LootFilterActivated" 
+                                           OnLabel="" 
+                                           OffLabel=""/>
+
+                        <Grid
+                        Margin="0,50,0,0"
+                        Name="GroupFilter">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="117*" />
+                                <ColumnDefinition Width="117*" />
+                                <ColumnDefinition Width="119*" />
+                                <ColumnDefinition Width="113*"/>
+                                <ColumnDefinition Width="0*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+
+                            <Separator  Grid.Row="1" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                            <!-- BAGS -->
+                            <TextBlock Grid.Row="4" 
+                               Grid.Column="0"
+                               Grid.ColumnSpan="4"
+                               Margin="29,0,24,0" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Bottom"  
+                               Text="Quality" 
+                               FontSize="20" Height="27" Width="64" Foreground="#FFC9C9C9"  />
+
+                            <TextBlock Grid.Row="5" 
+                                   Grid.Column="0" 
+                                   Margin="0,10,10,10" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"  
+                                   Text="Poor (Gray)" 
+                                   FontSize="13" Height="18" Width="64"  />
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="1"  
+                                     Margin="0,10,0,10"
+                                     x:Name="KeepGray"
+                                     GroupName="FilterGray"
+                                     Click="FilterGrayChanged"
+                                     ToolTip="KEEP"
+                                     BorderBrush="#379445"
+                                     Background="#293328"/>
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="1"  
+                                     Margin="30,10,0,10"
+                                     x:Name="AnyGray"
+                                     GroupName="FilterGray"
+                                     Click="FilterGrayChanged"
+                                     ToolTip="ANY" />
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="1"  
+                                     Margin="60,10,0,10"
+                                     x:Name="DeleteGray"
+                                     GroupName="FilterGray"
+                                     Click="FilterGrayChanged"
+                                     ToolTip="DELETE"
+                                     BorderBrush="#bf3434"
+                                     Background="#332828"/>
+
+
+                            <TextBlock Grid.Row="5" 
+                                   Grid.Column="2" 
+                                   Margin="0,10,10,10" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"  
+                                   Text="Common (White)" 
+                                   FontSize="13" Height="18" Width="98"  />
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="3"  
+                                     Margin="0,10,0,10"
+                                     x:Name="KeepWhite"
+                                     GroupName="FilterWhite"
+                                     Click="FilterWhiteChanged"
+                                     ToolTip="KEEP"
+                                     BorderBrush="#379445"
+                                     Background="#293328" Foreground="White" />
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="3"  
+                                     Margin="30,10,0,10"
+                                     x:Name="AnyWhite"
+                                     GroupName="FilterWhite"
+                                     Click="FilterWhiteChanged"
+                                     ToolTip="ANY" />
+                            <RadioButton Grid.Row="5" 
+                                     Grid.Column="3"  
+                                     Margin="60,10,0,10"
+                                     x:Name="DeleteWhite"
+                                     GroupName="FilterWhite"
+                                     Click="FilterWhiteChanged"
+                                     ToolTip="DELETE"
+                                     BorderBrush="#bf3434"
+                                     Background="#332828"/>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>

@@ -13,6 +13,11 @@ namespace Wholesome_Inventory_Manager.Settings
             if (AutoEquipSettings.CurrentSettings.SpecSelectedByUser == ClassSpec.None)
                 Main.AutoDetectMyClassSpec();
 
+            DiscordLink.RequestNavigate += (sender, e) =>
+            {
+                System.Diagnostics.Process.Start(e.Uri.ToString());
+            };
+
             // AUTO EQUIP
             AutoDetectStatWeights.IsChecked = AutoEquipSettings.CurrentSettings.AutoDetectStatWeights;
 
@@ -33,7 +38,40 @@ namespace Wholesome_Inventory_Manager.Settings
             StatsPreset.ItemsSource = Enum.GetNames(typeof(ClassSpec));
             GroupStats.IsEnabled = !(bool)AutoDetectStatWeights.IsChecked;
 
+            // LOOT FILTER
+            LootFilterActivated.IsChecked = AutoEquipSettings.CurrentSettings.LootFilterActivated;
+
+            DeleteGray.IsChecked = AutoEquipSettings.CurrentSettings.DeleteGray;
+            AnyGray.IsChecked = AutoEquipSettings.CurrentSettings.AnyGray;
+            KeepGray.IsChecked = AutoEquipSettings.CurrentSettings.KeepGray;
+            DeleteWhite.IsChecked = AutoEquipSettings.CurrentSettings.DeleteWhite;
+            AnyWhite.IsChecked = AutoEquipSettings.CurrentSettings.AnyWhite;
+            KeepWhite.IsChecked = AutoEquipSettings.CurrentSettings.KeepWhite;
+
             UpdateStats();
+        }
+
+
+        private void FilterWhiteChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteWhite = (bool)DeleteWhite.IsChecked;
+            AutoEquipSettings.CurrentSettings.AnyWhite = (bool)AnyWhite.IsChecked;
+            AutoEquipSettings.CurrentSettings.KeepWhite = (bool)KeepWhite.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void FilterGrayChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteGray = (bool)DeleteGray.IsChecked;
+            AutoEquipSettings.CurrentSettings.AnyGray = (bool)AnyGray.IsChecked;
+            AutoEquipSettings.CurrentSettings.KeepGray = (bool)KeepGray.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void LootFilterActivatedChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.LootFilterActivated = (bool)LootFilterActivated.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
         }
 
         private void EquipShieldsChanged(object sender, RoutedEventArgs e)
