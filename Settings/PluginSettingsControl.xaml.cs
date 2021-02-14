@@ -36,6 +36,8 @@ namespace Wholesome_Inventory_Manager.Settings
 
             // STATS
             StatsPreset.ItemsSource = Enum.GetNames(typeof(ClassSpec));
+            UpdateStats();
+            StatsPreset.SelectionChanged += new System.Windows.Controls.SelectionChangedEventHandler(AutoDetectStatsPresetChanged);
             GroupStats.IsEnabled = !(bool)AutoDetectStatWeights.IsChecked;
 
             // LOOT FILTER
@@ -47,8 +49,6 @@ namespace Wholesome_Inventory_Manager.Settings
             DeleteWhite.IsChecked = AutoEquipSettings.CurrentSettings.DeleteWhite;
             AnyWhite.IsChecked = AutoEquipSettings.CurrentSettings.AnyWhite;
             KeepWhite.IsChecked = AutoEquipSettings.CurrentSettings.KeepWhite;
-
-            UpdateStats();
         }
 
 
@@ -94,6 +94,7 @@ namespace Wholesome_Inventory_Manager.Settings
 
         private void AutoDetectStatsPresetChanged(object sender, RoutedEventArgs e)
         {
+            Logger.Log("SETTING CHANGED");
             AutoEquipSettings.CurrentSettings.SpecSelectedByUser = (ClassSpec)Enum.Parse(typeof(ClassSpec), StatsPreset.SelectedIndex.ToString());
             SettingsPresets.ChangeStatsWeightSettings(AutoEquipSettings.CurrentSettings.SpecSelectedByUser);
             UpdateStats();

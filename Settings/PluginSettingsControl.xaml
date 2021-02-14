@@ -397,11 +397,11 @@
                                   Margin="10"
                                   Grid.Row="1" 
                                   Grid.Column="0" 
-                                  Grid.ColumnSpan="5"
-                                  SelectionChanged="AutoDetectStatsPresetChanged">
+                                  Grid.ColumnSpan="5">
                                 <ComboBox.ItemsSource>
                                     <CompositeCollection>
-                                        <ComboBoxItem IsEnabled="False" Foreground="Black">Select Item</ComboBoxItem>
+                                        <ComboBoxItem IsEnabled="False" 
+                                                      Foreground="Black"/>
                                     </CompositeCollection>
                                 </ComboBox.ItemsSource>
                             </ComboBox>

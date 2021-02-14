@@ -156,6 +156,7 @@ public class SettingsPresets
                 {CharStat.Strength, 800},
                 {CharStat.Agility, 1000},
                 {CharStat.Stamina, 1},
+                {CharStat.Armor, 1},
                 {CharStat.HitRating, 500},
                 {CharStat.CriticalStrikeRating, 550},
                 {CharStat.HasteRating, 350},
@@ -168,6 +169,7 @@ public class SettingsPresets
         { ClassSpec.DruidRestoration, new Dictionary<CharStat, int>()
             {
                 {CharStat.Stamina, 1},
+                {CharStat.Armor, 1},
                 {CharStat.Intellect, 510},
                 {CharStat.Spirit, 320},
                 {CharStat.CriticalStrikeRating, 110},
@@ -179,6 +181,7 @@ public class SettingsPresets
         { ClassSpec.DruidBalance, new Dictionary<CharStat, int>()
             {
                 {CharStat.Stamina, 1},
+                {CharStat.Armor, 1},
                 {CharStat.Intellect, 220},
                 {CharStat.Spirit, 220},
                 {CharStat.HitRating, 1000},
@@ -269,6 +272,7 @@ public class SettingsPresets
         { ClassSpec.HunterBeastMastery, new Dictionary<CharStat, int>()
             {
                 {CharStat.Agility, 580},
+                {CharStat.Armor, 1},
                 {CharStat.Stamina, 1},
                 {CharStat.Intellect, 370},
                 {CharStat.HitRating, 1000},
@@ -290,6 +294,7 @@ public class SettingsPresets
                 {CharStat.AttackPower, 320},
                 {CharStat.ArmorPenetrationRating, 400},
                 {CharStat.DamagePerSecond, 379},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.HunterSurvival, new Dictionary<CharStat, int>()
@@ -303,6 +308,7 @@ public class SettingsPresets
                 {CharStat.AttackPower, 290},
                 {CharStat.ArmorPenetrationRating, 260},
                 {CharStat.DamagePerSecond, 1810},
+                {CharStat.Armor, 1},
             }
         },
         // MAGE
@@ -318,6 +324,7 @@ public class SettingsPresets
                 {CharStat.FireSpellPower, 240},
                 {CharStat.ArcaneSpellPower, 490},
                 {CharStat.FrostSpellPower, 240},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.MageFire, new Dictionary<CharStat, int>()
@@ -331,6 +338,7 @@ public class SettingsPresets
                 {CharStat.FireSpellPower, 460},
                 {CharStat.ArcaneSpellPower, 230},
                 {CharStat.FrostSpellPower, 230},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.MageFrost, new Dictionary<CharStat, int>()
@@ -344,6 +352,7 @@ public class SettingsPresets
                 {CharStat.FireSpellPower, 190},
                 {CharStat.ArcaneSpellPower, 190},
                 {CharStat.FrostSpellPower, 390},
+                {CharStat.Armor, 1},
             }
         },
         // PALADIN
@@ -355,6 +364,7 @@ public class SettingsPresets
                 {CharStat.HasteRating, 350},
                 {CharStat.SpellPower, 580},
                 {CharStat.ManaPer5, 880},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.PaladinProtection, new Dictionary<CharStat, int>()
@@ -384,6 +394,7 @@ public class SettingsPresets
                 {CharStat.ArmorPenetrationRating, 220},
                 {CharStat.SpellPower, 90},
                 {CharStat.DamagePerSecond, 4700},
+                {CharStat.Armor, 1},
             }
         },
         // PRIEST
@@ -396,6 +407,7 @@ public class SettingsPresets
                 {CharStat.HasteRating, 590},
                 {CharStat.SpellPower, 1000},
                 {CharStat.ManaPer5, 670},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.PriestHoly, new Dictionary<CharStat, int>()
@@ -407,6 +419,7 @@ public class SettingsPresets
                 {CharStat.HasteRating, 310},
                 {CharStat.SpellPower, 600},
                 {CharStat.ManaPer5, 1000},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.PriestShadow, new Dictionary<CharStat, int>()
@@ -419,6 +432,7 @@ public class SettingsPresets
                 {CharStat.HasteRating, 500},
                 {CharStat.SpellPower, 760},
                 {CharStat.ShadowSpellPower, 760},
+                {CharStat.Armor, 1},
             }
         },
         // ROGUE
@@ -433,7 +447,8 @@ public class SettingsPresets
                 {CharStat.AttackPower, 650},
                 {CharStat.ExpertiseRating, 870},
                 {CharStat.ArmorPenetrationRating, 650},
-                {CharStat.DamagePerSecond, 1700}
+                {CharStat.DamagePerSecond, 1700},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.RogueCombat, new Dictionary<CharStat, int>()
@@ -447,7 +462,8 @@ public class SettingsPresets
                 {CharStat.AttackPower, 500},
                 {CharStat.ExpertiseRating, 820},
                 {CharStat.ArmorPenetrationRating, 1000},
-                {CharStat.DamagePerSecond, 2200}
+                {CharStat.DamagePerSecond, 2200},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.RogueSubtelty, new Dictionary<CharStat, int>()
@@ -461,7 +477,8 @@ public class SettingsPresets
                 {CharStat.AttackPower, 500},
                 {CharStat.ExpertiseRating, 1000},
                 {CharStat.ArmorPenetrationRating, 750},
-                {CharStat.DamagePerSecond, 2280}
+                {CharStat.DamagePerSecond, 2280},
+                {CharStat.Armor, 1},
             }
         },
         // SHAMAN
@@ -473,6 +490,7 @@ public class SettingsPresets
                 {CharStat.CriticalStrikeRating, 400},
                 {CharStat.HasteRating, 560},
                 {CharStat.SpellPower, 600},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.ShamanEnhancement, new Dictionary<CharStat, int>()
@@ -487,7 +505,8 @@ public class SettingsPresets
                 {CharStat.ExpertiseRating, 840},
                 {CharStat.ArmorPenetrationRating, 260},
                 {CharStat.SpellPower, 290},
-                {CharStat.DamagePerSecond, 1350}
+                {CharStat.DamagePerSecond, 1350},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.ShamanRestoration, new Dictionary<CharStat, int>()
@@ -498,6 +517,7 @@ public class SettingsPresets
                 {CharStat.HasteRating, 350},
                 {CharStat.SpellPower, 770},
                 {CharStat.ManaPer5, 1000},
+                {CharStat.Armor, 1},
             }
         },
         // WARLOCK
@@ -512,6 +532,7 @@ public class SettingsPresets
                 {CharStat.SpellPower, 720},
                 {CharStat.FireSpellPower, 360},
                 {CharStat.ShadowSpellPower, 720},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.WarlockDemonology, new Dictionary<CharStat, int>()
@@ -525,6 +546,7 @@ public class SettingsPresets
                 {CharStat.SpellPower, 450},
                 {CharStat.FireSpellPower, 450},
                 {CharStat.ShadowSpellPower, 450},
+                {CharStat.Armor, 1},
             }
         },
         { ClassSpec.WarlockDestruction, new Dictionary<CharStat, int>()
@@ -538,6 +560,7 @@ public class SettingsPresets
                 {CharStat.SpellPower, 470},
                 {CharStat.FireSpellPower, 470},
                 {CharStat.ShadowSpellPower, 230},
+                {CharStat.Armor, 1},
             }
         },
         // WARRIOR

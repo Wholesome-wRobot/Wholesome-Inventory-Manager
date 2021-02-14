@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.11"; // Must match version in Version.txt
+    public static string version = "0.0.12"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -34,15 +34,6 @@ public class Main : IPlugin
         Logger.Log($"Launching version {version} on client {ToolBox.GetWoWVersion()}");
 
         AutoDetectMyClassSpec();
-
-        if (AutoEquipSettings.CurrentSettings.FirstLaunch)
-        {
-            Logger.Log("First Launch");
-            SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);
-            AutoEquipSettings.CurrentSettings.FirstLaunch = false;
-            AutoEquipSettings.CurrentSettings.Save();
-        }
-
         LoadWantedItemTypesList();
         WAECharacterSheet.RecordKnownSkills();
 
@@ -57,7 +48,7 @@ public class Main : IPlugin
             EventsLua.AttachEventLua(ev, ctx => Lua.LuaDoString($"ConfirmBindOnUse()"));
         }
         */
-        Setup();
+        LUASetup();
     }
 
     public void Dispose()
@@ -119,7 +110,7 @@ public class Main : IPlugin
         WantedItemType.Add("Thrown", AutoEquipSettings.CurrentSettings.EquipThrown);
     }
 
-    private void Setup()
+    private void LUASetup()
     {
         // Create invisible tooltip to read tooltip info
         Lua.LuaDoString($@"
@@ -255,15 +246,22 @@ public class Main : IPlugin
                 WAECharacterSheet.ClassSpec = ClassSpec.None;
                 break;
         }
-
+        
+        // Update stat weights in case of auto detect
         if (AutoEquipSettings.CurrentSettings.AutoDetectStatWeights && currentSpec != WAECharacterSheet.ClassSpec)
         {
-            WAEItemDB.ItemDb.Clear(); // Rescan all items
+            WAEItemDB.ItemDb.Clear(); // to Rescan all items
             SettingsPresets.ChangeStatsWeightSettings(WAECharacterSheet.ClassSpec);
         }
-
+        
+        // Set other default plugin settings according to detected class for first launch
         if (AutoEquipSettings.CurrentSettings.FirstLaunch && currentSpec != WAECharacterSheet.ClassSpec)
+        {
+            Logger.Log("First Launch");
             SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);
+            AutoEquipSettings.CurrentSettings.FirstLaunch = false;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
 
         AutoEquipSettings.CurrentSettings.SpecSelectedByUser = WAECharacterSheet.ClassSpec;
     }
