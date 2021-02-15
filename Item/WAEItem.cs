@@ -5,6 +5,7 @@ using wManager.Wow.Helpers;
 using System.Globalization;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
+using wManager;
 
 public class WAEItem
 {
@@ -171,6 +172,17 @@ public class WAEItem
                     AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
             }
         }
+    }
+
+    public void DeleteFromBag(string reason)
+    {
+        if (wManagerSetting.CurrentSetting.DoNotSellList.Contains(Name))
+            return;
+
+        Logger.Log($"Deleting {Name} ({reason})");
+        Lua.LuaDoString($"PickupContainerItem({InBag}, {InBagSlot});");
+        Lua.LuaDoString("DeleteCursorItem();");
+        Thread.Sleep(100);
     }
 
     public void Use()

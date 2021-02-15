@@ -32,11 +32,6 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     // LootFilter
     public bool LootFilterActivated { get; set; }
-    // Value
-    public int DeleteGoldValue { get; set; }
-    public int DeleteSilverValue { get; set; }
-    public int DeleteCopperValue { get; set; }
-    public bool DeleteItemWithNoValue { get; set; }
     // Quality
     public bool DeleteGray { get; set; }
     public bool AnyGray { get; set; }
@@ -50,6 +45,11 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public bool DeleteBlue { get; set; }
     public bool AnyBlue { get; set; }
     public bool KeepBlue { get; set; }
+    // Value
+    public int DeleteGoldValue { get; set; }
+    public int DeleteSilverValue { get; set; }
+    public int DeleteCopperValue { get; set; }
+    public bool DeleteItemWithNoValue { get; set; }
 
     public double LastUpdateDate { get; set; }
 
@@ -67,20 +67,20 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         DeleteItemWithNoValue = false;
 
         DeleteGray = false;
-        AnyGray = true;
-        KeepGray = false;
+        AnyGray = false;
+        KeepGray = true;
 
         DeleteWhite = false;
-        AnyWhite = true;
-        KeepWhite = false;
+        AnyWhite = false;
+        KeepWhite = true;
 
         DeleteGreen = false;
-        AnyGreen = true;
-        KeepGreen = false;
+        AnyGreen = false;
+        KeepGreen = true;
 
         DeleteBlue = false;
-        AnyBlue = true;
-        KeepBlue = false;
+        AnyBlue = false;
+        KeepBlue = true;
 
         // Bags
         EquipQuiver = false;

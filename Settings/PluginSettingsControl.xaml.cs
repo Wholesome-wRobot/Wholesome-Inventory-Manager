@@ -43,14 +43,69 @@ namespace Wholesome_Inventory_Manager.Settings
             // LOOT FILTER
             LootFilterActivated.IsChecked = AutoEquipSettings.CurrentSettings.LootFilterActivated;
 
+            // Rarity
             DeleteGray.IsChecked = AutoEquipSettings.CurrentSettings.DeleteGray;
             AnyGray.IsChecked = AutoEquipSettings.CurrentSettings.AnyGray;
             KeepGray.IsChecked = AutoEquipSettings.CurrentSettings.KeepGray;
+
             DeleteWhite.IsChecked = AutoEquipSettings.CurrentSettings.DeleteWhite;
             AnyWhite.IsChecked = AutoEquipSettings.CurrentSettings.AnyWhite;
             KeepWhite.IsChecked = AutoEquipSettings.CurrentSettings.KeepWhite;
+
+            DeleteGreen.IsChecked = AutoEquipSettings.CurrentSettings.DeleteGreen;
+            AnyGreen.IsChecked = AutoEquipSettings.CurrentSettings.AnyGreen;
+            KeepGreen.IsChecked = AutoEquipSettings.CurrentSettings.KeepGreen;
+
+            DeleteBlue.IsChecked = AutoEquipSettings.CurrentSettings.DeleteBlue;
+            AnyBlue.IsChecked = AutoEquipSettings.CurrentSettings.AnyBlue;
+            KeepBlue.IsChecked = AutoEquipSettings.CurrentSettings.KeepBlue;
+
+            // Value
+            DeleteItemWithNoValue.IsChecked = AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue;
+            DeleteGoldValue.Value = AutoEquipSettings.CurrentSettings.DeleteGoldValue;
+            DeleteSilverValue.Value = AutoEquipSettings.CurrentSettings.DeleteSilverValue;
+            DeleteCopperValue.Value = AutoEquipSettings.CurrentSettings.DeleteCopperValue;
         }
 
+        private void DeleteCopperValueChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteCopperValue = (int)DeleteCopperValue.Value;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void DeleteSilverValueChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteSilverValue = (int)DeleteSilverValue.Value;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void DeleteGoldValueChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteGoldValue = (int)DeleteGoldValue.Value;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void DeleteItemWithNoValueChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue = (bool)DeleteItemWithNoValue.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void FilterGreenChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteGreen = (bool)DeleteGreen.IsChecked;
+            AutoEquipSettings.CurrentSettings.AnyGreen = (bool)AnyGreen.IsChecked;
+            AutoEquipSettings.CurrentSettings.KeepGreen = (bool)KeepGreen.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void FilterBlueChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteBlue = (bool)DeleteBlue.IsChecked;
+            AutoEquipSettings.CurrentSettings.AnyBlue = (bool)AnyBlue.IsChecked;
+            AutoEquipSettings.CurrentSettings.KeepBlue = (bool)KeepBlue.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
 
         private void FilterWhiteChanged(object sender, RoutedEventArgs e)
         {

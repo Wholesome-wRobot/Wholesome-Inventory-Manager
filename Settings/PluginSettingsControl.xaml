@@ -70,7 +70,7 @@
                     Margin="10" 
                     Width="500" Grid.Row="1" Panel.ZIndex="-2">
             <!-- TAB AUTO EQUIP -->
-            <TabItem Header="AutoEquip" HorizontalAlignment="Center" Margin="10,0,-12,0" Width="152" >
+            <TabItem Header="AutoEquip">
                 <ScrollViewer 
                         Height="500"
                         VerticalScrollBarVisibility="Visible">
@@ -107,7 +107,7 @@
                                Margin="5,0,5,0" 
                                HorizontalAlignment="Right" 
                                VerticalAlignment="Center"  
-                               Text="Activate" 
+                               Text="Auto Equip" 
                                FontSize="13"  />
                         <mah:ToggleSwitch  Grid.Row="0" 
                                        Grid.Column="2"  
@@ -331,7 +331,7 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="StatsWeight" HorizontalAlignment="Center" Margin="31,0,-34,0" Width="155">
+            <TabItem Header="StatsWeight" Margin="44,0,-44,0">
                 <ScrollViewer 
                         Height="500"
                         VerticalScrollBarVisibility="Visible">
@@ -785,7 +785,7 @@
             </TabItem>
 
             <!-- LOOT FILTER -->
-            <TabItem Header="LootFilter" HorizontalAlignment="Center" Margin="51,0,-45,0" Width="132">
+            <TabItem Header="LootFilter" Margin="89,0,-89,0">
                 <ScrollViewer 
                         Height="500"
                         VerticalScrollBarVisibility="Visible">
@@ -802,7 +802,7 @@
                                    Margin="0,19,70,0" 
                                    HorizontalAlignment="Center" 
                                    VerticalAlignment="Top"  
-                                   Text="Activate" 
+                                   Text="Filter loot" 
                                    FontSize="13"  />
                         <mah:ToggleSwitch  Grid.Row="0" 
                                            Grid.Column="0"  
@@ -846,6 +846,7 @@
                             </Grid.RowDefinitions>
 
 
+                            <!-- QUALITY -->
                             <Separator  Grid.Row="1" 
                                        Grid.Column="0"
                                        Grid.ColumnSpan="4"
@@ -861,16 +862,17 @@
                                Text="Quality" 
                                FontSize="20" Height="27" Width="64" Foreground="#FFC9C9C9"  />
 
+                            <!-- GRAY ITEMS -->
                             <TextBlock Grid.Row="5" 
                                    Grid.Column="0" 
                                    Margin="0,10,10,10" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
-                                   Text="Poor (Gray)" 
-                                   FontSize="13" Height="18" Width="64"  />
+                                   Text="Poor" 
+                                   FontSize="13" Foreground="#FF838282" />
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="1"  
-                                     Margin="0,10,0,10"
+                                     Margin="5,10,0,10"
                                      x:Name="KeepGray"
                                      GroupName="FilterGray"
                                      Click="FilterGrayChanged"
@@ -879,14 +881,14 @@
                                      Background="#293328"/>
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="1"  
-                                     Margin="30,10,0,10"
+                                     Margin="35,10,0,10"
                                      x:Name="AnyGray"
                                      GroupName="FilterGray"
                                      Click="FilterGrayChanged"
                                      ToolTip="ANY" />
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="1"  
-                                     Margin="60,10,0,10"
+                                     Margin="65,10,0,10"
                                      x:Name="DeleteGray"
                                      GroupName="FilterGray"
                                      Click="FilterGrayChanged"
@@ -894,17 +896,17 @@
                                      BorderBrush="#bf3434"
                                      Background="#332828"/>
 
-
+                            <!-- WHITE ITEMS -->
                             <TextBlock Grid.Row="5" 
                                    Grid.Column="2" 
                                    Margin="0,10,10,10" 
                                    HorizontalAlignment="Right" 
                                    VerticalAlignment="Center"  
-                                   Text="Common (White)" 
-                                   FontSize="13" Height="18" Width="98"  />
+                                   Text="Common" 
+                                   FontSize="13"/>
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="3"  
-                                     Margin="0,10,0,10"
+                                     Margin="5,10,0,10"
                                      x:Name="KeepWhite"
                                      GroupName="FilterWhite"
                                      Click="FilterWhiteChanged"
@@ -913,20 +915,189 @@
                                      Background="#293328" Foreground="White" />
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="3"  
-                                     Margin="30,10,0,10"
+                                     Margin="35,10,0,10"
                                      x:Name="AnyWhite"
                                      GroupName="FilterWhite"
                                      Click="FilterWhiteChanged"
                                      ToolTip="ANY" />
                             <RadioButton Grid.Row="5" 
                                      Grid.Column="3"  
-                                     Margin="60,10,0,10"
+                                     Margin="65,10,0,10"
                                      x:Name="DeleteWhite"
                                      GroupName="FilterWhite"
                                      Click="FilterWhiteChanged"
                                      ToolTip="DELETE"
                                      BorderBrush="#bf3434"
                                      Background="#332828"/>
+
+                            <!-- GREEN ITEMS -->
+                            <TextBlock Grid.Row="6" 
+                                   Grid.Column="0" 
+                                   Margin="0,10,5,10" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"  
+                                   Text="Uncommon" 
+                                   FontSize="13" Foreground="#FF2FB222" />
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="1"  
+                                     Margin="5,10,0,10"
+                                     x:Name="KeepGreen"
+                                     GroupName="FilterGreen"
+                                     Click="FilterGreenChanged"
+                                     ToolTip="KEEP"
+                                     BorderBrush="#379445"
+                                     Background="#293328"/>
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="1"  
+                                     Margin="35,10,0,10"
+                                     x:Name="AnyGreen"
+                                     GroupName="FilterGreen"
+                                     Click="FilterGreenChanged"
+                                     ToolTip="ANY" />
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="1"  
+                                     Margin="65,10,0,10"
+                                     x:Name="DeleteGreen"
+                                     GroupName="FilterGreen"
+                                     Click="FilterGreenChanged"
+                                     ToolTip="DELETE"
+                                     BorderBrush="#bf3434"
+                                     Background="#332828"/>
+
+
+                            <!-- BLUE ITEMS -->
+                            <TextBlock Grid.Row="6" 
+                                   Grid.Column="2" 
+                                   Margin="0,10,10,10" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"  
+                                   Text="Rare" 
+                                   FontSize="13" Foreground="#FF3577D6" />
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="3"  
+                                     Margin="5,10,0,10"
+                                     x:Name="KeepBlue"
+                                     GroupName="FilterBlue"
+                                     Click="FilterBlueChanged"
+                                     ToolTip="KEEP"
+                                     BorderBrush="#379445"
+                                     Background="#293328" Foreground="White" />
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="3"  
+                                     Margin="35,10,0,10"
+                                     x:Name="AnyBlue"
+                                     GroupName="FilterBlue"
+                                     Click="FilterBlueChanged"
+                                     ToolTip="ANY" />
+                            <RadioButton Grid.Row="6" 
+                                     Grid.Column="3"  
+                                     Margin="65,10,0,10"
+                                     x:Name="DeleteBlue"
+                                     GroupName="FilterBlue"
+                                     Click="FilterBlueChanged"
+                                     ToolTip="DELETE"
+                                     BorderBrush="#bf3434"
+                                     Background="#332828"/>
+
+                            <Separator  Grid.Row="10" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                            <TextBlock Grid.Row="11" 
+                               Grid.Column="0"
+                               Grid.ColumnSpan="4"
+                               Margin="29,0,24,15" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Bottom"  
+                               Text="Value" 
+                               FontSize="20" Height="27" Width="64" Foreground="#FFC9C9C9"  />
+
+                            <TextBlock Grid.Row="12" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Delete unknown" 
+                               FontSize="13"  />
+                            <mah:ToggleSwitch  Grid.Row="12" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="DeleteItemWithNoValueChanged" 
+                                       x:Name="DeleteItemWithNoValue" 
+                                       ToolTip="Choose if you want to DELETE items with unknown value (like early ammo)"
+                                       OnLabel="" 
+                                       OffLabel=""/>
+
+                            <mah:NumericUpDown  Grid.Row="12" 
+                                            Minimum="0"
+                                            Maximum="99"
+                                           Grid.Column="2"  
+                                           Grid.ColumnSpan="4"
+                                           Margin="-10,14,0,15"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center" 
+                                           x:Name="DeleteGoldValue" 
+                                           HideUpDownButtons = "False"
+                                           ValueChanged="DeleteGoldValueChanged" 
+                                           ToolTip="All items worth less than this value will be DELETED"
+                                           Width="70"/>
+                            <TextBlock Grid.Row="12" 
+                                   Grid.Column="2" 
+                                   Margin="-10,-50,0,0" 
+                                   Grid.ColumnSpan="4"
+                                   HorizontalAlignment="Left" 
+                                   VerticalAlignment="Center"  
+                                   Text="Gold" 
+                                   FontSize="13" Foreground="#FFE8DE07"  />
+
+                            <mah:NumericUpDown  Grid.Row="12" 
+                                            Minimum="0"
+                                            Maximum="99"
+                                           Grid.Column="2"  
+                                           Grid.ColumnSpan="2"
+                                           Margin="70,14,0,15"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center" 
+                                           x:Name="DeleteSilverValue" 
+                                           HideUpDownButtons = "False"
+                                           ValueChanged="DeleteSilverValueChanged" 
+                                           ToolTip="All items worth less than this value will be DELETED"
+                                           Width="70"/>
+                            <TextBlock Grid.Row="12" 
+                                        Grid.Column="2"  
+                                        Grid.ColumnSpan="2"
+                                   Margin="70,-50,0,0" 
+                                   HorizontalAlignment="Left" 
+                                   VerticalAlignment="Center"  
+                                   Text="Silver" 
+                                   FontSize="13" Foreground="#FFBDBDBD"  />
+
+                            <mah:NumericUpDown  Grid.Row="12" 
+                                            Minimum="0"
+                                            Maximum="99"
+                                           Grid.Column="2"  
+                                           Grid.ColumnSpan="2"
+                                           Margin="150,14,0,15"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center" 
+                                           x:Name="DeleteCopperValue" 
+                                           HideUpDownButtons = "False"
+                                           ValueChanged="DeleteCopperValueChanged" 
+                                           ToolTip="All items worth less than this value will be DELETED"
+                                           Width="70"/>
+                            <TextBlock Grid.Row="12" 
+                                    Grid.Column="2"  
+                                    Grid.ColumnSpan="2"
+                                   Margin="150,-50,0,0" 
+                                   HorizontalAlignment="Left" 
+                                   VerticalAlignment="Center"  
+                                   Text="Copper" 
+                                   FontSize="13" Foreground="#FFA25926"  />
+
                         </Grid>
                     </Grid>
                 </ScrollViewer>
