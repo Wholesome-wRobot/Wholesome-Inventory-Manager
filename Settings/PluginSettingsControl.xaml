@@ -842,6 +842,13 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
@@ -860,7 +867,7 @@
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Bottom"  
                                Text="Quality" 
-                               FontSize="20" Height="27" Width="64" Foreground="#FFC9C9C9"  />
+                               FontSize="20" Foreground="#FFC9C9C9"  />
 
                             <!-- GRAY ITEMS -->
                             <TextBlock Grid.Row="5" 
@@ -1011,7 +1018,7 @@
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Bottom"  
                                Text="Value" 
-                               FontSize="20" Height="27" Width="64" Foreground="#FFC9C9C9"  />
+                               FontSize="20" Foreground="#FFC9C9C9"  />
 
                             <TextBlock Grid.Row="12" 
                                Grid.Column="0" 
@@ -1097,6 +1104,39 @@
                                    VerticalAlignment="Center"  
                                    Text="Copper" 
                                    FontSize="13" Foreground="#FFA25926"  />
+
+                            <Separator  Grid.Row="13" 
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="4"
+                                       Margin="5,10,0,10" />
+
+                            <TextBlock Grid.Row="14" 
+                               Grid.Column="0"
+                               Grid.ColumnSpan="4"
+                               Margin="29,0,24,15" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"  
+                               Text="Misc" 
+                               FontSize="20" Foreground="#FFC9C9C9"  />
+                            
+                            <TextBlock Grid.Row="15" 
+                               Grid.Column="0" 
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Deprecated quests" 
+                               FontSize="13"  />
+                            <mah:ToggleSwitch  Grid.Row="15" 
+                                       Grid.Column="1"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="DeleteDeprecatedQuestItemsChanged" 
+                                       x:Name="DeleteDeprecatedQuestItems" 
+                                       ToolTip="Choose if you want to DELETE items that start deprecated quests"
+                                       OnLabel="" 
+                                       OffLabel=""/>
 
                         </Grid>
                     </Grid>

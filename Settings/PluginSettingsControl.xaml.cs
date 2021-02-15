@@ -65,6 +65,15 @@ namespace Wholesome_Inventory_Manager.Settings
             DeleteGoldValue.Value = AutoEquipSettings.CurrentSettings.DeleteGoldValue;
             DeleteSilverValue.Value = AutoEquipSettings.CurrentSettings.DeleteSilverValue;
             DeleteCopperValue.Value = AutoEquipSettings.CurrentSettings.DeleteCopperValue;
+
+            // Misc
+            DeleteDeprecatedQuestItems.IsChecked = AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems;
+        }
+
+        private void DeleteDeprecatedQuestItemsChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems = (bool)DeleteDeprecatedQuestItems.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
         }
 
         private void DeleteCopperValueChanged(object sender, RoutedEventArgs e)

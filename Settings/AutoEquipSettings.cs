@@ -32,6 +32,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     // LootFilter
     public bool LootFilterActivated { get; set; }
+    public bool DeleteDeprecatedQuestItems { get; set; }
     // Quality
     public bool DeleteGray { get; set; }
     public bool AnyGray { get; set; }
@@ -60,6 +61,8 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
         // Filter Loot
         LootFilterActivated = false;
+
+        DeleteDeprecatedQuestItems = false;
 
         DeleteGoldValue = 0;
         DeleteSilverValue = 0;

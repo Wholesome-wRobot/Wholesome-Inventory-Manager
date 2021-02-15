@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using wManager.Wow.ObjectManager;
 
 public class WAELootFilter
 {
@@ -15,7 +16,15 @@ public class WAELootFilter
 
         foreach (WAEItem item in WAEContainers.AllItems)
         {
-            //Logger.Log($"{item.Name} - {item.ItemRarity} - {item.ItemSellPrice} - {item.ItemSubType}");
+            //Logger.Log($"{item.Name} - {item.ItemRarity} - {item.ItemType} - {item.ItemSubType} - {item.ItemMinLevel}");
+
+            // Deprecated quest
+            if (AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems
+                && item.ItemMinLevel > 0
+                && item.ItemType == "Quest" 
+                && item.ItemSubType == "Quest"
+                && ObjectManager.Me.Level > item.ItemMinLevel + 4)
+                item.DeleteFromBag("Quest is deprecated");
 
             // Rarity
             if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.DeleteGray)
