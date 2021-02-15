@@ -298,7 +298,9 @@ public static class WAECharacterSheet
         WAEItem idealOffHand = listAllOffHandWeapons
             .Where(w => w.ItemSubType == "Miscellaneous" || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
             .Where(w => WeaponIsIdeal(w) || OffHand.Item == null)
-            .Where(w => DualWield.KnownSpell || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield)
+            .Where(w => DualWield.KnownSpell 
+            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield 
+            || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
             .Where(w => w != idealMainhand && w != ideal2H)
             .FirstOrDefault();
         
@@ -307,7 +309,9 @@ public static class WAECharacterSheet
             .Where(w => (w.ItemSubType == "Miscellaneous" || DualWield.KnownSpell)
                 || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
                 || SuitableForTitansGrips(w))
-            .Where(w => DualWield.KnownSpell || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield)
+            .Where(w => DualWield.KnownSpell 
+            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
+            || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
             .Where(w => w != secondChoiceMainhand)
             .FirstOrDefault();
 
