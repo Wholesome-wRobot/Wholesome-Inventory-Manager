@@ -13,7 +13,7 @@ public static class WAECharacterSheet
     public static WAECharacterSheetSlot Head { get; set; } = new WAECharacterSheetSlot(1, new string[] { "INVTYPE_HEAD" });
     public static WAECharacterSheetSlot Neck { get; set; } = new WAECharacterSheetSlot(2, new string[] { "INVTYPE_NECK" });
     public static WAECharacterSheetSlot Shoulder { get; set; } = new WAECharacterSheetSlot(3, new string[] { "INVTYPE_SHOULDER" });
-    public static WAECharacterSheetSlot Chest { get; set; } = new WAECharacterSheetSlot(5, new string[] { "INVTYPE_CHEST" });
+    public static WAECharacterSheetSlot Chest { get; set; } = new WAECharacterSheetSlot(5, new string[] { "INVTYPE_CHEST", "INVTYPE_ROBE" });
     public static WAECharacterSheetSlot Waist { get; set; } = new WAECharacterSheetSlot(6, new string[] { "INVTYPE_WAIST" });
     public static WAECharacterSheetSlot Legs { get; set; } = new WAECharacterSheetSlot(7, new string[] { "INVTYPE_LEGS" });
     public static WAECharacterSheetSlot Feet { get; set; } = new WAECharacterSheetSlot(8, new string[] { "INVTYPE_FEET" });

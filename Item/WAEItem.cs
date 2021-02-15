@@ -138,6 +138,8 @@ public class WAEItem
                     Logger.LogError("Can't detect : " + entry.Key);
             }
         }
+        WeightScore += ItemLevel;
+        Logger.LogDebug("Item Level -> " + ItemLevel);
         Logger.LogDebug("Total : " + WeightScore.ToString()); ;
     }
 
@@ -243,6 +245,7 @@ public class WAEItem
         bool skillCheckOK = ItemSubType == "Miscellaneous" 
             || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
             || ItemSubType == "Fist Weapons" && Skill.Has(wManager.Wow.Enums.SkillLine.FistWeapons);
+        //Logger.Log($"{Name} - {ItemSubType} - {ItemEquipLoc}");
         return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 5;
     }
 
