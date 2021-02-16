@@ -24,30 +24,45 @@ public class WAELootFilter
                 && item.ItemType == "Quest" 
                 && item.ItemSubType == "Quest"
                 && ObjectManager.Me.Level > item.ItemMinLevel + 4)
+            {
                 item.DeleteFromBag("Quest is deprecated");
+                continue;
+            }
 
             // Rarity
             if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.DeleteGray)
+            {
                 item.DeleteFromBag("Quality is Poor");
+                continue;
+            }
             else if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.KeepGray)
                 continue;
 
             if (item.ItemRarity == 1 && AutoEquipSettings.CurrentSettings.DeleteWhite)
+            {
                 item.DeleteFromBag("Quality is Common");
+                continue;
+            }
             else if (item.ItemRarity == 1 && AutoEquipSettings.CurrentSettings.KeepWhite)
                 continue;
 
             if (item.ItemRarity == 2 && AutoEquipSettings.CurrentSettings.DeleteGreen)
+            {
                 item.DeleteFromBag("Quality is Uncommon");
+                continue;
+            }
             else if (item.ItemRarity == 2 && AutoEquipSettings.CurrentSettings.KeepGreen)
                 continue;
 
             if (item.ItemRarity == 3 && AutoEquipSettings.CurrentSettings.DeleteBlue)
-                item.DeleteFromBag("Quality is Rare");
+            {
+                item.DeleteFromBag("Quality is rare");
+                continue;
+            }
             else if (item.ItemRarity == 3 && AutoEquipSettings.CurrentSettings.KeepBlue)
                 continue;
 
-            // VALUE
+            // Value
             if (item.ItemSellPrice == 0 && !AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue)
                 continue;
 
