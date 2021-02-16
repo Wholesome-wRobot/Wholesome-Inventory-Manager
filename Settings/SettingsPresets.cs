@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using wManager.Wow.Enums;
+using wManager.Wow.ObjectManager;
 using static WAEEnums;
 
 public class SettingsPresets
@@ -8,94 +10,128 @@ public class SettingsPresets
         AutoEquipSettings.CurrentSettings.AutoEquipBags = true;
         AutoEquipSettings.CurrentSettings.AutoEquipGear = true;
 
-        switch (classSpec)
+        // Only change for restrictions, otherwise allow all
+        // DK
+        if (classSpec == ClassSpec.DeathKnightBloodDPS
+            || classSpec == ClassSpec.DeathKnightBloodTank)
         {
-            // Only change for restrictions, otherwise allow all
-            // DK
-            case (ClassSpec.DeathKnightBloodDPS):
-                AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.DeathKnightBloodTank):
-                AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.DeathKnightFrostDPS):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.DeathKnightFrostTank):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.DeathKnightUnholy):
-                AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            // Hunter
-            case (ClassSpec.HunterBeastMastery):
-                AutoEquipSettings.CurrentSettings.EquipThrown = false;
-                break;
-            // Paladin
-            case (ClassSpec.PaladinRetribution):
-                AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.PaladinProtection):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                break;
-            case (ClassSpec.PaladinHoly):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                break;
-            // Rogue
-            case (ClassSpec.RogueAssassination):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                break;
-            case (ClassSpec.RogueCombat):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                break;
-            case (ClassSpec.RogueSubtelty):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                // Allow only daggers ?
-                break;
-            //Shaman
-            case (ClassSpec.ShamanElemental):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                break;
-            case (ClassSpec.ShamanRestoration):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                break;
-            case (ClassSpec.ShamanEnhancement):
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            //Warrior
-            case (ClassSpec.WarriorTank):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                break;
-            case (ClassSpec.WarriorFury):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
-            case (ClassSpec.WarriorArms):
-                AutoEquipSettings.CurrentSettings.EquipBows = false;
-                AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
-                AutoEquipSettings.CurrentSettings.EquipGuns = false;
-                AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
-                AutoEquipSettings.CurrentSettings.EquipShields = false;
-                break;
+            AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+        }
+        else if (classSpec == ClassSpec.DeathKnightFrostDPS
+            || classSpec == ClassSpec.DeathKnightFrostTank)
+        {
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+        } 
+        // Hunter
+        else if (ObjectManager.Me.WowClass == WoWClass.Hunter)
+        {
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+        }
+        // Paladin
+        else if (classSpec == ClassSpec.PaladinRetribution)
+        {
+            AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        else if (classSpec == ClassSpec.PaladinProtection || classSpec == ClassSpec.PaladinHoly)
+        {
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        else if (ObjectManager.Me.WowClass == WoWClass.Rogue)
+        {
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+        }
+        // Shaman
+        else if (classSpec == ClassSpec.ShamanElemental || classSpec == ClassSpec.ShamanRestoration)
+        {
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        else if (classSpec == ClassSpec.ShamanEnhancement)
+        {
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        // Warrior
+        else if (classSpec == ClassSpec.WarriorFury)
+        {
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+        }
+        else if (classSpec == ClassSpec.WarriorTank)
+        {
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+        }
+        else if (classSpec == ClassSpec.WarriorArms)
+        {
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipOneHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+        }
+        // Druid
+        else if (ObjectManager.Me.WowClass == WoWClass.Druid)
+        {
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        // Mage
+        else if (ObjectManager.Me.WowClass == WoWClass.Mage)
+        {
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        // Priest
+        else if (ObjectManager.Me.WowClass == WoWClass.Priest)
+        {
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
+        }
+        // Warlock
+        else if (ObjectManager.Me.WowClass == WoWClass.Warlock)
+        {
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
+            AutoEquipSettings.CurrentSettings.EquipBows = false;
+            AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
+            AutoEquipSettings.CurrentSettings.EquipGuns = false;
+            AutoEquipSettings.CurrentSettings.EquipThrown = false;
         }
 
         AutoEquipSettings.CurrentSettings.Save();
@@ -329,6 +365,7 @@ public class SettingsPresets
         { ClassSpec.MageFire, new Dictionary<CharStat, int>()
             {
                 {CharStat.Stamina, 1},
+                {CharStat.Spirit, 10},
                 {CharStat.Intellect, 130},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 430},

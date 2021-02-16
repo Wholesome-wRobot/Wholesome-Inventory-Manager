@@ -133,15 +133,18 @@ public static class WAEContainers
                     WAEContainer equippedAmmoContainer = equippedQuiver == null ? equippedAmmoPouch : equippedQuiver;
                     WAEItem bestAmmoContainerInBags = GetBiggestAmmoContainerFromBags();
 
-                    // Check we have the right type of ammo container
-                    if ((equippedRanged == TypeRanged.Bows.ToString() || equippedRanged == TypeRanged.Crossbows.ToString()) && !equippedAmmoContainer.IsQuiver)
-                        ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
-                    else if (equippedRanged == TypeRanged.Guns.ToString() && !equippedAmmoContainer.IsAmmoPouch)
-                        ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
-                    // Try to find a better one
-                    else if (bestAmmoContainerInBags.QuiverCapacity > equippedAmmoContainer.Capacity
-                        || bestAmmoContainerInBags.AmmoPouchCapacity > equippedAmmoContainer.Capacity)
-                        ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
+                    if (bestAmmoContainerInBags != null)
+                    {
+                        // Check we have the right type of ammo container
+                        if ((equippedRanged == TypeRanged.Bows.ToString() || equippedRanged == TypeRanged.Crossbows.ToString()) && !equippedAmmoContainer.IsQuiver)
+                            ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
+                        else if (equippedRanged == TypeRanged.Guns.ToString() && !equippedAmmoContainer.IsAmmoPouch)
+                            ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
+                        // Try to find a better one
+                        else if (bestAmmoContainerInBags.QuiverCapacity > equippedAmmoContainer.Capacity
+                            || bestAmmoContainerInBags.AmmoPouchCapacity > equippedAmmoContainer.Capacity)
+                            ReplaceBag(equippedAmmoContainer, bestAmmoContainerInBags);
+                    }
                 }
 
                 // We have no ammo container equipped

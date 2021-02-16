@@ -1113,7 +1113,7 @@
                             <TextBlock Grid.Row="14" 
                                Grid.Column="0"
                                Grid.ColumnSpan="4"
-                               Margin="29,0,24,15" 
+                               Margin="29,0,24,0" 
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Center"  
                                Text="Misc" 
