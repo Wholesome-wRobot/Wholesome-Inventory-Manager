@@ -62,8 +62,15 @@ public static class WAEContainers
 
     public static WAEItem GetBiggestBagFromBags()
     {
+        /*foreach(WAEItem item in AllItems)
+        {
+            Logger.Log($"{item.Name} - {item.BagCapacity} - {item.ItemSubType} - {item.ItemType}");
+        }*/
         return AllItems
-                .FindAll(item => item.BagCapacity > 0 && item.AmmoPouchCapacity == 0 && item.QuiverCapacity == 0)
+                .FindAll(item => item.ItemType != "Recipe" 
+                && item.BagCapacity > 0 
+                && item.AmmoPouchCapacity == 0 
+                && item.QuiverCapacity == 0)
                 .OrderByDescending(item => item.BagCapacity)
                 .FirstOrDefault();
     }
