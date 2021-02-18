@@ -166,12 +166,15 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialRanged)
         {
-            if (item.ItemSubType == "Guns" && !haveBulletsInBags)
-                continue;
-            if ((item.ItemSubType == "Crossbows" || item.ItemSubType == "Bows") && !haveArrowsInBags)
-                continue;
+            if (!AutoEquipSettings.CurrentSettings.SwitchRanged)
+            {
+                if (item.ItemSubType == "Guns")
+                    continue;
+                if ((item.ItemSubType == "Crossbows" || item.ItemSubType == "Bows") && !haveArrowsInBags)
+                    continue;
+            }
 
-            //Logger.LogDebug($"Potential Ranged: {item.Name} ({item.ItemMinLevel})");
+            //Logger.Log($"Potential Ranged: {item.Name} ({item.ItemMinLevel})");
 
             bool itemTypeIsBanned = Main.WantedItemType.ContainsKey(item.ItemSubType) && !Main.WantedItemType[item.ItemSubType];
             bool equippedItemIsBanned = Ranged.Item != null
