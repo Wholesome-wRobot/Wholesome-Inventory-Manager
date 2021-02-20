@@ -155,6 +155,9 @@ public static class WAECharacterSheet
     {
         bool haveBulletsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
         bool haveArrowsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
+        bool noAmmoForMyCurrentRanged = Ranged.Item.ItemSubType == "Crossbows" && !haveArrowsInBags
+                                            || Ranged.Item.ItemSubType == "Bows" && !haveArrowsInBags
+                                            || Ranged.Item.ItemSubType == "Guns" && !haveBulletsInBags;
 
         // List potential replacement for this slot
         List<WAEItem> potentialRanged = WAEContainers.AllItems
@@ -168,13 +171,11 @@ public static class WAECharacterSheet
         {
             if (!AutoEquipSettings.CurrentSettings.SwitchRanged)
             {
-                if (item.ItemSubType == "Guns")
+                if (item.ItemSubType == "Guns" && !haveBulletsInBags)
                     continue;
                 if ((item.ItemSubType == "Crossbows" || item.ItemSubType == "Bows") && !haveArrowsInBags)
                     continue;
             }
-
-            //Logger.Log($"Potential Ranged: {item.Name} ({item.ItemMinLevel})");
 
             bool itemTypeIsBanned = Main.WantedItemType.ContainsKey(item.ItemSubType) && !Main.WantedItemType[item.ItemSubType];
             bool equippedItemIsBanned = Ranged.Item != null
@@ -191,11 +192,8 @@ public static class WAECharacterSheet
             if (itemTypeIsBanned && Ranged.Item != null)
                 continue;
 
-            if (Ranged.Item == null
-                || Ranged.Item.WeightScore < item.WeightScore
-                || (Ranged.Item.ItemSubType == "Crossbows" && !haveArrowsInBags)
-                || (Ranged.Item.ItemSubType == "Bows" && !haveArrowsInBags)
-                || (Ranged.Item.ItemSubType == "Guns" && !haveBulletsInBags))
+            if ((Ranged.Item == null || Ranged.Item.WeightScore < item.WeightScore)
+                && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged))
             {
                 if (itemTypeIsBanned)
                     Logger.Log($"Equipping {item.Name} ({item.WeightScore}) until we find a better option");
