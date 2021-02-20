@@ -155,9 +155,9 @@ public static class WAECharacterSheet
     {
         bool haveBulletsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
         bool haveArrowsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
-        bool noAmmoForMyCurrentRanged = Ranged.Item.ItemSubType == "Crossbows" && !haveArrowsInBags
-                                            || Ranged.Item.ItemSubType == "Bows" && !haveArrowsInBags
-                                            || Ranged.Item.ItemSubType == "Guns" && !haveBulletsInBags;
+        bool noAmmoForMyCurrentRanged = Ranged.Item?.ItemSubType == "Crossbows" && !haveArrowsInBags
+                                        || Ranged.Item?.ItemSubType == "Bows" && !haveArrowsInBags
+                                        || Ranged.Item?.ItemSubType == "Guns" && !haveBulletsInBags;
 
         // List potential replacement for this slot
         List<WAEItem> potentialRanged = WAEContainers.AllItems
