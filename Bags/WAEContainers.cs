@@ -14,9 +14,9 @@ public static class WAEContainers
 
     private static void ReplaceBag(WAEContainer bagToReplace, WAEItem newBag)
     {
-        Logger.Log($"Replacing {bagToReplace.ThisBag.Name} with {newBag.Name}");
         if (bagToReplace.EmptyBagInOtherBags())
         {
+            Logger.Log($"Replacing {bagToReplace.ThisBag.Name} with {newBag.Name}");
             if (newBag.InBag == bagToReplace.Position)
                 newBag = AllItems.Find(b => b.ItemLink == newBag.ItemLink);
             newBag.MoveToBag(bagToReplace.Position);

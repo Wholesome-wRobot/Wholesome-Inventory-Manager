@@ -48,12 +48,14 @@ public class SettingsPresets
             AutoEquipSettings.CurrentSettings.EquipGuns = false;
             AutoEquipSettings.CurrentSettings.EquipThrown = false;
         }
+        // Rogue
         else if (ObjectManager.Me.WowClass == WoWClass.Rogue)
         {
             AutoEquipSettings.CurrentSettings.EquipBows = false;
             AutoEquipSettings.CurrentSettings.EquipCrossbows = false;
             AutoEquipSettings.CurrentSettings.EquipGuns = false;
             AutoEquipSettings.CurrentSettings.EquipTwoHanders = false;
+            AutoEquipSettings.CurrentSettings.EquipShields = false;
         }
         // Shaman
         else if (classSpec == ClassSpec.ShamanElemental || classSpec == ClassSpec.ShamanRestoration)
