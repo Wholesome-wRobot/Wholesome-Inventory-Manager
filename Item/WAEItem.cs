@@ -30,6 +30,7 @@ public class WAEItem
     public double UniqueId { get; set; }
     public float WeightScore { get; set; } = 0;
     public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
+    public float WeaponSpeed { get; set; } = 0;
 
     private static int UniqueIdCounter = 0;
 
@@ -91,6 +92,7 @@ public class WAEItem
         UniqueId = existingCopy.UniqueId;
         WeightScore = existingCopy.WeightScore;
         ItemStats = existingCopy.ItemStats;
+        WeaponSpeed = existingCopy.WeaponSpeed;
     }
 
     public void RecordStats()
@@ -164,6 +166,8 @@ public class WAEItem
             if (l.Length > 0)
             {
                 // record specifics
+                if (ItemType == "Weapon" && l.Contains("Speed "))
+                    WeaponSpeed = float.Parse(l.Replace("Speed ", "").Replace(".", ","));
                 if (l.Contains(" Slot Bag"))
                     BagCapacity = int.Parse(l.Replace(" Slot Bag", ""));
                 else if (l.Contains(" Slot Quiver"))

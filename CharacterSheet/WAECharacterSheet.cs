@@ -424,6 +424,18 @@ public static class WAECharacterSheet
             .ToList();
     }
 
+    public static void CheckSwapWeapons()
+    {
+        if (MainHand.Item?.ItemEquipLoc == "INVTYPE_WEAPON" 
+            && OffHand.Item?.ItemEquipLoc == "INVTYPE_WEAPON"
+            && MainHand.Item.WeaponSpeed < OffHand.Item.WeaponSpeed)
+        {
+            Logger.Log("Swapping weapons to have slower speed in main hand");
+            MainHand.Item.DropInInventory(MainHand.InventorySlotID);
+            MainHand.Item.DropInInventory(OffHand.InventorySlotID);
+        }
+    }
+
     public static void AutoEquip()
     {
         //Logger.LogDebug("*** Auto equip...");
@@ -435,6 +447,7 @@ public static class WAECharacterSheet
         AutoEquipWeapons();
         AutoEquipRanged();
         AutoEquipAmmo();
+        CheckSwapWeapons();
 
         //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }

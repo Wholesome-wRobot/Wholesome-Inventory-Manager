@@ -192,7 +192,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 800},
                 {CharStat.Agility, 1000},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 //{CharStat.Armor, 1},
                 {CharStat.HitRating, 500},
                 {CharStat.CriticalStrikeRating, 550},
@@ -205,7 +205,7 @@ public class SettingsPresets
         },
         { ClassSpec.DruidRestoration, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 //{CharStat.Armor, 1},
                 {CharStat.Intellect, 510},
                 {CharStat.Spirit, 320},
@@ -217,7 +217,7 @@ public class SettingsPresets
         },
         { ClassSpec.DruidBalance, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 //{CharStat.Armor, 1},
                 {CharStat.Intellect, 220},
                 {CharStat.Spirit, 220},
@@ -231,7 +231,7 @@ public class SettingsPresets
         { ClassSpec.DeathKnightBloodDPS, new Dictionary<CharStat, int>()
             {
                 {CharStat.Strength, 990},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 910},
                 {CharStat.CriticalStrikeRating, 570},
                 {CharStat.HasteRating, 550},
@@ -263,7 +263,7 @@ public class SettingsPresets
         { ClassSpec.DeathKnightFrostDPS, new Dictionary<CharStat, int>()
             {
                 {CharStat.Strength, 970},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 450},
                 {CharStat.HasteRating, 280},
@@ -294,7 +294,7 @@ public class SettingsPresets
         { ClassSpec.DeathKnightUnholy, new Dictionary<CharStat, int>()
             {
                 {CharStat.Strength, 1000},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 660},
                 {CharStat.CriticalStrikeRating, 450},
                 {CharStat.HasteRating, 480},
@@ -310,7 +310,7 @@ public class SettingsPresets
             {
                 {CharStat.Agility, 580},
                 //{CharStat.Armor, 1},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 370},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 400},
@@ -323,7 +323,7 @@ public class SettingsPresets
         { ClassSpec.HunterMarksman, new Dictionary<CharStat, int>()
             {
                 {CharStat.Agility, 740},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 390},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 570},
@@ -337,7 +337,7 @@ public class SettingsPresets
         { ClassSpec.HunterSurvival, new Dictionary<CharStat, int>()
             {
                 {CharStat.Agility, 760},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 350},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 420},
@@ -351,7 +351,7 @@ public class SettingsPresets
         // MAGE
         { ClassSpec.MageArcane, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 340},
                 {CharStat.Spirit, 140},
                 {CharStat.HitRating, 1000},
@@ -366,7 +366,7 @@ public class SettingsPresets
         },
         { ClassSpec.MageFire, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Spirit, 10},
                 {CharStat.Intellect, 130},
                 {CharStat.HitRating, 1000},
@@ -381,7 +381,7 @@ public class SettingsPresets
         },
         { ClassSpec.MageFrost, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 60},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 190},
@@ -396,7 +396,7 @@ public class SettingsPresets
         // PALADIN
         { ClassSpec.PaladinHoly, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 1000},
                 {CharStat.CriticalStrikeRating, 460},
                 {CharStat.HasteRating, 350},
@@ -423,7 +423,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 800},
                 {CharStat.Agility, 320},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 400},
                 {CharStat.HasteRating, 300},
@@ -438,7 +438,7 @@ public class SettingsPresets
         // PRIEST
         { ClassSpec.PriestDiscipline, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 650},
                 {CharStat.Spirit, 220},
                 {CharStat.CriticalStrikeRating, 480},
@@ -450,7 +450,7 @@ public class SettingsPresets
         },
         { ClassSpec.PriestHoly, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 690},
                 {CharStat.Spirit, 520},
                 {CharStat.CriticalStrikeRating, 380},
@@ -462,7 +462,7 @@ public class SettingsPresets
         },
         { ClassSpec.PriestShadow, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 160},
                 {CharStat.Spirit, 160},
                 {CharStat.HitRating, 1000},
@@ -478,7 +478,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 550},
                 {CharStat.Agility, 1000},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 830},
                 {CharStat.CriticalStrikeRating, 810},
                 {CharStat.HasteRating, 640},
@@ -493,7 +493,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 550},
                 {CharStat.Agility, 1000},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 800},
                 {CharStat.CriticalStrikeRating, 750},
                 {CharStat.HasteRating, 730},
@@ -508,7 +508,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 550},
                 {CharStat.Agility, 1000},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 800},
                 {CharStat.CriticalStrikeRating, 750},
                 {CharStat.HasteRating, 750},
@@ -522,7 +522,7 @@ public class SettingsPresets
         // SHAMAN
         { ClassSpec.ShamanElemental, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 110},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 400},
@@ -535,7 +535,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 350},
                 {CharStat.Agility, 550},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 1000},
                 {CharStat.CriticalStrikeRating, 550},
                 {CharStat.HasteRating, 420},
@@ -549,7 +549,7 @@ public class SettingsPresets
         },
         { ClassSpec.ShamanRestoration, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 850},
                 {CharStat.CriticalStrikeRating, 620},
                 {CharStat.HasteRating, 350},
@@ -561,7 +561,7 @@ public class SettingsPresets
         // WARLOCK
         { ClassSpec.WarlockAffliction, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 150},
                 {CharStat.Spirit, 340},
                 {CharStat.HitRating, 1000},
@@ -575,7 +575,7 @@ public class SettingsPresets
         },
         { ClassSpec.WarlockDemonology, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 130},
                 {CharStat.Spirit, 290},
                 {CharStat.HitRating, 1000},
@@ -589,7 +589,7 @@ public class SettingsPresets
         },
         { ClassSpec.WarlockDestruction, new Dictionary<CharStat, int>()
             {
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.Intellect, 130},
                 {CharStat.Spirit, 260},
                 {CharStat.HitRating, 1000},
@@ -606,7 +606,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 1000},
                 {CharStat.Agility, 650},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 900},
                 {CharStat.CriticalStrikeRating, 800},
                 {CharStat.HasteRating, 500},
@@ -621,7 +621,7 @@ public class SettingsPresets
             {
                 {CharStat.Strength, 820},
                 {CharStat.Agility, 530},
-                {CharStat.Stamina, 1},
+                {CharStat.Stamina, 10},
                 {CharStat.HitRating, 480},
                 {CharStat.CriticalStrikeRating, 660},
                 {CharStat.HasteRating, 360},
