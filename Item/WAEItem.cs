@@ -118,7 +118,8 @@ public class WAEItem
                 string[] statsPair = pair.Split('§');
                 string statName = statsPair[0];
                 float statValue = float.Parse(statsPair[1], CultureInfo.InvariantCulture);
-                ItemStats.Add(statName, statValue);
+                if (!ItemStats.ContainsKey(statName))
+                    ItemStats.Add(statName, statValue);
             }
         }
         RecordWeightScore();

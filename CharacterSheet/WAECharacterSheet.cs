@@ -24,7 +24,7 @@ public static class WAECharacterSheet
     public static WAECharacterSheetSlot Trinket1 { get; set; } = new WAECharacterSheetSlot(13, new string[] { "INVTYPE_TRINKET" });
     public static WAECharacterSheetSlot Trinket2 { get; set; } = new WAECharacterSheetSlot(14, new string[] { "INVTYPE_TRINKET" });
     public static WAECharacterSheetSlot Back { get; set; } = new WAECharacterSheetSlot(15, new string[] { "INVTYPE_CLOAK" });
-    public static WAECharacterSheetSlot MainHand { get; set; } = new WAECharacterSheetSlot(16, new string[] { "INVTYPE_WEAPON", "INVTYPE_WEAPONMAINHAND",  "INVTYPE_2HWEAPON" });
+    public static WAECharacterSheetSlot MainHand { get; set; } = new WAECharacterSheetSlot(16, new string[] { "INVTYPE_WEAPON", "INVTYPE_WEAPONMAINHAND", "INVTYPE_2HWEAPON" });
     public static WAECharacterSheetSlot OffHand { get; set; } = new WAECharacterSheetSlot(17, new string[] { "INVTYPE_WEAPON", "INVTYPE_SHIELD", "INVTYPE_HOLDABLE", "INVTYPE_WEAPONOFFHAND" });
     public static WAECharacterSheetSlot Ranged { get; set; } = new WAECharacterSheetSlot(18, new string[] { "INVTYPE_RANGEDRIGHT", "INVTYPE_RANGED", "INVTYPE_THROWN" });
     public static List<string> AllItemLinks { get; set; } = new List<string>();
@@ -192,13 +192,21 @@ public static class WAECharacterSheet
             if (itemTypeIsBanned && Ranged.Item != null)
                 continue;
 
-            if ((Ranged.Item == null || Ranged.Item.WeightScore < item.WeightScore)
+            Logger.Log(item.Name + "COUCOU " + (noAmmoForMyCurrentRanged).ToString());
+
+            // Equip because slot is empty
+            if (Ranged.Item == null)
+            {
+                Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
+                if (item.Equip(Ranged.InventorySlotID))
+                    break;
+            }
+
+            if ((Ranged.Item.WeightScore < item.WeightScore)
                 && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged))
             {
                 if (itemTypeIsBanned)
                     Logger.Log($"Equipping {item.Name} ({item.WeightScore}) until we find a better option");
-                else if (Ranged.Item == null)
-                    Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
                 else
                     Logger.Log($"Replacing {Ranged.Item.Name} ({Ranged.Item.WeightScore}) with {item.Name} ({item.WeightScore})");
 
@@ -259,14 +267,14 @@ public static class WAECharacterSheet
         float currentCombinedWeaponsScore = currentMainHandScore + currentOffHandScore;
         if (!currentWeaponsAreIdeal)
             currentCombinedWeaponsScore = currentCombinedWeaponsScore * unIdealDebuff;
-        
+
         // Equip restricted to what we allow
-        List<WAEItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(MainHand); 
+        List<WAEItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(MainHand);
 
         if (MainHand.Item != null) listAllMainHandWeapons.Add(MainHand.Item);
         List<WAEItem> listAllOffHandWeapons = GetEquipableWeaponsFromBags(OffHand);
         if (OffHand.Item != null) listAllOffHandWeapons.Add(OffHand.Item);
-        
+
         listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
         listAllOffHandWeapons = listAllOffHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
 
@@ -281,7 +289,7 @@ public static class WAECharacterSheet
                 .Where(w => TwoHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
                 .Where(w => w != ideal2H)
                 .FirstOrDefault();
-        
+
         // Get ideal Main hand
         WAEItem idealMainhand = listAllMainHandWeapons
             .Where(w => OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
@@ -299,18 +307,18 @@ public static class WAECharacterSheet
         WAEItem idealOffHand = listAllOffHandWeapons
             .Where(w => w.ItemSubType == "Miscellaneous" || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
             .Where(w => WeaponIsIdeal(w) || OffHand.Item == null)
-            .Where(w => DualWield.KnownSpell 
-            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield 
+            .Where(w => DualWield.KnownSpell
+            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
             || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
             .Where(w => w != idealMainhand && w != ideal2H)
             .FirstOrDefault();
-        
+
         // Get second choice OffHand
         WAEItem secondChoiceOffhand = listAllOffHandWeapons
             .Where(w => (w.ItemSubType == "Miscellaneous" || DualWield.KnownSpell)
                 || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
                 || SuitableForTitansGrips(w))
-            .Where(w => DualWield.KnownSpell 
+            .Where(w => DualWield.KnownSpell
             || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
             || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
             .Where(w => w != secondChoiceMainhand)
@@ -335,7 +343,7 @@ public static class WAECharacterSheet
         Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
 
 
-        if (finalScoreDualWield > currentCombinedWeaponsScore 
+        if (finalScoreDualWield > currentCombinedWeaponsScore
             || finalScore2hands > currentCombinedWeaponsScore)
         {
             Logger.LogDebug("We've found a Better IDEAL Combination of weapons");
@@ -410,7 +418,7 @@ public static class WAECharacterSheet
     private static bool SuitableForTitansGrips(WAEItem weapon)
     {
         return KnowTitansGrip
-            && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords 
+            && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
             || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
             || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces);
     }
@@ -426,7 +434,7 @@ public static class WAECharacterSheet
 
     public static void CheckSwapWeapons()
     {
-        if (MainHand.Item?.ItemEquipLoc == "INVTYPE_WEAPON" 
+        if (MainHand.Item?.ItemEquipLoc == "INVTYPE_WEAPON"
             && OffHand.Item?.ItemEquipLoc == "INVTYPE_WEAPON"
             && MainHand.Item.WeaponSpeed < OffHand.Item.WeaponSpeed)
         {
@@ -477,7 +485,7 @@ public static class WAECharacterSheet
                     return result");
 
         List<string> skills = luaListAllSkills.Split('$').ToList();
-        foreach(string skill in skills)
+        foreach (string skill in skills)
         {
             if (skill.Length > 0)
             {
@@ -486,9 +494,10 @@ public static class WAECharacterSheet
                     .Replace("Shield", "Shields")
                     .Replace("Plate Mail", "Plate");
                 if (skillName == "Axes" || skillName == "Swords" || skillName == "Maces")
-                    skillName = "One-Handed " + skillName; 
+                    skillName = "One-Handed " + skillName;
                 //Logger.Log($"Adding {skillName} to known skills {int.Parse(skillPair[1])}");
-                MySkills.Add(skillName, int.Parse(skillPair[1]));
+                if (!MySkills.ContainsKey(skillName))
+                    MySkills.Add(skillName, int.Parse(skillPair[1]));
             }
         }
     }
