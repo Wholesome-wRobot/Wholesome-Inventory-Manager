@@ -127,14 +127,14 @@ public class WAEItem
 
     private void RecordWeightScore()
     {
-        Logger.LogDebug(Name);
+        //Logger.LogDebug(Name);
         foreach (KeyValuePair<string, float> entry in ItemStats)
         {
             if (StatEnums.ContainsKey(entry.Key))
             {
                 CharStat statEnum = StatEnums[entry.Key];
                 WeightScore += entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum);
-                Logger.LogDebug(entry.Key + " -> " + (entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum)).ToString());
+                //Logger.LogDebug(entry.Key + " -> " + (entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum)).ToString());
             }
             else
             {
@@ -143,8 +143,8 @@ public class WAEItem
             }
         }
         WeightScore += ItemLevel;
-        Logger.LogDebug("Item Level -> " + ItemLevel);
-        Logger.LogDebug("Total : " + WeightScore.ToString()); ;
+        //Logger.LogDebug("Item Level -> " + ItemLevel);
+        //Logger.LogDebug("Total : " + WeightScore.ToString()); ;
     }
 
     public float GetOffHandWeightScore()

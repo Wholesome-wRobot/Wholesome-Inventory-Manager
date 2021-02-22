@@ -192,8 +192,6 @@ public static class WAECharacterSheet
             if (itemTypeIsBanned && Ranged.Item != null)
                 continue;
 
-            Logger.Log(item.Name + "COUCOU " + (noAmmoForMyCurrentRanged).ToString());
-
             // Equip because slot is empty
             if (Ranged.Item == null)
             {
