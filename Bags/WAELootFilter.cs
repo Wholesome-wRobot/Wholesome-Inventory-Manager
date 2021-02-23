@@ -20,12 +20,12 @@ public class WAELootFilter
 
             // Deprecated quest
             if (AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems
-                && item.ItemMinLevel > 0
+                && item.ItemMinLevel > 1
                 && item.ItemType == "Quest" 
                 && item.ItemSubType == "Quest"
-                && ObjectManager.Me.Level > item.ItemMinLevel + 4)
+                && ObjectManager.Me.Level > item.ItemMinLevel + 6)
             {
-                item.DeleteFromBag("Quest is deprecated");
+                item.DeleteFromBag($"Quest level {item.ItemMinLevel} is deprecated");
                 continue;
             }
 
