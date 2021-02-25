@@ -333,18 +333,18 @@ public static class WAECharacterSheet
 
         float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
         float finalScoreSecondChoice2hands = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
-
+        /*
         Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
         Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hands}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hands})");
         Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
         Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
         Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
-
+        */
 
         if (finalScoreDualWield > currentCombinedWeaponsScore
             || finalScore2hands > currentCombinedWeaponsScore)
         {
-            Logger.LogDebug("We've found a Better IDEAL Combination of weapons");
+            //Logger.LogDebug("We've found a Better IDEAL Combination of weapons");
             if (finalScore2hands > finalScoreDualWield)
             {
                 ideal2H.Equip(MainHand.InventorySlotID, true);
@@ -364,7 +364,7 @@ public static class WAECharacterSheet
         if (finalScoreSecondDualWield > currentCombinedWeaponsScore
             || finalScoreSecondChoice2hands > currentCombinedWeaponsScore)
         {
-            Logger.LogDebug("We've found a Better NOT IDEAL combination of weapons");
+            //Logger.LogDebug("We've found a Better NOT IDEAL combination of weapons");
             if (finalScoreSecondChoice2hands > finalScoreSecondDualWield)
             {
                 secondChoice2H.Equip(MainHand.InventorySlotID, true);
