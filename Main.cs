@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.26"; // Must match version in Version.txt
+    public static string version = "0.0.27"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -42,6 +42,7 @@ public class Main : IPlugin
 
         EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
         EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => WAECharacterSheet.RecordKnownSkills());
+        wManager.Events.OthersEvents.OnSelectQuestRewardItem += OnSelectQuestRewardItem;
         /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
         {
@@ -49,6 +50,11 @@ public class Main : IPlugin
         }
         */
         LUASetup();
+    }
+
+    private void OnSelectQuestRewardItem(CancelEventArgs cancelable)
+    {
+        //Logger.Log("COUCOU");
     }
 
     public void Dispose()

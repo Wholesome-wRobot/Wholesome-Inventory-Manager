@@ -68,7 +68,7 @@ public class WAEItem
 
             RecordToolTip();
             RecordStats();
-            LogItemInfo();
+            //LogItemInfo();
             WAEItemDB.Add(this);
         }
     }
