@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
 using wManager.Plugin;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
@@ -16,7 +15,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "0.0.27"; // Must match version in Version.txt
+    public static string version = "0.1.0"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -42,7 +41,8 @@ public class Main : IPlugin
 
         EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
         EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => WAECharacterSheet.RecordKnownSkills());
-        wManager.Events.OthersEvents.OnSelectQuestRewardItem += OnSelectQuestRewardItem;
+        EventsLua.AttachEventLua("QUEST_COMPLETE", e => WAEQuest.QuestRewardGossipOpen = true);
+        wManager.Events.OthersEvents.OnSelectQuestRewardItem += WAEQuest.SelectReward;
         /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
         {
@@ -52,14 +52,10 @@ public class Main : IPlugin
         LUASetup();
     }
 
-    private void OnSelectQuestRewardItem(CancelEventArgs cancelable)
-    {
-        //Logger.Log("COUCOU");
-    }
-
     public void Dispose()
     {
         detectionPulse.DoWork -= BackGroundPulse;
+        wManager.Events.OthersEvents.OnSelectQuestRewardItem -= WAEQuest.SelectReward;
         detectionPulse.Dispose();
         Logger.Log("Disposed");
         isLaunched = false;
@@ -72,13 +68,13 @@ public class Main : IPlugin
             try
             {
                 if (Conditions.InGameAndConnectedAndProductStartedNotInPause
-                    && ObjectManager.Me.IsAlive)
+                    && ObjectManager.Me.IsAlive
+                    && !WAEQuest.SelectingReward)
                 {
                     //Logger.LogDebug("--------------------------------------");
                     DateTime dateBegin = DateTime.Now;
 
                     WAECharacterSheet.Scan();
-
                     WAEContainers.Scan();
 
                     if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
@@ -89,14 +85,14 @@ public class Main : IPlugin
 
                     WAELootFilter.FilterLoot();
 
-                    Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                    //Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
                 }
             }
             catch (Exception arg)
             {
                 Logger.LogError(string.Concat(arg));
             }
-            Thread.Sleep(5000);
+            ToolBox.Sleep(5000);
         }
     }
     
@@ -120,29 +116,29 @@ public class Main : IPlugin
     {
         // Create invisible tooltip to read tooltip info
         Lua.LuaDoString($@"
-        local tip = myTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
-        local L = L or tip: CreateFontString()
-        local R = R or tip: CreateFontString()
-        L: SetFontObject(GameFontNormal)
-        R: SetFontObject(GameFontNormal)
-        WEquipTooltip: AddFontStrings(L, R)
-        WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")");
+            local tip = myTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
+            local L = L or tip: CreateFontString()
+            local R = R or tip: CreateFontString()
+            L: SetFontObject(GameFontNormal)
+            R: SetFontObject(GameFontNormal)
+            WEquipTooltip: AddFontStrings(L, R)
+            WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")");
 
         // Create function to read invisible tooltip lines
         Lua.LuaDoString($@"
-        function EnumerateTooltipLines(...)
-            local result = """"
-            for i = 1, select(""#"", ...) do
-                local region = select(i, ...)
-                if region and region:GetObjectType() == ""FontString"" then
-                    local text = region:GetText() or """"
-                    if text ~= """" then
-                        result = result .. ""|"" .. text
+            function EnumerateTooltipLines(...)
+                local result = """"
+                for i = 1, select(""#"", ...) do
+                    local region = select(i, ...)
+                    if region and region:GetObjectType() == ""FontString"" then
+                        local text = region:GetText() or """"
+                        if text ~= """" then
+                            result = result .. ""|"" .. text
+                        end
                     end
                 end
-            end
-            return result
-        end");
+                return result
+            end");
     }
 
     public static void AutoDetectMyClassSpec()

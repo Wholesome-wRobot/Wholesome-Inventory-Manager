@@ -103,20 +103,39 @@
 
                         <!-- ACTIVATE -->
                         <TextBlock Grid.Row="0" 
-                               Grid.Column="1" 
+                               Grid.Column="0" 
                                Margin="5,0,5,0" 
                                HorizontalAlignment="Right" 
                                VerticalAlignment="Center"  
                                Text="Auto Equip" 
                                FontSize="13"  />
                         <mah:ToggleSwitch  Grid.Row="0" 
-                                       Grid.Column="2"  
+                                       Grid.Column="1"  
                                        Margin="0,10,0,10"
                                        HorizontalAlignment="Left"  
                                        VerticalAlignment="Center" 
                                        IsChecked="True" 
                                        Click="AutoEquipGearChanged" 
                                        x:Name="AutoEquipGear" 
+                                       OnLabel="" 
+                                       OffLabel=""/>
+                        
+                        <TextBlock Grid.Row="0" 
+                               Grid.Column="2" 
+                               Margin="5,0,5,0" 
+                               HorizontalAlignment="Right" 
+                               VerticalAlignment="Center"  
+                               Text="Quest Rewards" 
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="0" 
+                                       Grid.Column="3"  
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"  
+                                       VerticalAlignment="Center" 
+                                       IsChecked="True" 
+                                       Click="AutoSelectQuestRewardsChanged" 
+                                       x:Name="AutoSelectQuestRewards" 
+                                       ToolTip="Auto choose best quest rewards"
                                        OnLabel="" 
                                        OffLabel=""/>
 

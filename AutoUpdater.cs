@@ -3,7 +3,6 @@ using robotManager.Products;
 using System;
 using System.Net;
 using System.Text;
-using System.Threading;
 
 public static class AutoUpdater
 {
@@ -55,7 +54,7 @@ public static class AutoUpdater
                 Logger.Log($"Your version : {MyCurrentVersion} - Online Version : {onlineVersionContent}");
                 Logger.Log("Updating");
                 System.IO.File.WriteAllBytes(currentFile, onlineFileContent); // replace user file by online file
-                Thread.Sleep(5000);
+                ToolBox.Sleep(5000);
                 return true;
             }
         }

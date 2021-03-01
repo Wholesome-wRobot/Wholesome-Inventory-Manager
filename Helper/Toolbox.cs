@@ -11,7 +11,7 @@ public class ToolBox
         new Thread(() =>
         {
             Products.ProductStop();
-            Thread.Sleep(2000);
+            ToolBox.Sleep(2000);
             Products.ProductStart();
         }).Start();
     }
@@ -41,5 +41,12 @@ public class ToolBox
         }
         int highestTalents = Talents.Max(x => x.Value);
         return Talents.Where(t => t.Value == highestTalents).FirstOrDefault().Key;
+    }
+
+    public static void Sleep(int milliseconds)
+    {
+        int worldLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagWorld");
+        int homeLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagHome");
+        Thread.Sleep(worldLatency + homeLatency + milliseconds);
     }
 }

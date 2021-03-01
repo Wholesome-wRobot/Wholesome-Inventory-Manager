@@ -16,6 +16,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     // Gear
     public bool AutoEquipGear { get; set; }
+    public bool AutoSelectQuestRewards { get; set; }
     public bool AutoDetectStatWeights { get; set; }
     public bool SwitchRanged { get; set; }
     // Weapons
@@ -93,6 +94,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
         // Gear
         AutoEquipGear = true;
+        AutoSelectQuestRewards = true;
         SwitchRanged = false;
         EquipThrown = true;
         EquipBows = true;

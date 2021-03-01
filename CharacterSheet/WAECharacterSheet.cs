@@ -59,11 +59,26 @@ public static class WAECharacterSheet
         //Logger.LogDebug($"CharSheet Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
-    private static void AutoEquipAmor()
+    public static void AutoEquip()
+    {
+        //Logger.LogDebug("*** Auto equip...");
+        DateTime dateBegin = DateTime.Now;
+
+        AutoEquipArmor();
+        AutoEquipRings();
+        AutoEquipTrinkets();
+        AutoEquipWeapons();
+        AutoEquipRanged();
+        AutoEquipAmmo();
+        CheckSwapWeapons();
+
+        //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+    }
+
+    public static void AutoEquipArmor()
     {
         foreach (WAECharacterSheetSlot armorSlot in ArmorSlots)
         {
-            //Logger.LogDebug($"{armorSlot.InventorySlotID} -> {armorSlot.InvTypes} -> {armorSlot.Item?.Name} ({armorSlot.Item?.WeightScore})");
             // List potential replacement for this slot
             List<WAEItem> potentialArmors = WAEContainers.AllItems
                 .FindAll(i =>
@@ -74,22 +89,18 @@ public static class WAECharacterSheet
 
             foreach (WAEItem item in potentialArmors)
             {
-                //Logger.LogDebug($"Potential item: {item.Name} ({item.WeightScore})");
                 if (armorSlot.Item == null || armorSlot.Item.WeightScore < item.WeightScore)
                 {
-                    if (armorSlot.Item == null)
-                        Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
-                    else
-                        Logger.Log($"Replacing {armorSlot.Item.Name} ({armorSlot.Item.WeightScore}) with {item.Name} ({item.WeightScore})");
-
-                    if (item.Equip(armorSlot.InventorySlotID))
+                    if (armorSlot.Item == null && item.EquipSelectRoll(armorSlot.InventorySlotID, "Nohting equipped in this slot"))
+                        break;
+                    else if (item.EquipSelectRoll(armorSlot.InventorySlotID, $"Replacing {armorSlot.Item.Name} ({armorSlot.Item.WeightScore})"))
                         break;
                 }
             }
         }
     }
 
-    private static void AutoEquipRings()
+    public static void AutoEquipRings()
     {
         float ring1Score = Finger1.Item != null ? Finger1.Item.WeightScore : 0;
         float ring2Score = Finger2.Item != null ? Finger2.Item.WeightScore : 0;
@@ -105,22 +116,18 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialRings)
         {
-            //Logger.LogDebug($"Potential Ring: {item.Name} ({item.WeightScore})");
             if (lowestScoreFingerSlot.Item == null
                 || lowestScoreFingerSlot.Item.WeightScore < item.WeightScore)
             {
-                if (lowestScoreFingerSlot.Item == null)
-                    Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
-                else
-                    Logger.Log($"Replacing {lowestScoreFingerSlot.Item.Name} ({lowestScoreFingerSlot.Item.WeightScore}) with {item.Name} ({item.WeightScore})");
-
-                if (item.Equip(lowestScoreFingerSlot.InventorySlotID))
+                if (lowestScoreFingerSlot.Item == null && item.EquipSelectRoll(lowestScoreFingerSlot.InventorySlotID, "Nohting equipped in this slot"))
+                    break;
+                else if (item.EquipSelectRoll(lowestScoreFingerSlot.InventorySlotID, $"Replacing {lowestScoreFingerSlot.Item.Name} ({lowestScoreFingerSlot.Item.WeightScore})"))
                     break;
             }
         }
     }
 
-    private static void AutoEquipTrinkets()
+    public static void AutoEquipTrinkets()
     {
         float trinket1Score = Trinket1.Item != null ? Trinket1.Item.WeightScore : 0;
         float trinket2Score = Trinket2.Item != null ? Trinket2.Item.WeightScore : 0;
@@ -136,22 +143,18 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialTrinkets)
         {
-            //Logger.LogDebug($"Potential Trinket: {item.Name} ({item.WeightScore})");
             if (lowestScoreTrinketSlot.Item == null
                 || lowestScoreTrinketSlot.Item.WeightScore < item.WeightScore)
             {
-                if (lowestScoreTrinketSlot.Item == null)
-                    Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
-                else
-                    Logger.Log($"Replacing {lowestScoreTrinketSlot.Item.Name} ({lowestScoreTrinketSlot.Item.WeightScore}) with {item.Name} ({item.WeightScore})");
-
-                if (item.Equip(lowestScoreTrinketSlot.InventorySlotID))
+                if (lowestScoreTrinketSlot.Item == null && item.EquipSelectRoll(lowestScoreTrinketSlot.InventorySlotID, "Nohting equipped in this slot"))
+                    break;
+                else if (item.EquipSelectRoll(lowestScoreTrinketSlot.InventorySlotID, $"Replacing {lowestScoreTrinketSlot.Item.Name} ({lowestScoreTrinketSlot.Item.WeightScore})"))
                     break;
             }
         }
     }
 
-    private static void AutoEquipRanged()
+    public static void AutoEquipRanged()
     {
         bool haveBulletsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
         bool haveArrowsInBags = WAEContainers.AllItems.Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
@@ -184,9 +187,8 @@ public static class WAECharacterSheet
 
             if (equippedItemIsBanned && !itemTypeIsBanned)
             {
-                Logger.Log($"Equipping {item.Name} ({item.WeightScore}) because your don't want {Ranged.Item.ItemSubType}");
-                item.Equip(Ranged.InventorySlotID);
-                continue;
+                if (item.EquipSelectRoll(Ranged.InventorySlotID, $"You don't want {Ranged.Item.ItemSubType}"))
+                    continue;
             }
 
             if (itemTypeIsBanned && Ranged.Item != null)
@@ -195,26 +197,22 @@ public static class WAECharacterSheet
             // Equip because slot is empty
             if (Ranged.Item == null)
             {
-                Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
-                if (item.Equip(Ranged.InventorySlotID))
+                if (item.EquipSelectRoll(Ranged.InventorySlotID, "Nohting equipped in this slot"))
                     break;
             }
 
             if ((Ranged.Item.WeightScore < item.WeightScore)
                 && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged))
             {
-                if (itemTypeIsBanned)
-                    Logger.Log($"Equipping {item.Name} ({item.WeightScore}) until we find a better option");
-                else
-                    Logger.Log($"Replacing {Ranged.Item.Name} ({Ranged.Item.WeightScore}) with {item.Name} ({item.WeightScore})");
-
-                if (item.Equip(Ranged.InventorySlotID))
+                if (itemTypeIsBanned && item.EquipSelectRoll(Ranged.InventorySlotID, "Until we find a better option"))
+                    break;
+                else if (item.EquipSelectRoll(Ranged.InventorySlotID, $"Replacing {Ranged.Item.Name} ({Ranged.Item.WeightScore})"))
                     break;
             }
         }
     }
 
-    private static void AutoEquipAmmo()
+    public static void AutoEquipAmmo()
     {
         if (Ranged.Item != null)
         {
@@ -241,19 +239,16 @@ public static class WAECharacterSheet
                     || Ammo.Item.ItemSubType != item.ItemSubType
                     || !WAEContainers.AllItems.Exists(i => i.ItemId == item.ItemId))
                 {
-                    if (Ammo.Item == null)
-                        Logger.Log($"Equipping {item.Name} ({item.WeightScore})");
-                    else
-                        Logger.Log($"Replacing {Ammo.Item.Name} with {item.Name}");
-
-                    if (item.Equip(Ammo.InventorySlotID))
+                    if (Ammo.Item == null && item.EquipSelectRoll(Ammo.InventorySlotID, "Nohting equipped in this slot"))
+                        break;
+                    else if (item.EquipSelectRoll(Ammo.InventorySlotID, $"Replacing {Ammo.Item.Name} with {item.Name}"))
                         break;
                 }
             }
         }
     }
 
-    private static void AutoEquipWeapons()
+    public static void AutoEquipWeapons()
     {
         //Logger.LogDebug($"************ Weapon scan debug *****************");
         bool currentWeaponsAreIdeal = WeaponIsIdeal(MainHand.Item) && WeaponIsIdeal(OffHand.Item)
@@ -303,22 +298,23 @@ public static class WAECharacterSheet
 
         // Get ideal OffHand
         WAEItem idealOffHand = listAllOffHandWeapons
-            .Where(w => w.ItemSubType == "Miscellaneous" || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
+            //.Where(w => w.ItemSubType == "Miscellaneous" || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
             .Where(w => WeaponIsIdeal(w) || OffHand.Item == null)
             .Where(w => DualWield.KnownSpell
-            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
-            || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
+                || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
+                || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous"
+                || SuitableForTitansGrips(w))
             .Where(w => w != idealMainhand && w != ideal2H)
             .FirstOrDefault();
 
         // Get second choice OffHand
         WAEItem secondChoiceOffhand = listAllOffHandWeapons
-            .Where(w => (w.ItemSubType == "Miscellaneous" || DualWield.KnownSpell)
-                || OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType])
+            .Where(w => w.ItemSubType == "Miscellaneous" 
+                || (DualWield.KnownSpell && OneHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
                 || SuitableForTitansGrips(w))
             .Where(w => DualWield.KnownSpell
-            || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
-            || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
+                || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
+                || !DualWield.KnownSpell && w.ItemSubType == "Miscellaneous")
             .Where(w => w != secondChoiceMainhand)
             .FirstOrDefault();
 
@@ -344,18 +340,17 @@ public static class WAECharacterSheet
         if (finalScoreDualWield > currentCombinedWeaponsScore
             || finalScore2hands > currentCombinedWeaponsScore)
         {
-            //Logger.LogDebug("We've found a Better IDEAL Combination of weapons");
             if (finalScore2hands > finalScoreDualWield)
             {
-                ideal2H.Equip(MainHand.InventorySlotID, true);
+                ideal2H.EquipSelectRoll(MainHand.InventorySlotID, "Better overall score");
                 return;
             }
             else
             {
                 if (idealMainhand != null)
                 {
-                    idealMainhand?.Equip(MainHand.InventorySlotID, true);
-                    idealOffHand?.Equip(OffHand.InventorySlotID, true);
+                    idealMainhand?.EquipSelectRoll(MainHand.InventorySlotID, "Better overall score");
+                    idealOffHand?.EquipSelectRoll(OffHand.InventorySlotID, "Better overall score");
                     return;
                 }
             }
@@ -364,18 +359,17 @@ public static class WAECharacterSheet
         if (finalScoreSecondDualWield > currentCombinedWeaponsScore
             || finalScoreSecondChoice2hands > currentCombinedWeaponsScore)
         {
-            //Logger.LogDebug("We've found a Better NOT IDEAL combination of weapons");
             if (finalScoreSecondChoice2hands > finalScoreSecondDualWield)
             {
-                secondChoice2H.Equip(MainHand.InventorySlotID, true);
+                secondChoice2H.EquipSelectRoll(MainHand.InventorySlotID, "Better overall score");
                 return;
             }
             else
             {
                 if (secondChoiceMainhand != null)
                 {
-                    secondChoiceMainhand?.Equip(MainHand.InventorySlotID, true);
-                    secondChoiceOffhand?.Equip(OffHand.InventorySlotID, true);
+                    secondChoiceMainhand?.EquipSelectRoll(MainHand.InventorySlotID, "Better overall score");
+                    secondChoiceOffhand?.EquipSelectRoll(OffHand.InventorySlotID, "Better overall score");
                     return;
                 }
             }
@@ -391,11 +385,11 @@ public static class WAECharacterSheet
             && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Daggers)
             return false;
 
-        if ((ClassSpec == ClassSpec.WarriorArms || KnowTitansGrip)
-            && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.TwoHandedSwords
-            && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.TwoHandedAxes
-            && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.TwoHandedMaces)
-            return false;
+        if ((ClassSpec == ClassSpec.WarriorArms && KnowTitansGrip)
+            && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
+            || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
+            || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces))
+            return true;
 
         if (AutoEquipSettings.CurrentSettings.EquipShields
             && ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Shield)
@@ -426,7 +420,7 @@ public static class WAECharacterSheet
         return WAEContainers.AllItems
             .FindAll(i =>
                 i.CanEquip()
-                && slot.InvTypes.Contains(i.ItemEquipLoc))
+                && (slot.InvTypes.Contains(i.ItemEquipLoc) || SuitableForTitansGrips(i)))
             .ToList();
     }
 
@@ -440,22 +434,6 @@ public static class WAECharacterSheet
             MainHand.Item.DropInInventory(MainHand.InventorySlotID);
             MainHand.Item.DropInInventory(OffHand.InventorySlotID);
         }
-    }
-
-    public static void AutoEquip()
-    {
-        //Logger.LogDebug("*** Auto equip...");
-        DateTime dateBegin = DateTime.Now;
-
-        AutoEquipAmor();
-        AutoEquipRings();
-        AutoEquipTrinkets();
-        AutoEquipWeapons();
-        AutoEquipRanged();
-        AutoEquipAmmo();
-        CheckSwapWeapons();
-
-        //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     public static void RecordKnownSpecialSkills()

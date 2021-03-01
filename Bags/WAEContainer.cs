@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using wManager.Wow.Helpers;
 
 public class WAEContainer
@@ -56,9 +55,9 @@ public class WAEContainer
     public void MoveToSlot(int position)
     {
         Lua.LuaDoString($"PickupBagFromSlot({Position + 19});");
-        Thread.Sleep(50);
+        ToolBox.Sleep(50);
         Lua.LuaDoString($"PutItemInBag({position + 19});");
-        Thread.Sleep(50);
+        ToolBox.Sleep(50);
         WAEContainers.Scan();
     }
 
@@ -82,9 +81,9 @@ public class WAEContainer
                 WAEContainerSlot destination = freeSlots[i];
                 WAEItem smallBag = Items[i];
                 smallBag.PickupFromBag();
-                Thread.Sleep(100);
+                ToolBox.Sleep(100);
                 smallBag.MoveToBag(destination.BagPosition, destination.Slot);
-                Thread.Sleep(100);
+                ToolBox.Sleep(100);
             }
         }
 

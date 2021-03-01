@@ -31,10 +31,22 @@ public class WAEItem
     public float WeightScore { get; set; } = 0;
     public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
     public float WeaponSpeed { get; set; } = 0;
+    public int RewardSlot { get; set; } = 0;
 
     private static int UniqueIdCounter = 0;
 
+    public WAEItem(string itemLink, int rewardSlot)
+    {
+        CreateItemObject(itemLink);
+        RewardSlot = rewardSlot;
+    }
+
     public WAEItem(string itemLink)
+    {
+        CreateItemObject(itemLink);
+    }
+
+    private void CreateItemObject(string itemLink)
     {
         ItemLink = itemLink;
         UniqueId = ++UniqueIdCounter;
@@ -46,13 +58,13 @@ public class WAEItem
         else
         {
             string iteminfo = Lua.LuaDoString<string>($@"
-            itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-            itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
+                itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+                itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
 
-            return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
-            '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
-            '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
-            
+                return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
+                '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
+                '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
+
             string[] infoArray = iteminfo.Split('§');
             Name = infoArray[0];
             ItemLink = infoArray[1];
@@ -68,7 +80,7 @@ public class WAEItem
 
             RecordToolTip();
             RecordStats();
-            //LogItemInfo();
+            LogItemInfo();
             WAEItemDB.Add(this);
         }
     }
@@ -135,15 +147,14 @@ public class WAEItem
                 CharStat statEnum = StatEnums[entry.Key];
                 WeightScore += entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum);
                 //Logger.LogDebug(entry.Key + " -> " + (entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum)).ToString());
-            }
+            }/*
             else
             {
                 if (!entry.Key.Contains("Socket"))
                     Logger.LogError("Can't detect : " + entry.Key);
-            }
+            }*/
         }
         WeightScore += ItemLevel;
-        //Logger.LogDebug("Item Level -> " + ItemLevel);
         //Logger.LogDebug("Total : " + WeightScore.ToString()); ;
     }
 
@@ -187,7 +198,7 @@ public class WAEItem
         Logger.Log($"Deleting {Name} ({reason})");
         Lua.LuaDoString($"PickupContainerItem({InBag}, {InBagSlot});");
         Lua.LuaDoString("DeleteCursorItem();");
-        Thread.Sleep(100);
+        ToolBox.Sleep(100);
     }
 
     public void Use()
@@ -198,13 +209,23 @@ public class WAEItem
             Lua.LuaDoString($"UseContainerItem({InBag}, {InBagSlot})");
     }
 
-    public bool Equip(int slotId, bool log = false)
+    public bool EquipSelectRoll(int slotId, string reason)
     {
+        // SELECT REWARD
+        if (RewardSlot > 0)
+        {
+            Lua.LuaDoString($"GetQuestReward({RewardSlot})");
+            Logger.Log($"Selecting quest reward {Name} [{reason}]");
+            WAEContainers.AllItems.Clear();
+            return true;
+        }
+
+        // EQUIP
         WAECharacterSheetSlot slot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
         if (slot.Item?.ItemLink == ItemLink)
             return true;
 
-        if (ObjectManager.Me.InCombatFlagOnly)
+        if (ObjectManager.Me.InCombatFlagOnly || ObjectManager.Me.IsCast)
             return false;
 
         if (InBag < 0 || InBagSlot < 0)
@@ -213,15 +234,14 @@ public class WAEItem
         }
         else
         {
-            if (log)
-                Logger.Log($"Equipping {Name} ({WeightScore})");
+            Logger.Log($"Equipping {Name} ({WeightScore}) [{reason}]");
             ItemEquipAttempts.Add(ItemLink);
             PickupFromBag();
             DropInInventory(slotId);
-            Thread.Sleep(100);
+            ToolBox.Sleep(100);
             Lua.LuaDoString($"EquipPendingItem(0);");
             Lua.LuaDoString($"StaticPopup1Button1:Click()");
-            Thread.Sleep(200);
+            ToolBox.Sleep(200);
             WAECharacterSheet.Scan();
             WAEContainers.Scan();
             WAECharacterSheetSlot updatedSlot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
@@ -269,7 +289,7 @@ public class WAEItem
     public bool MoveToBag(int position, int slot)
     {
         Lua.LuaDoString($"PickupContainerItem({position}, {slot});"); // en fait un clique sur le slot de destination
-        Thread.Sleep(200);
+        ToolBox.Sleep(200);
         if (WAEContainers.ListContainers.Find(bag => bag.Position == position).GetContainerItemlink(slot) == ItemLink)
             return true;
         Logger.LogError($"Couldn't move {Name} to bag {position} slot {slot}, retrying soon.");
@@ -279,7 +299,7 @@ public class WAEItem
     public void MoveToBag(int position)
     {
         PickupFromBag();
-        Thread.Sleep(100);
+        ToolBox.Sleep(100);
         int bagSlot = 19 + position;
         Lua.LuaDoString($"PutItemInBag({bagSlot})");
         Thread.Sleep(100);

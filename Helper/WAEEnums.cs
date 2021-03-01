@@ -12,13 +12,6 @@ public class WAEEnums
         Guns
     }
 
-    public enum TypeRangedSlot
-    {
-        INVTYPE_THROWN,
-        INVTYPE_RANGEDRIGHT,
-        INVTYPE_RANGED
-    }
-
     public enum ClassSpec
     {
         None,

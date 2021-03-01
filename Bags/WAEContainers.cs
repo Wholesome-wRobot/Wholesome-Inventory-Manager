@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
@@ -38,7 +37,7 @@ public static class WAEContainers
 
     public static void Scan()
     {
-        Thread.Sleep(200);
+        ToolBox.Sleep(200);
         DateTime dateBegin = DateTime.Now;
         //Logger.LogDebug("*** Scanning bags...");
 

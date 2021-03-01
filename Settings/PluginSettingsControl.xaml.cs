@@ -22,6 +22,7 @@ namespace Wholesome_Inventory_Manager.Settings
             AutoDetectStatWeights.IsChecked = AutoEquipSettings.CurrentSettings.AutoDetectStatWeights;
 
             AutoEquipGear.IsChecked = AutoEquipSettings.CurrentSettings.AutoEquipGear;
+            AutoSelectQuestRewards.IsChecked = AutoEquipSettings.CurrentSettings.AutoSelectQuestRewards;
             AutoEquipBags.IsChecked = AutoEquipSettings.CurrentSettings.AutoEquipBags;
 
             EquipQuiver.IsChecked = AutoEquipSettings.CurrentSettings.EquipQuiver;
@@ -69,6 +70,12 @@ namespace Wholesome_Inventory_Manager.Settings
 
             // Misc
             DeleteDeprecatedQuestItems.IsChecked = AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems;
+        }
+
+        private void AutoSelectQuestRewardsChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.AutoSelectQuestRewards = (bool)AutoSelectQuestRewards.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
         }
 
         private void SwitchRangedChanged(object sender, RoutedEventArgs e)
