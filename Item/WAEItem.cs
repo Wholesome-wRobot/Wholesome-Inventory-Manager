@@ -50,7 +50,7 @@ public class WAEItem
     {
         ItemLink = itemLink;
         UniqueId = ++UniqueIdCounter;
-
+        //Logger.Log(itemLink);
         WAEItem existingCopy = WAEItemDB.Get(ItemLink);
 
         if (existingCopy != null)
@@ -60,6 +60,10 @@ public class WAEItem
             string iteminfo = Lua.LuaDoString<string>($@"
                 itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
                 itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
+
+                if (itemSellPrice == null) then
+                    itemSellPrice = 0
+                end
 
                 return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
                 '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
@@ -77,7 +81,6 @@ public class WAEItem
             ItemEquipLoc = infoArray[8];
             ItemTexture = infoArray[9];
             ItemSellPrice = int.Parse(infoArray[10]);
-
             RecordToolTip();
             RecordStats();
             LogItemInfo();
@@ -112,13 +115,14 @@ public class WAEItem
         if (ItemType != "Armor" && ItemType != "Weapon")
             return;
 
-        string stats = Lua.LuaDoString<string>($@"local itemstats=GetItemStats(""{ItemLink.Replace("\"", "\\\"")}"") 
-                local stats = """" 
-                for stat, value in pairs(itemstats) do 
-                    stats = stats.._G[stat]..""§""..value..""$"" 
+        string stats = Lua.LuaDoString<string>($@"
+                local itemstats=GetItemStats(""{ItemLink.Replace("\"", "\\\"")}"")
+                local stats = """"
+                for stat, value in pairs(itemstats) do
+                    stats = stats.._G[stat]..""§""..value..""$""
                 end
                 return stats");
-
+        //Logger.Log(stats);
         if (stats.Length < 1)
             return;
 
@@ -172,6 +176,7 @@ public class WAEItem
             WEquipTooltip:ClearLines()
             WEquipTooltip:SetHyperlink(""{ItemLink}"")
             return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
+        //Logger.Log(lines);
         string[] allLines = lines.Split('|');
         foreach (string l in allLines)
         {
