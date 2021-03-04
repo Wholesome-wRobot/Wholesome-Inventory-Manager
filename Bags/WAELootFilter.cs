@@ -17,6 +17,9 @@ public class WAELootFilter
         foreach (WAEItem item in WAEContainers.AllItems)
         {
             //Logger.Log($"{item.Name} - {item.ItemRarity} - {item.ItemType} - {item.ItemSubType} - {item.ItemMinLevel}");
+            // Skip Do Not Sell item
+            if (wManager.wManagerSetting.CurrentSetting.DoNotSellList.Contains(item.Name))
+                continue;
 
             // Deprecated quest
             if (AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems
