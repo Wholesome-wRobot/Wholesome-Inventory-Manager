@@ -230,8 +230,9 @@ public class WAEItem
         if (slot.Item?.ItemLink == ItemLink)
             return true;
 
-        if (ObjectManager.Me.InCombatFlagOnly || ObjectManager.Me.IsCast)
-            return false;
+        if (ItemSubType != "Arrow" && ItemSubType != "Bullet")
+            if (ObjectManager.Me.InCombatFlagOnly || ObjectManager.Me.IsCast)
+                return false;
 
         if (InBag < 0 || InBagSlot < 0)
         {

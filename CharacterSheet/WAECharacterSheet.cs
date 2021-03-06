@@ -69,7 +69,6 @@ public static class WAECharacterSheet
         AutoEquipTrinkets();
         AutoEquipWeapons();
         AutoEquipRanged();
-        AutoEquipAmmo();
         CheckSwapWeapons();
 
         //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
@@ -225,15 +224,13 @@ public static class WAECharacterSheet
             // List potential replacement for this slot
             List<WAEItem> potentialAmmo = WAEContainers.AllItems
                 .FindAll(i =>
-                    i.ItemSubType == typeAmmo
+                    typeAmmo != null && i.ItemSubType == typeAmmo
                     && ObjectManager.Me.Level >= i.ItemMinLevel)
                 .OrderBy(i => i.ItemMinLevel)
                 .ToList();
 
             foreach (WAEItem item in potentialAmmo)
             {
-                //Logger.LogDebug($"Potential ammo: {item.Name} ({item.ItemMinLevel})");
-
                 if (Ammo.Item == null
                     || Ammo.Item.ItemMinLevel > item.ItemMinLevel
                     || Ammo.Item.ItemSubType != item.ItemSubType
