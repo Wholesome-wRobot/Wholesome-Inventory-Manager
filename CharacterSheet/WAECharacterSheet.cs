@@ -227,7 +227,7 @@ public static class WAECharacterSheet
                 .FindAll(i =>
                     i.ItemSubType == typeAmmo
                     && ObjectManager.Me.Level >= i.ItemMinLevel)
-                .OrderByDescending(i => i.ItemMinLevel)
+                .OrderBy(i => i.ItemMinLevel)
                 .ToList();
 
             foreach (WAEItem item in potentialAmmo)
@@ -235,7 +235,7 @@ public static class WAECharacterSheet
                 //Logger.LogDebug($"Potential ammo: {item.Name} ({item.ItemMinLevel})");
 
                 if (Ammo.Item == null
-                    || Ammo.Item.ItemMinLevel < item.ItemMinLevel
+                    || Ammo.Item.ItemMinLevel > item.ItemMinLevel
                     || Ammo.Item.ItemSubType != item.ItemSubType
                     || !WAEContainers.AllItems.Exists(i => i.ItemId == item.ItemId))
                 {
