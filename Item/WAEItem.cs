@@ -70,6 +70,13 @@ public class WAEItem
                 '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
 
             string[] infoArray = iteminfo.Split('§');
+
+            if (infoArray.Length < 11)
+            {
+                Logger.LogDebug($"Item {itemLink} doesn't have the correct number of info. Skipping.");
+                return;
+            }
+
             Name = infoArray[0];
             ItemLink = infoArray[1];
             ItemRarity = int.Parse(infoArray[2]);
@@ -83,7 +90,7 @@ public class WAEItem
             ItemSellPrice = int.Parse(infoArray[10]);
             RecordToolTip();
             RecordStats();
-            LogItemInfo();
+            //LogItemInfo();
             WAEItemDB.Add(this);
         }
     }

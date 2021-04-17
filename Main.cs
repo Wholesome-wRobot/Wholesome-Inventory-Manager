@@ -15,7 +15,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "1.0.03"; // Must match version in Version.txt
+    public static string version = "1.0.04"; // Must match version in Version.txt
 
     public void Initialize()
     {
