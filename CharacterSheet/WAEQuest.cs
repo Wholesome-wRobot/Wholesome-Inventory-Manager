@@ -35,31 +35,34 @@ public class WAEQuest
 
             foreach (WAEItem item in itemRewards)
             {
-                // Weapons
-                if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
-                    || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
-                    || item.ItemSubType == "Miscellaneous")
-                    WAECharacterSheet.AutoEquipWeapons();
-
-                // Ranged
-                if (WAECharacterSheet.Ranged.InvTypes.Contains(item.ItemEquipLoc))
-                    WAECharacterSheet.AutoEquipRanged();
-
-                // Trinket
-                if (item.ItemEquipLoc == "INVTYPE_TRINKET")
-                    WAECharacterSheet.AutoEquipTrinkets();
-
-                // Ring
-                if (item.ItemEquipLoc == "INVTYPE_FINGER")
-                    WAECharacterSheet.AutoEquipRings();
-
-                // Armor
-                foreach (WAECharacterSheetSlot armorSlot in WAECharacterSheet.ArmorSlots)
+                if (item.ItemEquipLoc != "")
                 {
-                    if (armorSlot.InvTypes.Contains(item.ItemEquipLoc))
+                    // Weapons
+                    if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
+                        || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
+                        || item.ItemSubType == "Miscellaneous")
+                        WAECharacterSheet.AutoEquipWeapons();
+
+                    // Ranged
+                    if (WAECharacterSheet.Ranged.InvTypes.Contains(item.ItemEquipLoc))
+                        WAECharacterSheet.AutoEquipRanged();
+
+                    // Trinket
+                    if (item.ItemEquipLoc == "INVTYPE_TRINKET")
+                        WAECharacterSheet.AutoEquipTrinkets();
+
+                    // Ring
+                    if (item.ItemEquipLoc == "INVTYPE_FINGER")
+                        WAECharacterSheet.AutoEquipRings();
+
+                    // Armor
+                    foreach (WAECharacterSheetSlot armorSlot in WAECharacterSheet.ArmorSlots)
                     {
-                        WAECharacterSheet.AutoEquipArmor();
-                        break;
+                        if (armorSlot.InvTypes.Contains(item.ItemEquipLoc))
+                        {
+                            WAECharacterSheet.AutoEquipArmor();
+                            break;
+                        }
                     }
                 }
             }

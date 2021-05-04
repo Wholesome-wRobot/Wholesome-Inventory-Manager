@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "1.1.00"; // Must match version in Version.txt
+    public static string version = "1.1.01"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -95,7 +95,8 @@ public class Main : IPlugin
                     if (AutoEquipSettings.CurrentSettings.AutoEquipGear)
                         WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
 
-                    WAELootFilter.FilterLoot();
+                    if (!ObjectManager.Me.InCombatFlagOnly)
+                        WAELootFilter.FilterLoot();
 
                     WAEGroupRoll.CheckLootRoll();
 

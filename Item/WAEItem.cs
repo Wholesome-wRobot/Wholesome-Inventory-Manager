@@ -45,7 +45,7 @@ public class WAEItem
         RollId = rollId;
         ItemLink = itemLink;
         UniqueId = ++UniqueIdCounter;
-        //Logger.Log(itemLink);
+
         WAEItem existingCopy = WAEItemDB.Get(ItemLink);
 
         if (existingCopy != null)
@@ -149,23 +149,15 @@ public class WAEItem
 
     private void RecordWeightScore()
     {
-        //Logger.LogDebug(Name);
         foreach (KeyValuePair<string, float> entry in ItemStats)
         {
             if (StatEnums.ContainsKey(entry.Key))
             {
                 CharStat statEnum = StatEnums[entry.Key];
                 WeightScore += entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum);
-                //Logger.LogDebug(entry.Key + " -> " + (entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum)).ToString());
-            }/*
-            else
-            {
-                if (!entry.Key.Contains("Socket"))
-                    Logger.LogError("Can't detect : " + entry.Key);
-            }*/
+            }
         }
         WeightScore += ItemLevel;
-        //Logger.LogDebug("Total : " + WeightScore.ToString()); ;
     }
 
     public float GetOffHandWeightScore()
@@ -182,7 +174,7 @@ public class WAEItem
             WEquipTooltip:ClearLines()
             WEquipTooltip:SetHyperlink(""{ItemLink}"")
             return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
-        //Logger.Log(lines);
+
         string[] allLines = lines.Split('|');
         foreach (string l in allLines)
         {
@@ -303,7 +295,7 @@ public class WAEItem
         bool skillCheckOK = ItemSubType == "Miscellaneous" 
             || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
             || ItemSubType == "Fist Weapons" && Skill.Has(wManager.Wow.Enums.SkillLine.FistWeapons);
-        //Logger.Log($"{Name} - {ItemSubType} - {ItemEquipLoc}");
+        
         return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 5;
     }
 

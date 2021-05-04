@@ -15,7 +15,6 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
             for (int i = RollList.Count - 1; i >= 0; i--)
             {
                 int rollId = RollList[i];
-                //Logger.Log($"LOOT ROLL number {rollId}");
 
                 bool canNeed = Lua.LuaDoString<bool>($"_, _, _, _, _, canNeed, _, _, _, _, _, _ = GetLootRollItemInfo({rollId});", "canNeed");
                 string itemLink = Lua.LuaDoString<string>($"itemLink = GetLootRollItemLink({rollId});", "itemLink");
@@ -98,7 +97,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
 
             if (rollType == RollType.NEED)
             {
-                Logger.Log($"Rolling NEED in {waitTime}ms for {itemToRoll.Name} {adjustedReason}");
+                Logger.Log($"Rolling NEED in {waitTime}ms for {itemToRoll.Name} ({itemToRoll.WeightScore}) {adjustedReason}");
                 Thread.Sleep(waitTime);
                 Lua.LuaDoString($"ConfirmLootRoll({rollId}, 1)");
             }

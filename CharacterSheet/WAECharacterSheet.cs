@@ -468,7 +468,7 @@ public static class WAECharacterSheet
                     .Replace("Plate Mail", "Plate");
                 if (skillName == "Axes" || skillName == "Swords" || skillName == "Maces")
                     skillName = "One-Handed " + skillName;
-                //Logger.Log($"Adding {skillName} to known skills {int.Parse(skillPair[1])}");
+                
                 if (!MySkills.ContainsKey(skillName))
                     MySkills.Add(skillName, int.Parse(skillPair[1]));
             }
