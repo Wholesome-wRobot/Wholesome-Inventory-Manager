@@ -36,6 +36,10 @@ namespace Wholesome_Inventory_Manager.Settings
             EquipTwoHanders.IsChecked = AutoEquipSettings.CurrentSettings.EquipTwoHanders;
             EquipShields.IsChecked = AutoEquipSettings.CurrentSettings.EquipShields;
 
+            // Group loot
+            AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
+            AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
+
             // STATS
             StatsPreset.ItemsSource = Enum.GetNames(typeof(ClassSpec));
             UpdateStats();
@@ -70,6 +74,18 @@ namespace Wholesome_Inventory_Manager.Settings
 
             // Misc
             DeleteDeprecatedQuestItems.IsChecked = AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems;
+        }
+
+        private void AlwaysPassChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.AlwaysPass = (bool)AlwaysPass.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void AlwaysGreedChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.AlwaysGreed = (bool)AlwaysGreed.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
         }
 
         private void AutoSelectQuestRewardsChanged(object sender, RoutedEventArgs e)

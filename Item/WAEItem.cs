@@ -6,6 +6,8 @@ using System.Globalization;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
 using wManager;
+using System;
+using Wholesome_Inventory_Manager.CharacterSheet;
 
 public class WAEItem
 {
@@ -31,23 +33,16 @@ public class WAEItem
     public float WeightScore { get; set; } = 0;
     public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
     public float WeaponSpeed { get; set; } = 0;
-    public int RewardSlot { get; set; } = 0;
+    public int RewardSlot { get; set; } = -1;
+    public int RollId { get; set; } = -1;
+    public bool HasBeenRolled { get; set; } = false;
 
     private static int UniqueIdCounter = 0;
 
-    public WAEItem(string itemLink, int rewardSlot)
+    public WAEItem(string itemLink, int rewardSlot = -1, int rollId = -1)
     {
-        CreateItemObject(itemLink);
         RewardSlot = rewardSlot;
-    }
-
-    public WAEItem(string itemLink)
-    {
-        CreateItemObject(itemLink);
-    }
-
-    private void CreateItemObject(string itemLink)
-    {
+        RollId = rollId;
         ItemLink = itemLink;
         UniqueId = ++UniqueIdCounter;
         //Logger.Log(itemLink);
@@ -63,6 +58,10 @@ public class WAEItem
 
                 if (itemSellPrice == null) then
                     itemSellPrice = 0
+                end
+
+                if (itemEquipLoc == null) then
+                    itemEquipLoc = ''
                 end
 
                 return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
@@ -90,8 +89,8 @@ public class WAEItem
             ItemSellPrice = int.Parse(infoArray[10]);
             RecordToolTip();
             RecordStats();
-            //LogItemInfo();
             WAEItemDB.Add(this);
+            //LogItemInfo();
         }
     }
 
@@ -223,8 +222,17 @@ public class WAEItem
 
     public bool EquipSelectRoll(int slotId, string reason)
     {
+        // ROLL
+        if (RollId >= 0)
+        {
+            WAEGroupRoll.Roll(RollId, this, reason, RollType.NEED);
+            HasBeenRolled = true;
+            WAEContainers.AllItems.Clear();
+            return true;
+        }
+
         // SELECT REWARD
-        if (RewardSlot > 0)
+        if (RewardSlot >= 0)
         {
             Lua.LuaDoString($"GetQuestReward({RewardSlot})");
             Logger.Log($"Selecting quest reward {Name} [{reason}]");
@@ -323,6 +331,7 @@ public class WAEItem
         Logger.LogDebug($@"Name : {Name} | ItemLink : {ItemLink} | ItemRarity : {ItemRarity} | ItemLevel : {ItemLevel} | ItemMinLevel : {ItemMinLevel}
                     | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
-                    | BagCapacity : {BagCapacity} | UniqueId : {UniqueId} | WEIGHT SCORE : {WeightScore}");
+                    | BagCapacity : {BagCapacity} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
+                    | WEIGHT SCORE : {WeightScore}");
     }
 }

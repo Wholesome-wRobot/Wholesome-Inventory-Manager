@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using wManager.Wow.ObjectManager;
+﻿using wManager.Wow.ObjectManager;
 
 public class WAELootFilter
 {
@@ -8,15 +7,12 @@ public class WAELootFilter
         if (!AutoEquipSettings.CurrentSettings.LootFilterActivated)
             return;
 
-        List<WAEItem> itemsToDelete = new List<WAEItem>();
-
         int valueThresholdInCopper = AutoEquipSettings.CurrentSettings.DeleteGoldValue * 10000
             + AutoEquipSettings.CurrentSettings.DeleteSilverValue * 100
             + AutoEquipSettings.CurrentSettings.DeleteCopperValue;
 
         foreach (WAEItem item in WAEContainers.AllItems)
         {
-            //Logger.Log($"{item.Name} - {item.ItemRarity} - {item.ItemType} - {item.ItemSubType} - {item.ItemMinLevel}");
             // Skip Do Not Sell item
             if (wManager.wManagerSetting.CurrentSetting.DoNotSellList.Contains(item.Name))
                 continue;
@@ -71,7 +67,6 @@ public class WAELootFilter
 
             if (item.ItemSellPrice <= valueThresholdInCopper)
                 item.DeleteFromBag($"Item value {item.ItemSellPrice} is lesser than setting {valueThresholdInCopper}");
-
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Wholesome_Inventory_Manager.CharacterSheet;
 using wManager.Plugin;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
@@ -15,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "1.0.04"; // Must match version in Version.txt
+    public static string version = "1.1.00"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -42,6 +43,7 @@ public class Main : IPlugin
         EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
         EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => WAECharacterSheet.RecordKnownSkills());
         EventsLua.AttachEventLua("QUEST_COMPLETE", e => WAEQuest.QuestRewardGossipOpen = true);
+        EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnLuaEventsWithArgs;
         wManager.Events.OthersEvents.OnSelectQuestRewardItem += WAEQuest.SelectReward;
         /*
         foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
@@ -52,10 +54,17 @@ public class Main : IPlugin
         LUASetup();
     }
 
+    private void OnLuaEventsWithArgs(string eventid, List<string> args)
+    {
+        if (eventid == "START_LOOT_ROLL")
+            WAEGroupRoll.RollList.Add(int.Parse(args[0]));
+    }
+
     public void Dispose()
     {
         detectionPulse.DoWork -= BackGroundPulse;
         wManager.Events.OthersEvents.OnSelectQuestRewardItem -= WAEQuest.SelectReward;
+        EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnLuaEventsWithArgs;
         detectionPulse.Dispose();
         Logger.Log("Disposed");
         isLaunched = false;
@@ -87,6 +96,8 @@ public class Main : IPlugin
                         WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
 
                     WAELootFilter.FilterLoot();
+
+                    WAEGroupRoll.CheckLootRoll();
 
                     //Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
                 }

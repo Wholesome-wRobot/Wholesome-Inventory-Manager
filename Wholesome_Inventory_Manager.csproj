@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bags\WAELootFilter.cs" />
+    <Compile Include="CharacterSheet\WAEGroupRoll.cs" />
     <Compile Include="CharacterSheet\WAEQuest.cs" />
     <Compile Include="Settings\AutoEquipSettings.cs" />
     <Compile Include="AutoUpdater.cs" />

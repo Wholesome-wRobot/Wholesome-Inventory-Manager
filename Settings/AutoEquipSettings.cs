@@ -53,6 +53,9 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public int DeleteSilverValue { get; set; }
     public int DeleteCopperValue { get; set; }
     public bool DeleteItemWithNoValue { get; set; }
+    // Group roll
+    public bool AlwaysGreed { get; set; }
+    public bool AlwaysPass { get; set; }
 
     public double LastUpdateDate { get; set; }
 
@@ -104,6 +107,10 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         EquipOneHanders = true;
         EquipTwoHanders = true;
         EquipShields = true;
+
+        // Group roll
+        AlwaysGreed = false;
+        AlwaysPass = false;
 
         StatWeights = new List<StatWeight>();
     }

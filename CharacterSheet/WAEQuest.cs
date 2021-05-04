@@ -25,7 +25,7 @@ public class WAEQuest
             for (int i = 1; i <= nbQuestRewards; i++)
             {
                 string itemLink = Lua.LuaDoString<string>($"return GetQuestItemLink(\"choice\", {i})");
-                itemRewards.Add(new WAEItem(itemLink, i));
+                itemRewards.Add(new WAEItem(itemLink, rewardSlot: i));
             }
 
             itemRewards = itemRewards.OrderByDescending(i => i.WeightScore).ToList();
