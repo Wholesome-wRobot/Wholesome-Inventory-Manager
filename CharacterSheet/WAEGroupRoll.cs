@@ -12,6 +12,8 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
 
         public static void CheckLootRoll()
         {
+            DateTime dateBegin = DateTime.Now;
+
             for (int i = RollList.Count - 1; i >= 0; i--)
             {
                 int rollId = RollList[i];
@@ -74,6 +76,8 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
 
                 RollList.Remove(rollId);
             }
+
+            Logger.LogPerformance($"Loot Roll Check Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
         }
 
         public static void Roll(int rollId, WAEItem itemToRoll, string reason, RollType rollType)

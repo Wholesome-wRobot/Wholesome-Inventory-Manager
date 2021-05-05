@@ -37,7 +37,7 @@ public static class WAEContainers
 
     public static void Scan()
     {
-        ToolBox.Sleep(200);
+        //ToolBox.Sleep(200);
         DateTime dateBegin = DateTime.Now;
         //Logger.LogDebug("*** Scanning bags...");
 
@@ -51,7 +51,7 @@ public static class WAEContainers
                 ListContainers.Add(new WAEContainer(i));
         }
 
-        //Logger.LogDebug($"Bag Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        Logger.LogPerformance($"Bag Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     private static int GetNbBagEquipped()
@@ -231,6 +231,6 @@ public static class WAEContainers
             }
         }
 
-        //Logger.LogDebug($"Bag Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        Logger.LogPerformance($"Bag Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 }

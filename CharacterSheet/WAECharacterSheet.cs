@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using wManager.Wow.Class;
 using wManager.Wow.Enums;
@@ -56,7 +57,7 @@ public static class WAECharacterSheet
         foreach (WAECharacterSheetSlot slot in AllSlots)
             slot.RefreshItem();
 
-        //Logger.LogDebug($"CharSheet Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        Logger.LogPerformance($"CharSheet Scan Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     public static void AutoEquip()
@@ -71,7 +72,7 @@ public static class WAECharacterSheet
         AutoEquipRanged();
         CheckSwapWeapons();
 
-        //Logger.LogDebug($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+        Logger.LogPerformance($"Auto Equip Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     public static void AutoEquipArmor()
@@ -90,9 +91,8 @@ public static class WAECharacterSheet
             {
                 if (armorSlot.Item == null || armorSlot.Item.WeightScore < item.WeightScore)
                 {
-                    if (armorSlot.Item == null && item.EquipSelectRoll(armorSlot.InventorySlotID, "Nohting equipped in this slot"))
-                        break;
-                    else if (item.EquipSelectRoll(armorSlot.InventorySlotID, $"Replacing {armorSlot.Item.Name} ({armorSlot.Item.WeightScore})"))
+                    string reason = armorSlot.Item == null ? "Nothing equipped in this slot" : $"Replacing {armorSlot.Item.Name} ({armorSlot.Item.WeightScore})";
+                    if (item.EquipSelectRoll(armorSlot.InventorySlotID, reason))
                         break;
                 }
             }
@@ -115,12 +115,10 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialRings)
         {
-            if (lowestScoreFingerSlot.Item == null
-                || lowestScoreFingerSlot.Item.WeightScore < item.WeightScore)
+            if (lowestScoreFingerSlot.Item == null || lowestScoreFingerSlot.Item.WeightScore < item.WeightScore)
             {
-                if (lowestScoreFingerSlot.Item == null && item.EquipSelectRoll(lowestScoreFingerSlot.InventorySlotID, "Nohting equipped in this slot"))
-                    break;
-                else if (item.EquipSelectRoll(lowestScoreFingerSlot.InventorySlotID, $"Replacing {lowestScoreFingerSlot.Item.Name} ({lowestScoreFingerSlot.Item.WeightScore})"))
+                string reason = lowestScoreFingerSlot.Item == null ? "Nothing equipped in this slot" : $"Replacing {lowestScoreFingerSlot.Item.Name} ({lowestScoreFingerSlot.Item.WeightScore})";
+                if (item.EquipSelectRoll(lowestScoreFingerSlot.InventorySlotID, reason))
                     break;
             }
         }
@@ -142,12 +140,10 @@ public static class WAECharacterSheet
 
         foreach (WAEItem item in potentialTrinkets)
         {
-            if (lowestScoreTrinketSlot.Item == null
-                || lowestScoreTrinketSlot.Item.WeightScore < item.WeightScore)
+            if (lowestScoreTrinketSlot.Item == null || lowestScoreTrinketSlot.Item.WeightScore < item.WeightScore)
             {
-                if (lowestScoreTrinketSlot.Item == null && item.EquipSelectRoll(lowestScoreTrinketSlot.InventorySlotID, "Nohting equipped in this slot"))
-                    break;
-                else if (item.EquipSelectRoll(lowestScoreTrinketSlot.InventorySlotID, $"Replacing {lowestScoreTrinketSlot.Item.Name} ({lowestScoreTrinketSlot.Item.WeightScore})"))
+                string reason = lowestScoreTrinketSlot.Item == null ? "Nothing equipped in this slot" : $"Replacing {lowestScoreTrinketSlot.Item.Name} ({lowestScoreTrinketSlot.Item.WeightScore})";
+                if (item.EquipSelectRoll(lowestScoreTrinketSlot.InventorySlotID, reason))
                     break;
             }
         }
@@ -196,7 +192,7 @@ public static class WAECharacterSheet
             // Equip because slot is empty
             if (Ranged.Item == null)
             {
-                if (item.EquipSelectRoll(Ranged.InventorySlotID, "Nohting equipped in this slot"))
+                if (item.EquipSelectRoll(Ranged.InventorySlotID, "Nothing equipped in this slot"))
                     break;
             }
 
@@ -213,6 +209,8 @@ public static class WAECharacterSheet
 
     public static void AutoEquipAmmo()
     {
+        DateTime dateBegin = DateTime.Now;
+
         if (Ranged.Item != null)
         {
             string typeAmmo = null;
@@ -236,13 +234,14 @@ public static class WAECharacterSheet
                     || Ammo.Item.ItemSubType != item.ItemSubType
                     || !WAEContainers.AllItems.Exists(i => i.ItemId == item.ItemId))
                 {
-                    if (Ammo.Item == null && item.EquipSelectRoll(Ammo.InventorySlotID, "Nohting equipped in this slot"))
-                        break;
-                    else if (item.EquipSelectRoll(Ammo.InventorySlotID, $"Replacing {Ammo.Item.Name} with {item.Name}"))
+                    string reason = Ammo.Item == null ? "Nothing equipped in this slot" : $"Replacing {Ammo.Item.Name} ({Ammo.Item.WeightScore})";
+                    if (item.EquipSelectRoll(Ammo.InventorySlotID, reason))
                         break;
                 }
             }
         }
+
+        Logger.LogPerformance($"Auto Equip Ammo Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 
     public static void AutoEquipWeapons()

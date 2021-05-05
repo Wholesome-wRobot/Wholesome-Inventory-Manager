@@ -1,4 +1,5 @@
-﻿using wManager.Wow.ObjectManager;
+﻿using System;
+using wManager.Wow.ObjectManager;
 
 public class WAELootFilter
 {
@@ -6,6 +7,8 @@ public class WAELootFilter
     {
         if (!AutoEquipSettings.CurrentSettings.LootFilterActivated)
             return;
+
+        DateTime dateBegin = DateTime.Now;
 
         int valueThresholdInCopper = AutoEquipSettings.CurrentSettings.DeleteGoldValue * 10000
             + AutoEquipSettings.CurrentSettings.DeleteSilverValue * 100
@@ -68,5 +71,7 @@ public class WAELootFilter
             if (item.ItemSellPrice <= valueThresholdInCopper)
                 item.DeleteFromBag($"Item value {item.ItemSellPrice} is lesser than setting {valueThresholdInCopper}");
         }
+
+        Logger.LogPerformance($"Loot Filter Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
     }
 }

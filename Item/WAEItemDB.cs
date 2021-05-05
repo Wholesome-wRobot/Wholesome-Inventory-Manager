@@ -11,6 +11,9 @@ public static class WAEItemDB
 
     public static void Add(WAEItem item)
     {
+        if (ItemDb.Count > 300)
+            ItemDb.RemoveRange(0, 100);
+
         if (!ContainsByItemLink(item.Name))
             ItemDb.Add(item);
     }

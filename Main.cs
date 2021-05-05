@@ -16,7 +16,7 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "1.1.01"; // Must match version in Version.txt
+    public static string version = "1.1.02"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -80,7 +80,7 @@ public class Main : IPlugin
                     && ObjectManager.Me.IsAlive
                     && !WAEQuest.SelectingReward)
                 {
-                    //Logger.LogDebug("--------------------------------------");
+                    Logger.LogPerformance("--------------------------------------");
                     DateTime dateBegin = DateTime.Now;
 
                     WAECharacterSheet.Scan();
@@ -100,7 +100,7 @@ public class Main : IPlugin
 
                     WAEGroupRoll.CheckLootRoll();
 
-                    //Logger.LogDebug($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                    Logger.LogPerformance($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
                 }
             }
             catch (Exception arg)

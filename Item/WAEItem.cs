@@ -11,6 +11,7 @@ using Wholesome_Inventory_Manager.CharacterSheet;
 
 public class WAEItem
 {
+    private readonly int _maxNbEquipAttempts = 5;
     public static List<string> ItemEquipAttempts { get; set; } = new List<string>();
     public int ItemId { get; set; }
     public string Name { get; set; }
@@ -260,7 +261,11 @@ public class WAEItem
             WAECharacterSheetSlot updatedSlot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
             if (updatedSlot.Item == null || updatedSlot.Item.ItemLink != ItemLink)
             {
-                Logger.LogError($"Failed to equip {Name}. Retrying soon ({GetNbEquipAttempts()}).");
+                if (GetNbEquipAttempts() < _maxNbEquipAttempts)
+                    Logger.LogError($"Failed to equip {Name}. Retrying soon ({GetNbEquipAttempts()}).");
+                else
+                    Logger.LogError($"Failed to equip {Name} after {GetNbEquipAttempts()} attempts.");
+
                 Lua.LuaDoString($"ClearCursor()");
                 return false;
             }
@@ -288,7 +293,7 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        if (!ItemSkillsDictionary.ContainsKey(ItemSubType)
+        if (ItemSubType == "" || !ItemSkillsDictionary.ContainsKey(ItemSubType)
             && ItemSubType != "Miscellaneous")
             return false;
 
@@ -296,7 +301,7 @@ public class WAEItem
             || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
             || ItemSubType == "Fist Weapons" && Skill.Has(wManager.Wow.Enums.SkillLine.FistWeapons);
         
-        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < 5;
+        return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < _maxNbEquipAttempts;
     }
 
     public bool MoveToBag(int position, int slot)
