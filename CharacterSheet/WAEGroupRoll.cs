@@ -20,6 +20,13 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
 
                 bool canNeed = Lua.LuaDoString<bool>($"_, _, _, _, _, canNeed, _, _, _, _, _, _ = GetLootRollItemInfo({rollId});", "canNeed") || Main.WoWVersion <= ToolBox.WoWVersion.TBC;
                 string itemLink = Lua.LuaDoString<string>($"itemLink = GetLootRollItemLink({rollId});", "itemLink");
+
+                if (itemLink.Length < 10)
+                {
+                    Logger.LogDebug($"Couldn't get item link of roll {rollId}, skipping");
+                    continue;
+                }
+
                 WAEItem itemToRoll = new WAEItem(itemLink, rollId: rollId);
 
                 if (AutoEquipSettings.CurrentSettings.AlwaysPass)

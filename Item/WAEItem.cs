@@ -53,6 +53,9 @@ public class WAEItem
         InBag = inBag;
         InBagSlot = inBagSlot;
 
+        if (itemLink.Length < 10)
+            return;
+
         RecordItemId(itemLink);
 
         WAEItem existingCopy = WAEItemDB.Get(ItemLink);
