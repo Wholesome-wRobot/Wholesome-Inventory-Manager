@@ -16,9 +16,15 @@ public static class WAEContainers
         if (bagToReplace.EmptyBagInOtherBags())
         {
             Logger.Log($"Replacing {bagToReplace.ThisBag.Name} with {newBag.Name}");
+
             if (newBag.InBag == bagToReplace.Position)
                 newBag = AllItems.Find(b => b.ItemLink == newBag.ItemLink);
+
             newBag.MoveToBag(bagToReplace.Position);
+
+            WAELootFilter.ProtectFromFilter(newBag.ItemLink);
+            Lua.LuaDoString($"EquipPendingItem(0);");
+            Lua.LuaDoString($"StaticPopup1Button1:Click()");
         }
         Scan();
     }
@@ -61,10 +67,6 @@ public static class WAEContainers
 
     public static WAEItem GetBiggestBagFromBags()
     {
-        /*foreach(WAEItem item in AllItems)
-        {
-            Logger.Log($"{item.Name} - {item.BagCapacity} - {item.ItemSubType} - {item.ItemType}");
-        }*/
         return AllItems
                 .FindAll(item => item.ItemType != "Recipe" 
                 && item.BagCapacity > 0 
@@ -170,6 +172,11 @@ public static class WAEContainers
                                 int availableSpot = GetEmptyContainerSlots().Last();
                                 Logger.Log($"Equipping {bestAmmoContainerInBags.Name} in slot {availableSpot}");
                                 bestAmmoContainerInBags.MoveToBag(availableSpot);
+
+                                Lua.LuaDoString($"EquipPendingItem(0);");
+                                Lua.LuaDoString($"StaticPopup1Button1:Click()");
+                                WAELootFilter.ProtectFromFilter(bestAmmoContainerInBags.ItemLink);
+
                                 Scan();
                             }
                             else
@@ -210,6 +217,11 @@ public static class WAEContainers
                         Logger.Log($"Equipping {biggestBag.Name}");
                         int availableSpot = GetEmptyContainerSlots().First();
                         biggestBag.MoveToBag(availableSpot);
+
+                        Lua.LuaDoString($"EquipPendingItem(0);");
+                        Lua.LuaDoString($"StaticPopup1Button1:Click()");
+                        WAELootFilter.ProtectFromFilter(biggestBag.ItemLink);
+
                         Scan();
                     }
                     if (GetNbBagEquipped() >= maxAmountOfBags)

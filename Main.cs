@@ -16,7 +16,9 @@ public class Main : IPlugin
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
-    public static string version = "1.1.02"; // Must match version in Version.txt
+    public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
+
+    public static string version = "2.0.00"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -31,7 +33,7 @@ public class Main : IPlugin
             return;
         }
 
-        Logger.Log($"Launching version {version} on client {ToolBox.GetWoWVersion()}");
+        Logger.Log($"Launching version {version} on client {WoWVersion}");
 
         AutoDetectMyClassSpec();
         LoadWantedItemTypesList();
@@ -45,12 +47,7 @@ public class Main : IPlugin
         EventsLua.AttachEventLua("QUEST_COMPLETE", e => WAEQuest.QuestRewardGossipOpen = true);
         EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnLuaEventsWithArgs;
         wManager.Events.OthersEvents.OnSelectQuestRewardItem += WAEQuest.SelectReward;
-        /*
-        foreach (var ev in new string[] { "AUTOEQUIP_BIND_CONFIRM", "EQUIP_BIND_CONFIRM", "LOOT_BIND_CONFIRM", "USE_BIND_CONFIRM" })
-        {
-            EventsLua.AttachEventLua(ev, ctx => Lua.LuaDoString($"ConfirmBindOnUse()"));
-        }
-        */
+
         LUASetup();
     }
 
@@ -63,8 +60,8 @@ public class Main : IPlugin
     public void Dispose()
     {
         detectionPulse.DoWork -= BackGroundPulse;
-        wManager.Events.OthersEvents.OnSelectQuestRewardItem -= WAEQuest.SelectReward;
         EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnLuaEventsWithArgs;
+        wManager.Events.OthersEvents.OnSelectQuestRewardItem -= WAEQuest.SelectReward;
         detectionPulse.Dispose();
         Logger.Log("Disposed");
         isLaunched = false;
@@ -86,7 +83,7 @@ public class Main : IPlugin
                     WAECharacterSheet.Scan();
                     WAEContainers.Scan();
 
-                    if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
+                    if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipBags)
                         WAEContainers.BagEquip();
 
                     if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
@@ -131,7 +128,7 @@ public class Main : IPlugin
     {
         // Create invisible tooltip to read tooltip info
         Lua.LuaDoString($@"
-            local tip = myTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
+            local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
             local L = L or tip: CreateFontString()
             local R = R or tip: CreateFontString()
             L: SetFontObject(GameFontNormal)

@@ -57,12 +57,15 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public bool AlwaysGreed { get; set; }
     public bool AlwaysPass { get; set; }
 
+    public bool LogItemInfo { get; set; }
+
     public double LastUpdateDate { get; set; }
 
     public AutoEquipSettings()
     {
         FirstLaunch = true;
         AutoDetectStatWeights = true;
+        LogItemInfo = false;
 
         // Filter Loot
         LootFilterActivated = false;

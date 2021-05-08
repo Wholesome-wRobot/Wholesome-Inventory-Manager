@@ -18,7 +18,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
             {
                 int rollId = RollList[i];
 
-                bool canNeed = Lua.LuaDoString<bool>($"_, _, _, _, _, canNeed, _, _, _, _, _, _ = GetLootRollItemInfo({rollId});", "canNeed");
+                bool canNeed = Lua.LuaDoString<bool>($"_, _, _, _, _, canNeed, _, _, _, _, _, _ = GetLootRollItemInfo({rollId});", "canNeed") || Main.WoWVersion <= ToolBox.WoWVersion.TBC;
                 string itemLink = Lua.LuaDoString<string>($"itemLink = GetLootRollItemLink({rollId});", "itemLink");
                 WAEItem itemToRoll = new WAEItem(itemLink, rollId: rollId);
 
@@ -40,7 +40,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
                 WAEContainers.Scan();
                 WAEContainers.AllItems.Add(itemToRoll);
 
-                if (canNeed && itemToRoll.ItemEquipLoc != "")
+                if (canNeed && itemToRoll.ItemEquipLoc != "" && itemToRoll.ItemSubType != "Bag")
                 {
                     // Weapons
                     if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
@@ -82,7 +82,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
 
         public static void Roll(int rollId, WAEItem itemToRoll, string reason, RollType rollType)
         {
-            int waitTime = 2000 + new Random().Next(1, 5000);
+            int waitTime = 1000 + new Random().Next(1, 3000);
             string adjustedReason = reason == "" ? "" : $"[{reason}]";
  
             if (rollType == RollType.PASS)

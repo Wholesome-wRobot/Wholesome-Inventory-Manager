@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using wManager;
 using wManager.Wow.Helpers;
 
 public class ToolBox
@@ -15,10 +16,26 @@ public class ToolBox
             Products.ProductStart();
         }).Start();
     }
-
-    public static string GetWoWVersion()
+    
+    public static void AddToDoNotSellList(string itemName)
     {
-        return Lua.LuaDoString<string>("v, b, d, t = GetBuildInfo(); return v");
+        if (!wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))
+            wManagerSetting.CurrentSetting.DoNotSellList.Add(itemName);
+    }
+
+    public static void RemoveFromDoNotSellList(string itemName)
+    {
+        if (wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))
+            wManagerSetting.CurrentSetting.DoNotSellList.Remove(itemName);
+    }
+
+    public static WoWVersion GetWoWVersion()
+    {
+        string version = Lua.LuaDoString<string>("v, b, d, t = GetBuildInfo(); return v");
+        if (version == "2.4.3")
+            return WoWVersion.TBC;
+        else
+            return WoWVersion.WOTLK;
     }
 
     public static int GetTalentRank(int tabIndex, int talentIndex)
@@ -48,5 +65,12 @@ public class ToolBox
         int worldLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagWorld");
         int homeLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagHome");
         Thread.Sleep(worldLatency + homeLatency + milliseconds);
+    }
+
+    public enum WoWVersion
+    {
+        VANILLA,
+        TBC,
+        WOTLK
     }
 }

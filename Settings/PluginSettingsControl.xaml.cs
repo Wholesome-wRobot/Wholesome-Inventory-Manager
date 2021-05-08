@@ -67,13 +67,31 @@ namespace Wholesome_Inventory_Manager.Settings
             KeepBlue.IsChecked = AutoEquipSettings.CurrentSettings.KeepBlue;
 
             // Value
-            DeleteItemWithNoValue.IsChecked = AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue;
-            DeleteGoldValue.Value = AutoEquipSettings.CurrentSettings.DeleteGoldValue;
-            DeleteSilverValue.Value = AutoEquipSettings.CurrentSettings.DeleteSilverValue;
-            DeleteCopperValue.Value = AutoEquipSettings.CurrentSettings.DeleteCopperValue;
+            if (Main.WoWVersion < ToolBox.WoWVersion.WOTLK)
+            {
+                DeleteItemWithNoValue.IsEnabled = false;
+                DeleteItemWithNoValue.IsChecked = false;
+                DeleteGoldValue.IsEnabled = false;
+                DeleteSilverValue.IsEnabled = false;
+                DeleteCopperValue.IsEnabled = false;
+            }
+            else
+            {
+                DeleteItemWithNoValue.IsChecked = AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue;
+                DeleteGoldValue.Value = AutoEquipSettings.CurrentSettings.DeleteGoldValue;
+                DeleteSilverValue.Value = AutoEquipSettings.CurrentSettings.DeleteSilverValue;
+                DeleteCopperValue.Value = AutoEquipSettings.CurrentSettings.DeleteCopperValue;
+            }
 
             // Misc
             DeleteDeprecatedQuestItems.IsChecked = AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems;
+            LogItemInfo.IsChecked = AutoEquipSettings.CurrentSettings.LogItemInfo;
+        }
+
+        private void LogItemInfoChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.LogItemInfo = (bool)LogItemInfo.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
         }
 
         private void AlwaysPassChanged(object sender, RoutedEventArgs e)

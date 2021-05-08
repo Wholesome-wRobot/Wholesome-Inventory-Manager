@@ -6,14 +6,14 @@ using System.Globalization;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
 using wManager;
-using System;
 using Wholesome_Inventory_Manager.CharacterSheet;
+using System.Text.RegularExpressions;
 
 public class WAEItem
 {
     private readonly int _maxNbEquipAttempts = 5;
     public static List<string> ItemEquipAttempts { get; set; } = new List<string>();
-    public int ItemId { get; set; }
+    public uint ItemId { get; set; }
     public string Name { get; set; }
     public string ItemLink { get; set; }
     public int ItemRarity { get; set; }
@@ -40,12 +40,20 @@ public class WAEItem
 
     private static int UniqueIdCounter = 0;
 
-    public WAEItem(string itemLink, int rewardSlot = -1, int rollId = -1)
+    public WAEItem(string itemLink, 
+        int rewardSlot = -1, 
+        int rollId = -1, 
+        int inBag = -1, 
+        int inBagSlot = -1)
     {
+        UniqueId = ++UniqueIdCounter;
+        ItemLink = itemLink;
         RewardSlot = rewardSlot;
         RollId = rollId;
-        ItemLink = itemLink;
-        UniqueId = ++UniqueIdCounter;
+        InBag = inBag;
+        InBagSlot = inBagSlot;
+
+        RecordItemId(itemLink);
 
         WAEItem existingCopy = WAEItemDB.Get(ItemLink);
 
@@ -78,7 +86,7 @@ public class WAEItem
             }
 
             Name = infoArray[0];
-            ItemLink = infoArray[1];
+            ItemLink = itemLink;
             ItemRarity = int.Parse(infoArray[2]);
             ItemLevel = int.Parse(infoArray[3]);
             ItemMinLevel = int.Parse(infoArray[4]);
@@ -88,11 +96,38 @@ public class WAEItem
             ItemEquipLoc = infoArray[8];
             ItemTexture = infoArray[9];
             ItemSellPrice = int.Parse(infoArray[10]);
-            RecordToolTip();
-            RecordStats();
+
+            if (Main.WoWVersion <= ToolBox.WoWVersion.TBC)
+            {
+                RecordToolTipTBC();
+                RecordBagSpaceTBC();
+            }
+            else
+            {
+                RecordToolTipWotLK();
+                RecordStatsWotLK();
+            }
+
+
             WAEItemDB.Add(this);
-            //LogItemInfo();
+            if (AutoEquipSettings.CurrentSettings.LogItemInfo)
+                LogItemInfo();
         }
+    }
+
+    private void RecordItemId(string itemLink)
+    {
+        if (itemLink.Split(':').Length < 2)
+        {
+            Logger.LogError($"[{Name}] Couldn't parse item ID from item link {itemLink}");
+            return;
+        }
+
+        uint parsedItemId = 0;
+        if (uint.TryParse(itemLink.Split(':')[1], out parsedItemId))
+            ItemId = parsedItemId;
+        else
+            Logger.LogError($"Couldn't parse item ID {itemLink.Split(':')[1]}");
     }
 
     private void CloneFromDB(WAEItem existingCopy)
@@ -115,9 +150,136 @@ public class WAEItem
         WeightScore = existingCopy.WeightScore;
         ItemStats = existingCopy.ItemStats;
         WeaponSpeed = existingCopy.WeaponSpeed;
+        ItemId = existingCopy.ItemId;
     }
 
-    public void RecordStats()
+    public void RecordBagSpaceTBC()
+    {
+        if (ItemSubType == "Bag" || ItemSubType == "Quiver" || ItemSubType == "Ammo Pouch")
+        {
+            if (TBCBags.ContainsKey(ItemId))
+                BagCapacity = TBCBags[ItemId];
+
+            if (TBCQuivers.ContainsKey(ItemId))
+                QuiverCapacity = TBCQuivers[ItemId];
+
+            if (TBCAmmoPouches.ContainsKey(ItemId))
+                AmmoPouchCapacity = TBCAmmoPouches[ItemId];
+
+            if (BagCapacity == 0 && AmmoPouchCapacity == 0 && QuiverCapacity == 0)
+                Logger.LogError($"We don't know the capacity of {Name}");
+        }
+    }
+
+    public void RecordToolTipTBC()
+    {
+
+        if (ItemType != "Armor" && ItemType != "Weapon")
+            return;
+
+        // Record the info present in the tooltip
+        string lines = Lua.LuaDoString<string>($@"
+            WEquipTooltip:ClearLines()
+            WEquipTooltip:SetHyperlink(""{ItemLink}"")
+            return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
+
+        string[] allLines = lines.Split('|');
+        foreach (string l in allLines)
+        {
+            bool lineRecorded = false;
+            if (l.Length > 0 
+                && l != "r" 
+                && !l.Contains("Socket") 
+                && !l.Contains("Requires") 
+                && !l.Contains(Name) 
+                && !l.Contains("Binds")
+                && !l.Contains("Unique"))
+            {
+                // Loof for item stats
+                foreach (KeyValuePair<string, CharStat> statEnum in StatEnums)
+                {
+                    if (l.ToLower().Contains(statEnum.Key.ToLower()))
+                    {
+                        string line = l.Replace(".", ",").Replace("(", "").Replace(")", "");
+
+                        if (line.Contains("and damage done"))
+                        {
+                            Match prefix = Regex.Match(line, @"^.*?(?=and damage done)");
+                            line = line.Replace(prefix.Value, "");
+                        }
+
+                        string[] words = line.Split(' ');
+
+                        string value = string.Empty;
+                        bool statNumberFound = false;
+
+                        foreach (string word in words)
+                        {
+                            for (int i = 0; i < word.Length; i++)
+                            {
+                                if (char.IsDigit(word[i]) || word[i] == ',')
+                                {
+                                    value += word[i];
+                                    statNumberFound = true;
+                                }
+                            }
+                            if (statNumberFound)
+                                break;
+                        }
+
+                        if (value.Length > 0 && !ItemStats.ContainsKey(statEnum.Key))
+                        {
+                            ItemStats.Add(statEnum.Key, float.Parse(value));
+                            lineRecorded = true;
+                        }
+                        else
+                            Logger.LogError($"No value found for {statEnum.Value}");
+
+                        break;
+                    }
+                }
+
+                if (lineRecorded)
+                    continue;
+
+                // record specifics
+                if (ItemType == "Weapon" && l.Contains("Speed "))
+                    WeaponSpeed = float.Parse(l.Replace("Speed ", "").Replace(".", ","));
+
+                /*if (!lineRecorded)
+                    Logger.LogError($"Ignored : {l}");*/
+            }
+        }
+        RecordWeightScore();
+    }
+
+    public void RecordToolTipWotLK()
+    {
+        // Record the info present in the tooltip
+        string lines = Lua.LuaDoString<string>($@"
+            WEquipTooltip:ClearLines()
+            WEquipTooltip:SetHyperlink(""{ItemLink}"")
+            return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
+
+        string[] allLines = lines.Split('|');
+        foreach (string l in allLines)
+        {
+            if (l.Length > 0)
+            {
+                // record specifics
+                if (ItemType == "Weapon" && l.Contains("Speed "))
+                    WeaponSpeed = float.Parse(l.Replace("Speed ", "").Replace(".", ","));
+                if (l.Contains(" Slot Bag"))
+                    BagCapacity = int.Parse(l.Replace(" Slot Bag", ""));
+                else if (l.Contains(" Slot Quiver"))
+                    QuiverCapacity = int.Parse(l.Replace(" Slot Quiver", ""));
+                else if (l.Contains(" Slot Ammo Pouch"))
+                    AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
+            }
+        }
+    }
+
+    public void RecordStatsWotLK()
     {
         if (ItemType != "Armor" && ItemType != "Weapon")
             return;
@@ -129,7 +291,7 @@ public class WAEItem
                     stats = stats.._G[stat]..""§""..value..""$""
                 end
                 return stats");
-        //Logger.Log(stats);
+        //Logger.Log("stats -> " + stats);
         if (stats.Length < 1)
             return;
 
@@ -168,32 +330,6 @@ public class WAEItem
         return WeightScore;
     }
 
-    public void RecordToolTip()
-    {
-        // Record the info present in the tooltip
-        string lines = Lua.LuaDoString<string>($@"
-            WEquipTooltip:ClearLines()
-            WEquipTooltip:SetHyperlink(""{ItemLink}"")
-            return EnumerateTooltipLines(WEquipTooltip: GetRegions())");
-
-        string[] allLines = lines.Split('|');
-        foreach (string l in allLines)
-        {
-            if (l.Length > 0)
-            {
-                // record specifics
-                if (ItemType == "Weapon" && l.Contains("Speed "))
-                    WeaponSpeed = float.Parse(l.Replace("Speed ", "").Replace(".", ","));
-                if (l.Contains(" Slot Bag"))
-                    BagCapacity = int.Parse(l.Replace(" Slot Bag", ""));
-                else if (l.Contains(" Slot Quiver"))
-                    QuiverCapacity = int.Parse(l.Replace(" Slot Quiver", ""));
-                else if (l.Contains(" Slot Ammo Pouch"))
-                    AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
-            }
-        }
-    }
-
     public void DeleteFromBag(string reason)
     {
         if (wManagerSetting.CurrentSetting.DoNotSellList.Contains(Name))
@@ -215,6 +351,8 @@ public class WAEItem
 
     public bool EquipSelectRoll(int slotId, string reason)
     {
+        WAELootFilter.ProtectFromFilter(ItemLink);
+
         // ROLL
         if (RollId >= 0)
         {
@@ -270,6 +408,7 @@ public class WAEItem
                 return false;
             }
             ItemEquipAttempts.RemoveAll(i => i == ItemLink);
+            WAELootFilter.AllowForFilter(ItemLink);
             return true;
 
         }
@@ -328,7 +467,7 @@ public class WAEItem
         Logger.LogDebug($@"Name : {Name} | ItemLink : {ItemLink} | ItemRarity : {ItemRarity} | ItemLevel : {ItemLevel} | ItemMinLevel : {ItemMinLevel}
                     | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
-                    | BagCapacity : {BagCapacity} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
-                    | WEIGHT SCORE : {WeightScore}");
+                    | BagCapacity : {BagCapacity} | WeaponSpeed : {WeaponSpeed} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
+                    | InBag: {InBag} | InBagSlot: {InBagSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}");
     }
 }

@@ -20,7 +20,6 @@ public class WAEQuest
 
         if (nbQuestRewards > 0 && QuestRewardGossipOpen)
         {
-            //Logger.Log("SELECTING REWARD");
             List<WAEItem> itemRewards = new List<WAEItem>();
             for (int i = 1; i <= nbQuestRewards; i++)
             {
@@ -35,7 +34,7 @@ public class WAEQuest
 
             foreach (WAEItem item in itemRewards)
             {
-                if (item.ItemEquipLoc != "")
+                if (item.ItemEquipLoc != "" && item.ItemSubType != "Bag")
                 {
                     // Weapons
                     if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
@@ -90,13 +89,9 @@ public class WAEQuest
             foreach (WAEItem bagItem in WAEContainers.AllItems)
             {
                 if (bagItem.ItemLink == reward.ItemLink)
-                {
-                    //Logger.Log($"{reward.Name} detected in inventory");
                     return reward;
-                }
             }
         }
-        //Logger.Log($"No reward detected in inventory");
         return null;
     }
 }

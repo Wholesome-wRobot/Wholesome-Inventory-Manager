@@ -83,6 +83,12 @@ public class WAEEnums
 
     public static Dictionary<string, CharStat> StatEnums { get; } = new Dictionary<string, CharStat>()
     {
+        // TBC
+        { "damage and healing done by magical spells", CharStat.SpellPower },
+        { "for all magical spells and effects", CharStat.SpellPower },
+        { "Your attacks ignore", CharStat.ArmorPenetrationRating },
+        { "Spell Damage", CharStat.SpellPower },
+        // WotLK
         { "Stamina", CharStat.Stamina },
         { "Intellect", CharStat.Intellect },
         { "Agility", CharStat.Agility },
@@ -110,6 +116,8 @@ public class WAEEnums
         { "Shadow Spell Power", CharStat.ShadowSpellPower },
         { "Arcane Spell Power", CharStat.ArcaneSpellPower },
         { "Frost Spell Power", CharStat.FrostSpellPower },
+        // TBC backup
+        { "Block", CharStat.BlockValue },
     };
 
     public static Dictionary<string, SkillLine> ItemSkillsDictionary { get; set; } = new Dictionary<string, SkillLine>
@@ -154,5 +162,125 @@ public class WAEEnums
         SkillLine.TwoHandedSwords,
         SkillLine.Staves,
         SkillLine.Polearms
+    };
+
+    public static Dictionary<uint, int> TBCBags { get; } = new Dictionary<uint, int>()
+    {
+        { 38082, 22 },
+        { 4981, 12 },
+        { 5765, 10 },
+        { 856, 15 },
+        { 14156, 18 },
+        { 4498, 8 },
+        { 3343, 8 },
+        { 22571, 6 },
+        { 19291, 14 },
+        { 10959, 16 },
+        { 918, 10 },
+        { 30744, 14 },
+        { 23389, 4 },
+        { 10683, 16 },
+        { 11324, 14 },
+        { 16057, 12 },
+        { 932, 10 },
+        { 3233, 8 },
+        { 5573, 8 },
+        { 5764, 10 },
+        { 4241, 8 },
+        { 1729, 10 },
+        { 27680, 18 },
+        { 4930, 6 },
+        { 11845, 4 },
+        { 4497, 10 },
+        { 4499, 12 },
+        { 21843, 18 },
+        { 33117, 18 },
+        { 6756, 6 },
+        { 3914, 14 },
+        { 5080, 6 },
+        { 804, 10 },
+        { 5576, 10 },
+        { 5575, 10 },
+        { 1725, 12 },
+        { 6754, 8 },
+        { 857, 10 },
+        { 933, 10 },
+        { 3762, 12 },
+        { 4238, 6 },
+        { 10050, 12 },
+        { 22976, 4 },
+        { 14155, 16 },
+        { 1470, 10 },
+        { 21841, 16 },
+        { 23852, 8 },
+        { 1537, 8 },
+        { 4957, 6 },
+        { 17966, 18 },
+        { 3352, 10 },
+        { 19914, 18 },
+        { 34845, 20 },
+        { 21876, 20 },
+        { 20400, 16 },
+        { 2657, 8 },
+        { 5762, 6 },
+        { 10051, 12 },
+        { 5763, 8 },
+        { 14046, 14 },
+        { 5571, 6 },
+        { 828, 6 },
+        { 4496, 6 },
+        { 5572, 6 },
+        { 805, 6 },
+        { 4245, 10 },
+        { 6446, 10 },
+        { 1652, 12 },
+        { 35516, 20 },
+        { 20474, 4 },
+        { 22679, 18 },
+        { 34067, 20 },
+        { 9587, 14 },
+        { 4500, 16 },
+        { 16885, 14 },
+        { 11742, 16 },
+        { 5574, 8 },
+        { 2082, 6 },
+        { 5603, 8 },
+        { 4240, 8 }
+    };
+
+    public static Dictionary<uint, int> TBCQuivers { get; } = new Dictionary<uint, int>()
+    {
+        { 18714, 18 },
+        { 29143, 18 },
+        { 19319, 16 },
+        { 7371, 14 },
+        { 3573, 10 },
+        { 34100, 20 },
+        { 7278, 8 },
+        { 2101, 6 },
+        { 11362, 10 },
+        { 8217, 16 },
+        { 34105, 24 },
+        { 3605, 12 },
+        { 2662, 16 },
+        { 5439, 8 },
+        { 29144, 18 },
+    };
+
+    public static Dictionary<uint, int> TBCAmmoPouches { get; } = new Dictionary<uint, int>()
+    {
+        { 3604, 12 },
+        { 19320, 16 },
+        { 7372, 14 },
+        { 3574, 10 },
+        { 34099, 20 },
+        { 11363, 10 },
+        { 34106, 24 },
+        { 2663, 16 },
+        { 2102, 6 },
+        { 7279, 8 },
+        { 5441, 8 },
+        { 29118, 18 },
+        { 8218, 16 }
     };
 }

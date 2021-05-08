@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using wManager.Wow.ObjectManager;
 
 public class WAELootFilter
 {
+    public static List<string> ProtectedItems { get; set; } = new List<string>();
+
     public static void FilterLoot()
     {
         if (!AutoEquipSettings.CurrentSettings.LootFilterActivated)
@@ -17,7 +20,7 @@ public class WAELootFilter
         foreach (WAEItem item in WAEContainers.AllItems)
         {
             // Skip Do Not Sell item
-            if (wManager.wManagerSetting.CurrentSetting.DoNotSellList.Contains(item.Name))
+            if (wManager.wManagerSetting.CurrentSetting.DoNotSellList.Contains(item.Name) || ProtectedItems.Contains(item.ItemLink))
                 continue;
 
             // Deprecated quest
@@ -30,6 +33,11 @@ public class WAELootFilter
                 item.DeleteFromBag($"Quest level {item.ItemMinLevel} is deprecated");
                 continue;
             }
+
+            // Skip quest
+            if (item.ItemType == "Quest"
+                || item.ItemSubType == "Quest")
+                continue;
 
             // Rarity
             if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.DeleteGray)
@@ -68,10 +76,22 @@ public class WAELootFilter
             if (item.ItemSellPrice == 0 && !AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue)
                 continue;
 
-            if (item.ItemSellPrice <= valueThresholdInCopper)
+            if (item.ItemSellPrice < valueThresholdInCopper)
                 item.DeleteFromBag($"Item value {item.ItemSellPrice} is lesser than setting {valueThresholdInCopper}");
         }
 
         Logger.LogPerformance($"Loot Filter Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+    }
+
+    public static void ProtectFromFilter(string itemLink)
+    {
+        if (!ProtectedItems.Contains(itemLink))
+            ProtectedItems.Add(itemLink);
+    }
+
+    public static void AllowForFilter(string itemLink)
+    {
+        if (ProtectedItems.Contains(itemLink))
+            ProtectedItems.Remove(itemLink);
     }
 }

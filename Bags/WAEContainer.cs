@@ -37,9 +37,7 @@ public class WAEContainer
             {
                 if (allItems[i] != "null")
                 {
-                    item = new WAEItem(allItems[i]);
-                    item.InBagSlot = i;
-                    item.InBag = Position;
+                    item = new WAEItem(allItems[i], inBagSlot: i, inBag: Position);
                     Slots.Add(new WAEContainerSlot(i, position, item));
                     Items.Add(item);
                     WAEContainers.AllItems.Add(item);
