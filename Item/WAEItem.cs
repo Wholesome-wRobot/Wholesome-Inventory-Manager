@@ -467,10 +467,21 @@ public class WAEItem
 
     public void LogItemInfo()
     {
+        string stats = "";
+        if (ItemStats.Count > 0)
+        {
+            stats = "STATS: ";
+            foreach (KeyValuePair<string, float> stat in ItemStats)
+            {
+                stats += $"{stat.Key}:{stat.Value} ";
+            }
+        }
+
         Logger.LogDebug($@"Name : {Name} | ItemLink : {ItemLink} | ItemRarity : {ItemRarity} | ItemLevel : {ItemLevel} | ItemMinLevel : {ItemMinLevel}
                     | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
                     | BagCapacity : {BagCapacity} | WeaponSpeed : {WeaponSpeed} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
-                    | InBag: {InBag} | InBagSlot: {InBagSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}");
+                    | InBag: {InBag} | InBagSlot: {InBagSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
+                    {stats}");
     }
 }

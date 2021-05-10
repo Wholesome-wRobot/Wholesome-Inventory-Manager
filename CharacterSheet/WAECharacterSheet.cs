@@ -197,7 +197,7 @@ public static class WAECharacterSheet
             }
 
             if ((Ranged.Item.WeightScore < item.WeightScore)
-                && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged))
+                && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged || item.ItemSubType == "Wands"))
             {
                 if (itemTypeIsBanned && item.EquipSelectRoll(Ranged.InventorySlotID, "Until we find a better option"))
                     break;
