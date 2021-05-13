@@ -88,6 +88,7 @@ public class WAEEnums
         { "for all magical spells and effects", CharStat.SpellPower },
         { "Your attacks ignore", CharStat.ArmorPenetrationRating },
         { "Spell Damage", CharStat.SpellPower },
+        { "Spell Critical", CharStat.SpellPenetration },
         // WotLK
         { "Stamina", CharStat.Stamina },
         { "Intellect", CharStat.Intellect },

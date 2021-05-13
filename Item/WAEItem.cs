@@ -8,6 +8,7 @@ using static WAEEnums;
 using wManager;
 using Wholesome_Inventory_Manager.CharacterSheet;
 using System.Text.RegularExpressions;
+using wManager.Wow.Enums;
 
 public class WAEItem
 {
@@ -203,6 +204,9 @@ public class WAEItem
                 {
                     if (l.ToLower().Contains(statEnum.Key.ToLower()))
                     {
+                        if (ObjectManager.Me.WowClass != WoWClass.Druid && l.Contains("Cat, Bear"))
+                            continue;
+
                         string line = l.Replace(".", ",").Replace("(", "").Replace(")", "");
 
                         if (line.Contains("and damage done"))
@@ -435,13 +439,14 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        if (ItemSubType == "" || !ItemSkillsDictionary.ContainsKey(ItemSubType)
-            && ItemSubType != "Miscellaneous")
+        if (ItemSubType == "" 
+            || !Conditions.InGameAndConnectedAndProductStartedNotInPause
+            || (!ItemSkillsDictionary.ContainsKey(ItemSubType) && ItemSubType != "Miscellaneous"))
             return false;
 
         bool skillCheckOK = ItemSubType == "Miscellaneous" 
             || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
-            || ItemSubType == "Fist Weapons" && Skill.Has(wManager.Wow.Enums.SkillLine.FistWeapons);
+            || ItemSubType == "Fist Weapons" && Skill.Has(SkillLine.FistWeapons);
         
         return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < _maxNbEquipAttempts;
     }

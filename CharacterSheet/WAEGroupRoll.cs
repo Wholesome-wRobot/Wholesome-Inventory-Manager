@@ -24,6 +24,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
                 if (itemLink.Length < 10)
                 {
                     Logger.LogDebug($"Couldn't get item link of roll {rollId}, skipping");
+                    RollList.Remove(rollId);
                     continue;
                 }
 

@@ -1,4 +1,6 @@
-﻿public class WAECharacterSheetSlot
+﻿using wManager.Wow.Helpers;
+
+public class WAECharacterSheetSlot
 {
     public WAEItem Item { get; set; }
     public int InventorySlotID { get; set; }
@@ -12,7 +14,10 @@
 
     public void RefreshItem()
     {
-        string itemLink = WAECharacterSheet.AllItemLinks[InventorySlotID];
-        Item = itemLink != "null" ? new WAEItem(itemLink) : null;
+        if (Conditions.InGameAndConnectedAndProductStartedNotInPause)
+        {
+            string itemLink = WAECharacterSheet.AllItemLinks[InventorySlotID];
+            Item = itemLink != "null" ? new WAEItem(itemLink) : null;
+        }
     }
 }

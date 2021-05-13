@@ -7,6 +7,12 @@ using wManager.Wow.Helpers;
 
 public class ToolBox
 {
+    public static void AddToDoNotSellList(string itemName)
+    {
+        if (!wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))
+            wManagerSetting.CurrentSetting.DoNotSellList.Add(itemName);
+    }
+
     public static void Restart()
     {
         new Thread(() =>
@@ -15,12 +21,6 @@ public class ToolBox
             ToolBox.Sleep(2000);
             Products.ProductStart();
         }).Start();
-    }
-    
-    public static void AddToDoNotSellList(string itemName)
-    {
-        if (!wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))
-            wManagerSetting.CurrentSetting.DoNotSellList.Add(itemName);
     }
 
     public static void RemoveFromDoNotSellList(string itemName)
