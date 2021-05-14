@@ -143,7 +143,8 @@ public class WAEEnums
         { "Cloth", SkillLine.Cloth },
         { "Leather", SkillLine.Leather },
         { "Mail", SkillLine.Mail },
-        { "Plate", SkillLine.PlateMail }
+        { "Plate", SkillLine.PlateMail },
+        { "Librams", SkillLine.None },
     };
 
     public static List<SkillLine> OneHanders { get; set; } = new List<SkillLine>()
