@@ -24,7 +24,7 @@ public static class WAEContainers
 
             WAELootFilter.ProtectFromFilter(newBag.ItemLink);
             Lua.LuaDoString($"EquipPendingItem(0);");
-            Lua.LuaDoString($"StaticPopup1Button1:Click()");
+            //Lua.LuaDoString($"StaticPopup1Button1:Click()");
         }
         Scan();
     }
@@ -174,7 +174,7 @@ public static class WAEContainers
                                 bestAmmoContainerInBags.MoveToBag(availableSpot);
 
                                 Lua.LuaDoString($"EquipPendingItem(0);");
-                                Lua.LuaDoString($"StaticPopup1Button1:Click()");
+                                //Lua.LuaDoString($"StaticPopup1Button1:Click()");
                                 WAELootFilter.ProtectFromFilter(bestAmmoContainerInBags.ItemLink);
 
                                 Scan();
@@ -219,7 +219,7 @@ public static class WAEContainers
                         biggestBag.MoveToBag(availableSpot);
 
                         Lua.LuaDoString($"EquipPendingItem(0);");
-                        Lua.LuaDoString($"StaticPopup1Button1:Click()");
+                        //Lua.LuaDoString($"StaticPopup1Button1:Click()");
                         WAELootFilter.ProtectFromFilter(biggestBag.ItemLink);
 
                         Scan();

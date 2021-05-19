@@ -196,8 +196,7 @@ public static class WAECharacterSheet
                     break;
             }
 
-            if ((Ranged.Item.WeightScore < item.WeightScore)
-                && (noAmmoForMyCurrentRanged || AutoEquipSettings.CurrentSettings.SwitchRanged || item.ItemSubType == "Wands"))
+            if (Ranged.Item.WeightScore < item.WeightScore)
             {
                 if (itemTypeIsBanned && item.EquipSelectRoll(Ranged.InventorySlotID, "Until we find a better option"))
                     break;
@@ -295,6 +294,7 @@ public static class WAECharacterSheet
         // Swap if both ideal are One Hand/Main Hand
         if (idealMainhand != null
             && secondChoiceMainhand != null
+            && secondChoiceMainhand.WeightScore > idealMainhand.WeightScore
             && idealMainhand.ItemLink != secondChoiceMainhand.ItemLink
             && idealMainhand.ItemEquipLoc == "INVTYPE_WEAPON"
             && secondChoiceMainhand.ItemEquipLoc == "INVTYPE_WEAPONMAINHAND")

@@ -399,7 +399,7 @@ public class WAEItem
             DropInInventory(slotId);
             ToolBox.Sleep(100);
             Lua.LuaDoString($"EquipPendingItem(0);");
-            Lua.LuaDoString($"StaticPopup1Button1:Click()");
+            //Lua.LuaDoString($"StaticPopup1Button1:Click()");
             ToolBox.Sleep(200);
             WAECharacterSheet.Scan();
             WAEContainers.Scan();
