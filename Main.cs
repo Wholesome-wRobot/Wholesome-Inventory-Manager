@@ -18,7 +18,7 @@ public class Main : IPlugin
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.05"; // Must match version in Version.txt
+    public static string version = "2.0.06"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -79,6 +79,9 @@ public class Main : IPlugin
                 {
                     Logger.LogPerformance("--------------------------------------");
                     DateTime dateBegin = DateTime.Now;
+
+                    if (!ToolBox.WEEquipToolTipExists())
+                        LUASetup();
 
                     WAECharacterSheet.Scan();
                     WAEContainers.Scan();
@@ -184,12 +187,24 @@ public class Main : IPlugin
                     WAECharacterSheet.ClassSpec = ClassSpec.DruidRestoration;
                 else
                 {
-                    if (ToolBox.GetTalentRank(2, 5) > 2 // Thick Hide
-                        || ToolBox.GetTalentRank(2, 16) > 0 // Natural Reaction
-                        || ToolBox.GetTalentRank(2, 22) > 0) // Protector of the Pack
-                        WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
-                    else
-                        WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
+                    // TBC FERAL
+                    if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.TBC)
+                    {
+                        if (ToolBox.GetTalentRank(2, 7) > 0) // Feral Charge
+                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
+                        else
+                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
+                    }
+                    // WOTLK FERAL
+                    if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.WOTLK)
+                    {
+                        if (ToolBox.GetTalentRank(2, 5) > 2 // Thick Hide
+                            || ToolBox.GetTalentRank(2, 16) > 0 // Natural Reaction
+                            || ToolBox.GetTalentRank(2, 22) > 0) // Protector of the Pack
+                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
+                        else
+                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
+                    }
                 }
                 break;
 

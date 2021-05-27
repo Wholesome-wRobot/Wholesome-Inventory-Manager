@@ -133,7 +133,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)\$(ProjectName).dll" "C:\Users\Nico\Desktop\$(ProjectName).dll"
 copy /Y "$(TargetDir)\$(ProjectName).dll" "$(SolutionDir)\Compiled\$(ProjectName).dll"
-copy /Y "$(TargetDir)\$(ProjectName).dll" "F:\WoW\WoW TBC\WRobot\WRobot\Plugins\$(ProjectName).dll"</PostBuildEvent>
+copy /Y "$(TargetDir)\$(ProjectName).dll" "F:\WoW\WoW TBC\WRobot\Plugins\$(ProjectName).dll"</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

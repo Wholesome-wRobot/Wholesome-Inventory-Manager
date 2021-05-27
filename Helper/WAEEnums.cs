@@ -144,7 +144,11 @@ public class WAEEnums
         { "Leather", SkillLine.Leather },
         { "Mail", SkillLine.Mail },
         { "Plate", SkillLine.PlateMail },
+        // IGNORE
         { "Librams", SkillLine.None },
+        { "Totems", SkillLine.None },
+        { "Idols", SkillLine.None },
+        { "Sigils", SkillLine.None },
     };
 
     public static List<SkillLine> OneHanders { get; set; } = new List<SkillLine>()

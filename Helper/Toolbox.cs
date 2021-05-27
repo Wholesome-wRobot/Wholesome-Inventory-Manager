@@ -23,6 +23,11 @@ public class ToolBox
         }).Start();
     }
 
+    public static bool WEEquipToolTipExists()
+    {
+        return !Lua.LuaDoString<bool>("return WEquipTooltip == nil;");
+    }
+
     public static void RemoveFromDoNotSellList(string itemName)
     {
         if (wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))
