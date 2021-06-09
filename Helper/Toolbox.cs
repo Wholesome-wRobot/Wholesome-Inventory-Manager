@@ -13,6 +13,18 @@ public class ToolBox
             wManagerSetting.CurrentSetting.DoNotSellList.Add(itemName);
     }
 
+    // Returns whether the player has the debuff passed as a string (ex: Weakened Soul)
+    public static bool HasDebuff(string debuffName, string unitName = "player")
+    {
+        return Lua.LuaDoString<bool>
+            ($@"for i=1,25 do
+                    local n, _, _, _, _  = UnitDebuff('{unitName}',i);
+                    if n == '{debuffName}' then
+                    return true
+                    end
+                end");
+    }
+
     public static void Restart()
     {
         new Thread(() =>

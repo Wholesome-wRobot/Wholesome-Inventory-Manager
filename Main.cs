@@ -18,7 +18,7 @@ public class Main : IPlugin
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.06"; // Must match version in Version.txt
+    public static string version = "2.0.07"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -74,7 +74,6 @@ public class Main : IPlugin
             try
             {
                 if (Conditions.InGameAndConnectedAndProductStartedNotInPause
-                    && ObjectManager.Me.IsAlive
                     && !WAEQuest.SelectingReward)
                 {
                     Logger.LogPerformance("--------------------------------------");
@@ -86,16 +85,22 @@ public class Main : IPlugin
                     WAECharacterSheet.Scan();
                     WAEContainers.Scan();
 
-                    if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipBags)
+                    if (!ObjectManager.Me.InCombatFlagOnly 
+                        && AutoEquipSettings.CurrentSettings.AutoEquipBags
+                        && ObjectManager.Me.IsAlive)
                         WAEContainers.BagEquip();
 
-                    if (!ObjectManager.Me.InCombatFlagOnly && AutoEquipSettings.CurrentSettings.AutoEquipGear)
+                    if (!ObjectManager.Me.InCombatFlagOnly 
+                        && AutoEquipSettings.CurrentSettings.AutoEquipGear
+                        && ObjectManager.Me.IsAlive)
                         WAECharacterSheet.AutoEquip();
 
-                    if (AutoEquipSettings.CurrentSettings.AutoEquipGear)
+                    if (AutoEquipSettings.CurrentSettings.AutoEquipGear
+                        && ObjectManager.Me.IsAlive)
                         WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
 
-                    if (!ObjectManager.Me.InCombatFlagOnly)
+                    if (!ObjectManager.Me.InCombatFlagOnly
+                        && ObjectManager.Me.IsAlive)
                         WAELootFilter.FilterLoot();
 
                     WAEGroupRoll.CheckLootRoll();

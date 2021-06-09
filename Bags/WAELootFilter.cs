@@ -36,7 +36,13 @@ public class WAELootFilter
 
             // Skip quest
             if (item.ItemType == "Quest"
-                || item.ItemSubType == "Quest")
+                || item.ItemSubType == "Quest"
+                || item.ItemType == "Key"
+                || item.ItemSubType == "Key")
+                continue;
+
+            // Value
+            if (ToolBox.GetWoWVersion() > ToolBox.WoWVersion.TBC && item.ItemSellPrice == 0 && !AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue)
                 continue;
 
             // Rarity
@@ -70,10 +76,6 @@ public class WAELootFilter
                 continue;
             }
             else if (item.ItemRarity == 3 && AutoEquipSettings.CurrentSettings.KeepBlue)
-                continue;
-
-            // Value
-            if (item.ItemSellPrice == 0 && !AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue)
                 continue;
 
             if (item.ItemSellPrice < valueThresholdInCopper)
