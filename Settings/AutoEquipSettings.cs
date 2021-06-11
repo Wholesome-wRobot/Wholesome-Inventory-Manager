@@ -63,7 +63,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     public AutoEquipSettings()
     {
-        FirstLaunch = true;
+        FirstLaunch = true; 
         AutoDetectStatWeights = true;
         LogItemInfo = false;
 
