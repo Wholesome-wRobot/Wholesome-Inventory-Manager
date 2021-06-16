@@ -337,7 +337,7 @@ public static class WAECharacterSheet
 
         float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
         float finalScoreSecondChoice2hands = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
-        
+        /*
         if (AutoEquipSettings.CurrentSettings.LogItemInfo)
         {
             Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
@@ -346,7 +346,7 @@ public static class WAECharacterSheet
             Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
             Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
         }
-        
+        */
 
         if (finalScoreDualWield > currentCombinedWeaponsScore
             || finalScore2hands > currentCombinedWeaponsScore)
