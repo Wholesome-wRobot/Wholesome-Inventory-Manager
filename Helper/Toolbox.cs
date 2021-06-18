@@ -4,9 +4,28 @@ using System.Linq;
 using System.Threading;
 using wManager;
 using wManager.Wow.Helpers;
+using static WAEEnums;
 
 public class ToolBox
 {
+    public static bool ImACaster()
+    {
+        return WAECharacterSheet.ClassSpec == ClassSpec.DruidBalance
+            || WAECharacterSheet.ClassSpec == ClassSpec.DruidRestoration
+            || WAECharacterSheet.ClassSpec == ClassSpec.MageArcane
+            || WAECharacterSheet.ClassSpec == ClassSpec.MageFire
+            || WAECharacterSheet.ClassSpec == ClassSpec.MageFrost
+            || WAECharacterSheet.ClassSpec == ClassSpec.PaladinHoly
+            || WAECharacterSheet.ClassSpec == ClassSpec.PriestDiscipline
+            || WAECharacterSheet.ClassSpec == ClassSpec.PriestHoly
+            || WAECharacterSheet.ClassSpec == ClassSpec.PriestShadow
+            || WAECharacterSheet.ClassSpec == ClassSpec.ShamanElemental
+            || WAECharacterSheet.ClassSpec == ClassSpec.ShamanRestoration
+            || WAECharacterSheet.ClassSpec == ClassSpec.WarlockAffliction
+            || WAECharacterSheet.ClassSpec == ClassSpec.WarlockDemonology
+            || WAECharacterSheet.ClassSpec == ClassSpec.WarlockDestruction;
+    }
+
     public static void AddToDoNotSellList(string itemName)
     {
         if (!wManagerSetting.CurrentSetting.DoNotSellList.Contains(itemName))

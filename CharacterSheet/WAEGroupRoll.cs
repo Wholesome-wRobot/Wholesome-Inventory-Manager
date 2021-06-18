@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using wManager.Wow.Helpers;
+using wManager.Wow.ObjectManager;
 
 namespace Wholesome_Inventory_Manager.CharacterSheet
 {
@@ -53,7 +54,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
                     // Weapons
                     if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
                     || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
-                    || itemToRoll.ItemSubType == "Miscellaneous")
+                    || (itemToRoll.ItemSubType == "Miscellaneous" && ToolBox.ImACaster()))
                         WAECharacterSheet.AutoEquipWeapons();
 
                     // Ranged
