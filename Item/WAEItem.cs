@@ -112,7 +112,6 @@ public class WAEItem
                 RecordStatsWotLK();
             }
 
-
             WAEItemDB.Add(this);
             if (AutoEquipSettings.CurrentSettings.LogItemInfo)
                 LogItemInfo();
@@ -199,7 +198,7 @@ public class WAEItem
                 && !l.Contains("Binds")
                 && !l.Contains("Unique"))
             {
-                // Loof for item stats
+                // Look for item stats
                 foreach (KeyValuePair<string, CharStat> statEnum in StatEnums)
                 {
                     if (l.ToLower().Contains(statEnum.Key.ToLower()))
@@ -319,6 +318,8 @@ public class WAEItem
 
     private void RecordWeightScore()
     {
+        AdjustDPSScore();
+
         foreach (KeyValuePair<string, float> entry in ItemStats)
         {
             if (StatEnums.ContainsKey(entry.Key))
@@ -327,7 +328,39 @@ public class WAEItem
                 WeightScore += entry.Value * AutoEquipSettings.CurrentSettings.GetStat(statEnum);
             }
         }
+
         WeightScore += ItemLevel;
+    }
+
+    private void AdjustDPSScore()
+    {
+        if (ItemStats.ContainsKey("Damage Per Second"))
+        {
+            WoWClass myClass = ObjectManager.Me.WowClass;
+
+            // Ranged weapons
+            if (ItemEquipLoc == "INVTYPE_RANGEDRIGHT"
+                || ItemEquipLoc == "INVTYPE_RANGED"
+                || ItemEquipLoc == "INVTYPE_THROWN")
+            {
+                if (myClass == WoWClass.Druid
+                    || myClass == WoWClass.Rogue
+                    || myClass == WoWClass.Warrior)
+                {
+                    Logger.LogDebug($"Adjusting {Name} DPS ({ItemStats["Damage Per Second"]}) to {ItemStats["Damage Per Second"] / 20}");
+                    ItemStats["Damage Per Second"] = ItemStats["Damage Per Second"]/20;
+                }
+            }
+            // Melee weapons
+            else
+            {
+                if (myClass == WoWClass.Hunter)
+                {
+                    Logger.LogDebug($"Adjusting {Name} DPS ({ItemStats["Damage Per Second"]}) to {ItemStats["Damage Per Second"] / 20}");
+                    ItemStats["Damage Per Second"] = ItemStats["Damage Per Second"] / 20;
+                }
+            }
+        }
     }
 
     public float GetOffHandWeightScore()
