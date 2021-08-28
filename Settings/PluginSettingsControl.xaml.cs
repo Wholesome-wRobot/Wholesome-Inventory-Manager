@@ -31,6 +31,7 @@ namespace Wholesome_Inventory_Manager.Settings
             EquipGuns.IsChecked = AutoEquipSettings.CurrentSettings.EquipGuns;
             EquipCrossbows.IsChecked = AutoEquipSettings.CurrentSettings.EquipCrossbows;
             SwitchRanged.IsChecked = AutoEquipSettings.CurrentSettings.SwitchRanged;
+            EquipAmmo.IsChecked = AutoEquipSettings.CurrentSettings.EquipAmmo;
 
             EquipOneHanders.IsChecked = AutoEquipSettings.CurrentSettings.EquipOneHanders;
             EquipTwoHanders.IsChecked = AutoEquipSettings.CurrentSettings.EquipTwoHanders;
@@ -115,6 +116,12 @@ namespace Wholesome_Inventory_Manager.Settings
         private void SwitchRangedChanged(object sender, RoutedEventArgs e)
         {
             AutoEquipSettings.CurrentSettings.SwitchRanged = (bool)SwitchRanged.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void EquipAmmoChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.EquipAmmo = (bool)EquipAmmo.IsChecked;
             AutoEquipSettings.CurrentSettings.Save();
         }
 

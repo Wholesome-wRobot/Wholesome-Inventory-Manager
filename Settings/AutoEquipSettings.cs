@@ -28,6 +28,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     public bool EquipBows { get; set; }
     public bool EquipCrossbows { get; set; }
     public bool EquipGuns { get; set; }
+    public bool EquipAmmo { get; set; }
     // Bags
     public bool AutoEquipBags { get; set; }
     public bool EquipQuiver { get; set; }
@@ -106,6 +107,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         EquipBows = true;
         EquipCrossbows = true;
         EquipGuns = true;
+        EquipAmmo = true;
 
         EquipOneHanders = true;
         EquipTwoHanders = true;

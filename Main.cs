@@ -18,7 +18,7 @@ public class Main : IPlugin
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.10"; // Must match version in Version.txt
+    public static string version = "2.0.11"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -95,7 +95,7 @@ public class Main : IPlugin
                         && ObjectManager.Me.IsAlive)
                         WAECharacterSheet.AutoEquip();
 
-                    if (AutoEquipSettings.CurrentSettings.AutoEquipGear
+                    if (AutoEquipSettings.CurrentSettings.EquipAmmo
                         && ObjectManager.Me.IsAlive)
                         WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
 
