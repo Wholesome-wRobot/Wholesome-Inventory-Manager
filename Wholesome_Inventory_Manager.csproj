@@ -43,12 +43,8 @@
       <HintPath>packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
-    </Reference>
-    <Reference Include="MemoryRobot">
-      <HintPath>F:\WoW\WoW Wotlk\WRobot WOTLK\Bin\MemoryRobot.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="MahApps.Metro">
+      <HintPath>Dependencies\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="MoreLinq, Version=3.3.2.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
       <HintPath>packages\morelinq.3.3.2\lib\net451\MoreLinq.dll</HintPath>
@@ -57,8 +53,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="robotManager">
-      <HintPath>F:\WoW\WoW Wotlk\WRobot WOTLK\Bin\robotManager.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>Dependencies\robotManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -85,7 +80,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="wManager">
-      <HintPath>F:\WoW\WoW Wotlk\WRobot WOTLK\Bin\wManager.dll</HintPath>
+      <HintPath>Dependencies\wManager.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
