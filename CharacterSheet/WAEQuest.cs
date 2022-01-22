@@ -13,13 +13,13 @@ public class WAEQuest
         if (!AutoEquipSettings.CurrentSettings.AutoSelectQuestRewards)
             return;
 
-        cancelable.Cancel = true;
-        SelectingReward = true;
-
         int nbQuestRewards = Lua.LuaDoString<int>("return GetNumQuestChoices()");
 
         if (nbQuestRewards > 0 && QuestRewardGossipOpen)
         {
+            SelectingReward = true;
+            cancelable.Cancel = true;
+
             List<WAEItem> itemRewards = new List<WAEItem>();
             for (int i = 1; i <= nbQuestRewards; i++)
             {
@@ -75,10 +75,11 @@ public class WAEQuest
                 if (QuestRewardReceived(itemRewards) != null)
                     Logger.Log($"Selected quest reward {QuestRewardReceived(itemRewards).Name} because it has the highest sell value");
             }
+
+            SelectingReward = false;
+            QuestRewardGossipOpen = false;
         }
 
-        SelectingReward = false;
-        QuestRewardGossipOpen = false;
     }
 
     private static WAEItem QuestRewardReceived(List<WAEItem> itemRewards)
