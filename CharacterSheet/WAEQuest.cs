@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 
 public class WAEQuest
@@ -37,22 +38,37 @@ public class WAEQuest
                 if (item.ItemEquipLoc != "" && item.ItemSubType != "Bag")
                 {
                     // Weapons
-                    if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
-                        || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[item.ItemSubType])
-                        || item.ItemSubType == "Miscellaneous")
-                        WAECharacterSheet.AutoEquipWeapons();
+                    if (WAEEnums.ItemSkillsDictionary.TryGetValue(item.ItemSubType, out SkillLine skillLine))
+                    {
+                        if (WAEEnums.TwoHanders.Contains(skillLine)
+                            || WAEEnums.OneHanders.Contains(skillLine)
+                            || item.ItemSubType == "Miscellaneous")
+                        {
+                            WAECharacterSheet.AutoEquipWeapons();
+                            continue;
+                        }
+                    }
 
                     // Ranged
                     if (WAECharacterSheet.Ranged.InvTypes.Contains(item.ItemEquipLoc))
+                    {
                         WAECharacterSheet.AutoEquipRanged();
+                        continue;
+                    }
 
                     // Trinket
                     if (item.ItemEquipLoc == "INVTYPE_TRINKET")
+                    {
                         WAECharacterSheet.AutoEquipTrinkets();
+                        continue;
+                    }
 
                     // Ring
                     if (item.ItemEquipLoc == "INVTYPE_FINGER")
+                    {
                         WAECharacterSheet.AutoEquipRings();
+                        continue;
+                    }
 
                     // Armor
                     foreach (WAECharacterSheetSlot armorSlot in WAECharacterSheet.ArmorSlots)

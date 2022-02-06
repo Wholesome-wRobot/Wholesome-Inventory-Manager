@@ -18,7 +18,7 @@ public class Main : IPlugin
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.12"; // Must match version in Version.txt
+    public static string version = "2.0.13"; // Must match version in Version.txt
 
     public void Initialize()
     {
