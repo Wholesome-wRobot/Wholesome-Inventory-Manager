@@ -13,12 +13,13 @@ public class Main : IPlugin
     public static string PluginName = "Wholesome Inventory Manager";
     public static bool isLaunched;
     private readonly BackgroundWorker detectionPulse = new BackgroundWorker();
+    public static object WAELock = new object();
 
     public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.13"; // Must match version in Version.txt
+    public static string version = "2.0.14"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -73,39 +74,41 @@ public class Main : IPlugin
         {
             try
             {
-                if (Conditions.InGameAndConnectedAndProductStartedNotInPause
-                    && !WAEQuest.SelectingReward)
+                if (Conditions.InGameAndConnectedAndProductStartedNotInPause)
                 {
-                    Logger.LogPerformance("--------------------------------------");
-                    DateTime dateBegin = DateTime.Now;
+                    lock (WAELock)
+                    {
+                        Logger.LogPerformance("--------------------------------------");
+                        DateTime dateBegin = DateTime.Now;
 
-                    if (!ToolBox.WEEquipToolTipExists())
-                        LUASetup();
+                        if (!ToolBox.WEEquipToolTipExists())
+                            LUASetup();
 
-                    WAECharacterSheet.Scan();
-                    WAEContainers.Scan();
+                        WAECharacterSheet.Scan();
+                        WAEContainers.Scan();
 
-                    if (!ObjectManager.Me.InCombatFlagOnly 
-                        && AutoEquipSettings.CurrentSettings.AutoEquipBags
-                        && ObjectManager.Me.IsAlive)
-                        WAEContainers.BagEquip();
+                        if (!ObjectManager.Me.InCombatFlagOnly
+                            && AutoEquipSettings.CurrentSettings.AutoEquipBags
+                            && ObjectManager.Me.IsAlive)
+                            WAEContainers.BagEquip();
 
-                    if (!ObjectManager.Me.InCombatFlagOnly 
-                        && AutoEquipSettings.CurrentSettings.AutoEquipGear
-                        && ObjectManager.Me.IsAlive)
-                        WAECharacterSheet.AutoEquip();
+                        if (!ObjectManager.Me.InCombatFlagOnly
+                            && AutoEquipSettings.CurrentSettings.AutoEquipGear
+                            && ObjectManager.Me.IsAlive)
+                            WAECharacterSheet.AutoEquip();
 
-                    if (AutoEquipSettings.CurrentSettings.EquipAmmo
-                        && ObjectManager.Me.IsAlive)
-                        WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
+                        if (AutoEquipSettings.CurrentSettings.EquipAmmo
+                            && ObjectManager.Me.IsAlive)
+                            WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
 
-                    if (!ObjectManager.Me.InCombatFlagOnly
-                        && ObjectManager.Me.IsAlive)
-                        WAELootFilter.FilterLoot();
+                        if (!ObjectManager.Me.InCombatFlagOnly
+                            && ObjectManager.Me.IsAlive)
+                            WAELootFilter.FilterLoot();
 
-                    WAEGroupRoll.CheckLootRoll();
+                        WAEGroupRoll.CheckLootRoll();
 
-                    Logger.LogPerformance($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                        Logger.LogPerformance($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
+                    }
                 }
             }
             catch (Exception arg)

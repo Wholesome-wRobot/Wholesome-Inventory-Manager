@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
-using System.Linq;
-using wManager.Wow.Helpers;
 using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using Wholesome_Inventory_Manager.CharacterSheet;
+using wManager;
+using wManager.Wow.Enums;
+using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
-using wManager;
-using Wholesome_Inventory_Manager.CharacterSheet;
-using System.Text.RegularExpressions;
-using wManager.Wow.Enums;
 
 public class WAEItem
 {
@@ -33,7 +33,7 @@ public class WAEItem
     public int InBagSlot { get; set; } = -1;
     public double UniqueId { get; set; }
     public float WeightScore { get; set; } = 0;
-    public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>(){};
+    public Dictionary<string, float> ItemStats { get; set; } = new Dictionary<string, float>() { };
     public float WeaponSpeed { get; set; } = 0;
     public int RewardSlot { get; set; } = -1;
     public int RollId { get; set; } = -1;
@@ -41,10 +41,10 @@ public class WAEItem
 
     private static int UniqueIdCounter = 0;
 
-    public WAEItem(string itemLink, 
-        int rewardSlot = -1, 
-        int rollId = -1, 
-        int inBag = -1, 
+    public WAEItem(string itemLink,
+        int rewardSlot = -1,
+        int rollId = -1,
+        int inBag = -1,
         int inBagSlot = -1)
     {
         UniqueId = ++UniqueIdCounter;
@@ -190,11 +190,11 @@ public class WAEItem
         foreach (string l in allLines)
         {
             bool lineRecorded = false;
-            if (l.Length > 0 
-                && l != "r" 
-                && !l.Contains("Socket") 
-                && !l.Contains("Requires") 
-                && !l.Contains(Name) 
+            if (l.Length > 0
+                && l != "r"
+                && !l.Contains("Socket")
+                && !l.Contains("Requires")
+                && !l.Contains(Name)
                 && !l.Contains("Binds")
                 && !l.Contains("Unique"))
             {
@@ -348,7 +348,7 @@ public class WAEItem
                     || myClass == WoWClass.Warrior)
                 {
                     Logger.LogDebug($"Adjusting {Name} DPS ({ItemStats["Damage Per Second"]}) to {ItemStats["Damage Per Second"] / 20}");
-                    ItemStats["Damage Per Second"] = ItemStats["Damage Per Second"]/20;
+                    ItemStats["Damage Per Second"] = ItemStats["Damage Per Second"] / 20;
                 }
             }
             // Melee weapons
@@ -472,15 +472,15 @@ public class WAEItem
 
     public bool CanEquip()
     {
-        if (ItemSubType == "" 
+        if (ItemSubType == ""
             || !Conditions.InGameAndConnectedAndProductStartedNotInPause
             || (!ItemSkillsDictionary.ContainsKey(ItemSubType) && ItemSubType != "Miscellaneous"))
             return false;
 
-        bool skillCheckOK = ItemSubType == "Miscellaneous" 
+        bool skillCheckOK = ItemSubType == "Miscellaneous"
             || WAECharacterSheet.MySkills.ContainsKey(ItemSubType) && WAECharacterSheet.MySkills[ItemSubType] > 0
             || ItemSubType == "Fist Weapons" && Skill.Has(SkillLine.FistWeapons);
-        
+
         return ObjectManager.Me.Level >= ItemMinLevel && skillCheckOK && GetNbEquipAttempts() < _maxNbEquipAttempts;
     }
 

@@ -231,6 +231,7 @@ public static class WAECharacterSheet
                 if (Ammo.Item == null
                     || Ammo.Item.ItemMinLevel > item.ItemMinLevel
                     || Ammo.Item.ItemSubType != item.ItemSubType
+                    || !potentialAmmo.Exists(pa => pa.Name == Ammo.Item.Name)
                     || !WAEContainers.AllItems.Exists(i => i.ItemId == item.ItemId))
                 {
                     string reason = Ammo.Item == null ? "Nothing equipped in this slot" : $"Replacing {Ammo.Item.Name} ({Ammo.Item.WeightScore})";
