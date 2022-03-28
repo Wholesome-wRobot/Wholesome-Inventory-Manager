@@ -378,7 +378,7 @@ public class WAEItem
         Logger.Log($"Deleting {Name} ({reason})");
         Lua.LuaDoString($"PickupContainerItem({InBag}, {InBagSlot});");
         Lua.LuaDoString("DeleteCursorItem();");
-        ToolBox.Sleep(100);
+        ToolBox.Sleep(200);
     }
 
     public void Use()
