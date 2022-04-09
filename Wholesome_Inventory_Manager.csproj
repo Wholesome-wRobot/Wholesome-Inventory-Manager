@@ -84,7 +84,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WholesomeToolbox">
       <HintPath>Dependencies\WholesomeToolbox.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="wManager">
