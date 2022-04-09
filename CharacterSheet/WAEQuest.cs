@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using WholesomeToolbox;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 
@@ -15,7 +16,7 @@ public class WAEQuest
             if (!AutoEquipSettings.CurrentSettings.AutoSelectQuestRewards)
                 return;
 
-            int nbQuestRewards = Lua.LuaDoString<int>("return GetNumQuestChoices()");
+            int nbQuestRewards = WTGossip.NbQuestChoices;
 
             if (nbQuestRewards > 0 && QuestRewardGossipOpen)
             {

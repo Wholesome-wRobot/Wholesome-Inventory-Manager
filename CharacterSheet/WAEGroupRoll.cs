@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using wManager.Wow.Helpers;
-using wManager.Wow.ObjectManager;
 
 namespace Wholesome_Inventory_Manager.CharacterSheet
 {
@@ -93,7 +92,7 @@ namespace Wholesome_Inventory_Manager.CharacterSheet
         {
             int waitTime = 1000 + new Random().Next(1, 3000);
             string adjustedReason = reason == "" ? "" : $"[{reason}]";
- 
+
             if (rollType == RollType.PASS)
             {
                 Logger.Log($"Rolling PASS in {waitTime}ms for {itemToRoll.Name} {adjustedReason}");

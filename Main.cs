@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Wholesome_Inventory_Manager.CharacterSheet;
+using WholesomeToolbox;
 using wManager.Plugin;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
@@ -19,7 +20,7 @@ public class Main : IPlugin
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.15"; // Must match version in Version.txt
+    public static string version = "2.0.16"; // Must match version in Version.txt
 
     public void Initialize()
     {
@@ -171,34 +172,34 @@ public class Main : IPlugin
         switch (ObjectManager.Me.WowClass)
         {
             case (WoWClass.Warlock):
-                if (ToolBox.GetSpec() == 2)
+                if (WTTalent.GetSpec() == 2)
                     WAECharacterSheet.ClassSpec = ClassSpec.WarlockDemonology;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.WarlockDestruction;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.WarlockAffliction;
                 break;
 
             case (WoWClass.DeathKnight):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightBloodDPS;
-                else if (ToolBox.GetSpec() == 2)
+                else if (WTTalent.GetSpec() == 2)
                     WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightFrostDPS;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightUnholy;
                 break;
 
             case (WoWClass.Druid):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.DruidBalance;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.DruidRestoration;
                 else
                 {
                     // TBC FERAL
                     if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.TBC)
                     {
-                        if (ToolBox.GetTalentRank(2, 7) > 0) // Feral Charge
+                        if (WTTalent.GetTalentRank(2, 7) > 0) // Feral Charge
                             WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
                         else
                             WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
@@ -206,9 +207,9 @@ public class Main : IPlugin
                     // WOTLK FERAL
                     if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.WOTLK)
                     {
-                        if (ToolBox.GetTalentRank(2, 5) > 2 // Thick Hide
-                            || ToolBox.GetTalentRank(2, 16) > 0 // Natural Reaction
-                            || ToolBox.GetTalentRank(2, 22) > 0) // Protector of the Pack
+                        if (WTTalent.GetTalentRank(2, 5) > 2 // Thick Hide
+                            || WTTalent.GetTalentRank(2, 16) > 0 // Natural Reaction
+                            || WTTalent.GetTalentRank(2, 22) > 0) // Protector of the Pack
                             WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
                         else
                             WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
@@ -217,63 +218,63 @@ public class Main : IPlugin
                 break;
 
             case (WoWClass.Hunter):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.HunterBeastMastery;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.HunterSurvival;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.HunterMarksman;
                 break;
 
             case (WoWClass.Mage):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.MageArcane;
-                else if (ToolBox.GetSpec() == 2)
+                else if (WTTalent.GetSpec() == 2)
                     WAECharacterSheet.ClassSpec = ClassSpec.MageFire;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.MageFrost;
                 break;
 
             case (WoWClass.Paladin):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.PaladinHoly;
-                else if (ToolBox.GetSpec() == 2)
+                else if (WTTalent.GetSpec() == 2)
                     WAECharacterSheet.ClassSpec = ClassSpec.PaladinProtection;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.PaladinRetribution;
                 break;
 
             case (WoWClass.Priest):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.PriestDiscipline;
-                else if (ToolBox.GetSpec() == 2)
+                else if (WTTalent.GetSpec() == 2)
                     WAECharacterSheet.ClassSpec = ClassSpec.PriestHoly;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.PriestShadow;
                 break;
 
             case (WoWClass.Rogue):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.RogueAssassination;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.RogueSubtelty;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.RogueCombat;
                 break;
 
             case (WoWClass.Shaman):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.ShamanElemental;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.ShamanRestoration;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.ShamanEnhancement;
                 break;
 
             case (WoWClass.Warrior):
-                if (ToolBox.GetSpec() == 1)
+                if (WTTalent.GetSpec() == 1)
                     WAECharacterSheet.ClassSpec = ClassSpec.WarriorArms;
-                else if (ToolBox.GetSpec() == 3)
+                else if (WTTalent.GetSpec() == 3)
                     WAECharacterSheet.ClassSpec = ClassSpec.WarriorTank;
                 else
                     WAECharacterSheet.ClassSpec = ClassSpec.WarriorFury;

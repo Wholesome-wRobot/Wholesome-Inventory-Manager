@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using WholesomeToolbox;
 using wManager.Wow.Class;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
@@ -455,7 +456,7 @@ public static class WAECharacterSheet
             DualWield = new Spell("Dual Wield");
 
         if (!KnowTitansGrip && ClassSpec == ClassSpec.WarriorFury)
-            KnowTitansGrip = ToolBox.GetTalentRank(2, 27) > 0;
+            KnowTitansGrip = WTTalent.GetTalentRank(2, 27) > 0;
     }
 
     public static void RecordKnownSkills()
