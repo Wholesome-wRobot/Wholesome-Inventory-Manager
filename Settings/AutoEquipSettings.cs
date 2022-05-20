@@ -8,8 +8,7 @@ using static WAEEnums;
 
 [Serializable]
 public class AutoEquipSettings : robotManager.Helpful.Settings
-{
-    public static AutoEquipSettings CurrentSettings { get; set; }
+{    public static AutoEquipSettings CurrentSettings { get; set; }
     public bool FirstLaunch { get; set; }
     public List<StatWeight> StatWeights { get; set; }
     public ClassSpec SpecSelectedByUser { get; set; }
@@ -62,7 +61,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     public double LastUpdateDate { get; set; }
 
-    public AutoEquipSettings()
+    internal AutoEquipSettings()
     {
         FirstLaunch = true; 
         AutoDetectStatWeights = true;
@@ -186,7 +185,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         }
     }
 
-    public static bool Load()
+    internal static bool Load()
     {
         try
         {

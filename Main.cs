@@ -1,31 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Wholesome_Inventory_Manager.CharacterSheet;
-using WholesomeToolbox;
+﻿using Wholesome_Inventory_Manager.Managers.Bags;
+using Wholesome_Inventory_Manager.Managers.CharacterSheet;
+using Wholesome_Inventory_Manager.Managers.Filter;
+using Wholesome_Inventory_Manager.Managers.Items;
+using Wholesome_Inventory_Manager.Managers.Quest;
+using Wholesome_Inventory_Manager.Managers.Roll;
 using wManager.Plugin;
-using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
-using wManager.Wow.ObjectManager;
-using static WAEEnums;
 
 public class Main : IPlugin
 {
     public static string PluginName = "Wholesome Inventory Manager";
-    public static bool isLaunched;
-    private readonly BackgroundWorker detectionPulse = new BackgroundWorker();
-    public static object WAELock = new object();
-
-    public static Dictionary<string, bool> WantedItemType = new Dictionary<string, bool>();
+    public static string version = "2.0.18"; // Must match version in Version.txt
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
-    public static string version = "2.0.18"; // Must match version in Version.txt
+    private IEquipManager _equipManager;
+    private IRollManager _rollManager;
+    private ISkillsManager _skillsManager;
+    private ICharacterSheetManager _characterSheetManager;
+    private IWIMContainers _containers;
+    private ILootFilter _lootFilter;
+    private IQuestRewardManager _questRewardManager;
 
     public void Initialize()
     {
-        isLaunched = true;
-
+        ClassSpecManager.Initialize();
         AutoEquipSettings.Load();
 
         if (AutoUpdater.CheckUpdate(version))
@@ -37,89 +36,37 @@ public class Main : IPlugin
 
         Logger.Log($"Launching version {version} on client {WoWVersion}");
 
-        AutoDetectMyClassSpec();
-        LoadWantedItemTypesList();
-        WAECharacterSheet.RecordKnownSkills();
-
-        detectionPulse.DoWork += BackGroundPulse;
-        detectionPulse.RunWorkerAsync();
-
-        EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => AutoDetectMyClassSpec());
-        EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => WAECharacterSheet.RecordKnownSkills());
-        EventsLua.AttachEventLua("QUEST_COMPLETE", e => WAEQuest.QuestRewardGossipOpen = true);
-        EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnLuaEventsWithArgs;
-        wManager.Events.OthersEvents.OnSelectQuestRewardItem += WAEQuest.SelectReward;
+        _skillsManager = new SkillsManager();
+        _skillsManager.Initialize();
+        _characterSheetManager = new CharacterSheetManager();
+        _characterSheetManager.Initialize();
+        _lootFilter = new LootFilter();
+        _lootFilter.Initialize();
+        _containers = new WIMContainers(_characterSheetManager, _lootFilter);
+        _containers.Initialize();
+        _equipManager = new EquipManager(_skillsManager, _characterSheetManager, _containers, _lootFilter);
+        _equipManager.Initialize();
+        _rollManager = new RollManager(_equipManager, _characterSheetManager);
+        _rollManager.Initialize();
+        _questRewardManager = new QuestRewardManager(_equipManager, _characterSheetManager);
+        _questRewardManager.Initialize();
 
         LUASetup();
     }
 
-    private void OnLuaEventsWithArgs(string eventid, List<string> args)
-    {
-        if (eventid == "START_LOOT_ROLL")
-            WAEGroupRoll.RollList.Add(int.Parse(args[0]));
-    }
-
     public void Dispose()
     {
-        detectionPulse.DoWork -= BackGroundPulse;
-        EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnLuaEventsWithArgs;
-        wManager.Events.OthersEvents.OnSelectQuestRewardItem -= WAEQuest.SelectReward;
-        detectionPulse.Dispose();
+        ClassSpecManager.Dispose();
+        _questRewardManager?.Dispose();
+        _rollManager?.Dispose();
+        _equipManager?.Dispose();
+        _containers?.Dispose();
+        _lootFilter?.Dispose();
+        _characterSheetManager?.Dispose();
+        _skillsManager?.Dispose();
         Logger.Log("Disposed");
-        isLaunched = false;
     }
 
-    private void BackGroundPulse(object sender, DoWorkEventArgs args)
-    {
-        while (isLaunched)
-        {
-            try
-            {
-                if (Conditions.InGameAndConnectedAndProductStartedNotInPause)
-                {
-                    lock (WAELock)
-                    {
-                        Logger.LogPerformance("--------------------------------------");
-                        DateTime dateBegin = DateTime.Now;
-
-                        if (!ToolBox.WEEquipToolTipExists())
-                            LUASetup();
-
-                        WAECharacterSheet.Scan();
-                        WAEContainers.Scan();
-
-                        if (!ObjectManager.Me.InCombatFlagOnly
-                            && AutoEquipSettings.CurrentSettings.AutoEquipBags
-                            && ObjectManager.Me.IsAlive)
-                            WAEContainers.BagEquip();
-
-                        if (!ObjectManager.Me.InCombatFlagOnly
-                            && AutoEquipSettings.CurrentSettings.AutoEquipGear
-                            && ObjectManager.Me.IsAlive)
-                            WAECharacterSheet.AutoEquip();
-
-                        if (AutoEquipSettings.CurrentSettings.EquipAmmo
-                            && ObjectManager.Me.IsAlive)
-                            WAECharacterSheet.AutoEquipAmmo(); // Allow ammo switch during fights
-
-                        if (!ObjectManager.Me.InCombatFlagOnly
-                            && ObjectManager.Me.IsAlive)
-                            WAELootFilter.FilterLoot();
-
-                        WAEGroupRoll.CheckLootRoll();
-
-                        Logger.LogPerformance($"Total Process time : {(DateTime.Now.Ticks - dateBegin.Ticks) / 10000} ms");
-                    }
-                }
-            }
-            catch (Exception arg)
-            {
-                Logger.LogError(string.Concat(arg));
-            }
-            ToolBox.Sleep(5000);
-        }
-    }
-    
     public void Settings()
     {
         AutoEquipSettings.Load();
@@ -127,180 +74,34 @@ public class Main : IPlugin
         AutoEquipSettings.CurrentSettings.Save();
     }
 
-    private void LoadWantedItemTypesList()
-    {
-        WantedItemType.Clear();
-        WantedItemType.Add("Bows", AutoEquipSettings.CurrentSettings.EquipBows);
-        WantedItemType.Add("Crossbows", AutoEquipSettings.CurrentSettings.EquipCrossbows);
-        WantedItemType.Add("Guns", AutoEquipSettings.CurrentSettings.EquipGuns);
-        WantedItemType.Add("Thrown", AutoEquipSettings.CurrentSettings.EquipThrown);
-    }
-
     private void LUASetup()
     {
         // Create invisible tooltip to read tooltip info
         Lua.LuaDoString($@"
-            local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
-            local L = L or tip: CreateFontString()
-            local R = R or tip: CreateFontString()
-            L: SetFontObject(GameFontNormal)
-            R: SetFontObject(GameFontNormal)
-            WEquipTooltip: AddFontStrings(L, R)
-            WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")");
+                local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
+                local L = L or tip: CreateFontString()
+                local R = R or tip: CreateFontString()
+                L: SetFontObject(GameFontNormal)
+                R: SetFontObject(GameFontNormal)
+                WEquipTooltip: AddFontStrings(L, R)
+                WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")"
+            );
 
         // Create function to read invisible tooltip lines
         Lua.LuaDoString($@"
-            function EnumerateTooltipLines(...)
-                local result = """"
-                for i = 1, select(""#"", ...) do
-                    local region = select(i, ...)
-                    if region and region:GetObjectType() == ""FontString"" then
-                        local text = region:GetText() or """"
-                        if text ~= """" then
-                            result = result .. ""|"" .. text
+                function EnumerateTooltipLines(...)
+                    local result = """"
+                    for i = 1, select(""#"", ...) do
+                        local region = select(i, ...)
+                        if region and region:GetObjectType() == ""FontString"" then
+                            local text = region:GetText() or """"
+                            if text ~= """" then
+                                result = result .. ""|"" .. text
+                            end
                         end
                     end
-                end
-                return result
-            end");
-    }
-
-    public static void AutoDetectMyClassSpec()
-    {
-        ClassSpec currentSpec = WAECharacterSheet.ClassSpec;
-
-        switch (ObjectManager.Me.WowClass)
-        {
-            case (WoWClass.Warlock):
-                if (WTTalent.GetSpec() == 2)
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockDemonology;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockDestruction;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarlockAffliction;
-                break;
-
-            case (WoWClass.DeathKnight):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightBloodDPS;
-                else if (WTTalent.GetSpec() == 2)
-                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightFrostDPS;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.DeathKnightUnholy;
-                break;
-
-            case (WoWClass.Druid):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.DruidBalance;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.DruidRestoration;
-                else
-                {
-                    // TBC FERAL
-                    if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.TBC)
-                    {
-                        if (WTTalent.GetTalentRank(2, 7) > 0) // Feral Charge
-                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
-                        else
-                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
-                    }
-                    // WOTLK FERAL
-                    if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.WOTLK)
-                    {
-                        if (WTTalent.GetTalentRank(2, 5) > 2 // Thick Hide
-                            || WTTalent.GetTalentRank(2, 16) > 0 // Natural Reaction
-                            || WTTalent.GetTalentRank(2, 22) > 0) // Protector of the Pack
-                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralTank;
-                        else
-                            WAECharacterSheet.ClassSpec = ClassSpec.DruidFeralDPS;
-                    }
-                }
-                break;
-
-            case (WoWClass.Hunter):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.HunterBeastMastery;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.HunterSurvival;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.HunterMarksman;
-                break;
-
-            case (WoWClass.Mage):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.MageArcane;
-                else if (WTTalent.GetSpec() == 2)
-                    WAECharacterSheet.ClassSpec = ClassSpec.MageFire;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.MageFrost;
-                break;
-
-            case (WoWClass.Paladin):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinHoly;
-                else if (WTTalent.GetSpec() == 2)
-                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinProtection;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.PaladinRetribution;
-                break;
-
-            case (WoWClass.Priest):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.PriestDiscipline;
-                else if (WTTalent.GetSpec() == 2)
-                    WAECharacterSheet.ClassSpec = ClassSpec.PriestHoly;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.PriestShadow;
-                break;
-
-            case (WoWClass.Rogue):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.RogueAssassination;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.RogueSubtelty;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.RogueCombat;
-                break;
-
-            case (WoWClass.Shaman):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanElemental;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanRestoration;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.ShamanEnhancement;
-                break;
-
-            case (WoWClass.Warrior):
-                if (WTTalent.GetSpec() == 1)
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorArms;
-                else if (WTTalent.GetSpec() == 3)
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorTank;
-                else
-                    WAECharacterSheet.ClassSpec = ClassSpec.WarriorFury;
-                break;
-
-            default:
-                WAECharacterSheet.ClassSpec = ClassSpec.None;
-                break;
-        }
-        
-        // Update stat weights in case of auto detect
-        if (AutoEquipSettings.CurrentSettings.AutoDetectStatWeights && currentSpec != WAECharacterSheet.ClassSpec)
-        {
-            WAEItemDB.ItemDb.Clear(); // to Rescan all items
-            SettingsPresets.ChangeStatsWeightSettings(WAECharacterSheet.ClassSpec);
-        }
-        
-        // Set other default plugin settings according to detected class for first launch
-        if (AutoEquipSettings.CurrentSettings.FirstLaunch && currentSpec != WAECharacterSheet.ClassSpec)
-        {
-            Logger.Log("First Launch");
-            SettingsPresets.ChangeAutoEquipSetting(WAECharacterSheet.ClassSpec);
-            AutoEquipSettings.CurrentSettings.FirstLaunch = false;
-            AutoEquipSettings.CurrentSettings.Save();
-        }
-
-        AutoEquipSettings.CurrentSettings.SpecSelectedByUser = WAECharacterSheet.ClassSpec;
+                    return result
+                end"
+            );
     }
 }

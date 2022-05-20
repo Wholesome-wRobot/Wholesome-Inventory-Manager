@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Windows;
+using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using static WAEEnums;
 
 namespace Wholesome_Inventory_Manager.Settings
 {
     public partial class PluginSettingsControl
     {
-        public PluginSettingsControl()
+        internal PluginSettingsControl()
         {
             InitializeComponent();
 
             if (AutoEquipSettings.CurrentSettings.SpecSelectedByUser == ClassSpec.None)
-                Main.AutoDetectMyClassSpec();
+            {
+                ClassSpecManager.DetectSpec();
+            }
 
             DiscordLink.RequestNavigate += (sender, e) =>
             {
@@ -224,7 +227,7 @@ namespace Wholesome_Inventory_Manager.Settings
         {
             AutoEquipSettings.CurrentSettings.AutoDetectStatWeights = (bool)AutoDetectStatWeights.IsChecked;
             GroupStats.IsEnabled = !(bool)AutoDetectStatWeights.IsChecked;
-            Main.AutoDetectMyClassSpec();
+            ClassSpecManager.DetectSpec();
             SettingsPresets.ChangeStatsWeightSettings(AutoEquipSettings.CurrentSettings.SpecSelectedByUser);
             UpdateStats();
             AutoEquipSettings.CurrentSettings.Save();

@@ -49,6 +49,9 @@
       <HintPath>packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MemoryRobot">
+      <HintPath>Dependencies\MemoryRobot.dll</HintPath>
+    </Reference>
     <Reference Include="MoreLinq, Version=3.3.2.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
       <HintPath>packages\morelinq.3.3.2\lib\net451\MoreLinq.dll</HintPath>
       <Private>False</Private>
@@ -92,19 +95,34 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bags\WAELootFilter.cs" />
-    <Compile Include="CharacterSheet\WAEGroupRoll.cs" />
-    <Compile Include="CharacterSheet\WAEQuest.cs" />
+    <Compile Include="Managers\Bags\ContainerSlot.cs" />
+    <Compile Include="Managers\Bags\IContainerSlot.cs" />
+    <Compile Include="Managers\Bags\IWIMContainer.cs" />
+    <Compile Include="Managers\Bags\IWIMContainers.cs" />
+    <Compile Include="Managers\Bags\WIMContainer.cs" />
+    <Compile Include="Managers\Bags\WIMContainers.cs" />
+    <Compile Include="Managers\CharacterSheet\CharacterSheetManager.cs" />
+    <Compile Include="Managers\CharacterSheet\ClassSpecManager.cs" />
+    <Compile Include="Managers\CharacterSheet\ICharacterSheetManager.cs" />
+    <Compile Include="Managers\Filter\ILootFilter.cs" />
+    <Compile Include="Managers\Filter\LootFilter.cs" />
+    <Compile Include="Managers\ICycleable.cs" />
+    <Compile Include="Managers\Items\EquipManager.cs" />
+    <Compile Include="Managers\Items\IEquipManager.cs" />
+    <Compile Include="Managers\Quest\IQuestRewardManager.cs" />
+    <Compile Include="Managers\Quest\QuestRewardManager.cs" />
+    <Compile Include="Managers\Roll\IRollManager.cs" />
+    <Compile Include="Managers\CharacterSheet\ISheetSlot.cs" />
+    <Compile Include="Managers\CharacterSheet\ISkillsManager.cs" />
+    <Compile Include="Managers\Items\ItemCache.cs" />
+    <Compile Include="Managers\Items\IWIMItem.cs" />
+    <Compile Include="Managers\Roll\RollManager.cs" />
+    <Compile Include="Managers\CharacterSheet\SheetSlot.cs" />
+    <Compile Include="Managers\CharacterSheet\SkillsManager.cs" />
+    <Compile Include="Managers\Items\WIMItem.cs" />
     <Compile Include="Settings\AutoEquipSettings.cs" />
     <Compile Include="AutoUpdater.cs" />
-    <Compile Include="Bags\WAEContainers.cs" />
-    <Compile Include="CharacterSheet\WAECharacterSheet.cs" />
-    <Compile Include="CharacterSheet\WAECharacterSheetSlot.cs" />
-    <Compile Include="Bags\WAEContainer.cs" />
-    <Compile Include="Bags\WAEContainerSlot.cs" />
     <Compile Include="Helper\WAEEnums.cs" />
-    <Compile Include="Item\WAEItem.cs" />
-    <Compile Include="Item\WAEItemDB.cs" />
     <Compile Include="Helper\Logger.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
