@@ -11,8 +11,8 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         bool IsAmmoPouch { get; }
         bool IsQuiver { get; }
         bool IsOriginalBackpack { get; }
-        List<IContainerSlot> Slots { get; }
-        List<IWIMItem> Items { get; }
+        SynchronizedCollection<IContainerSlot> Slots { get; }
+        SynchronizedCollection<IWIMItem> Items { get; }
 
         void MoveToSlot(int position);
         int GetContainerNbFreeSlots();

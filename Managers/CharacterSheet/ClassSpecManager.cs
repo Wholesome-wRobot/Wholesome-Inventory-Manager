@@ -159,7 +159,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
                 ItemCache.ClearCache(); // to Rescan all items
                 SettingsPresets.ChangeStatsWeightSettings(MySpec);
             }
-
+            
             // Set other default plugin settings according to detected class for first launch
             if (AutoEquipSettings.CurrentSettings.FirstLaunch && initialSpec != MySpec)
             {
@@ -168,7 +168,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
                 AutoEquipSettings.CurrentSettings.FirstLaunch = false;
                 AutoEquipSettings.CurrentSettings.Save();
             }
-            
+
             AutoEquipSettings.CurrentSettings.SpecSelectedByUser = MySpec;
         }
 

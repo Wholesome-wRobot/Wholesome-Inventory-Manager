@@ -12,17 +12,16 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         public bool IsQuiver { get; private set; }
         public bool IsOriginalBackpack { get; private set; }
         public IWIMItem BagItem { get; private set; }
-        public List<IWIMItem> Items { get; private set; } = new List<IWIMItem>();
-        public List<IContainerSlot> Slots { get; private set; } = new List<IContainerSlot>();
+        public SynchronizedCollection<IWIMItem> Items { get; private set; } = new SynchronizedCollection<IWIMItem>();
+        public SynchronizedCollection<IContainerSlot> Slots { get; private set; } = new SynchronizedCollection<IContainerSlot>();
 
-        public WIMContainer(int position)
+        public WIMContainer(int position, string bagLink)
         {
             Position = position;
             Capacity = GetContainerNbSlots();
             if (Position != 0)
             {
-                string bagItemLink = Lua.LuaDoString<string>($"return GetContainerItemLink(0, {Position - 4})");
-                BagItem = new WIMItem(bagItemLink);
+                BagItem = new WIMItem(bagLink);
                 IsQuiver = BagItem.QuiverCapacity > 0;
                 IsAmmoPouch = BagItem.AmmoPouchCapacity > 0;
             }

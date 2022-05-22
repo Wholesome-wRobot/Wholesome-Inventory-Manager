@@ -3,6 +3,7 @@ using System.Linq;
 using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
+using wManager.Events;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
@@ -17,7 +18,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private readonly IWIMContainers _containers;
         private readonly ILootFilter _lootFilter;
         private readonly Dictionary<string, bool> _wantedRanged = new Dictionary<string, bool>();
-        private List<string> _itemEquipAttempts = new List<string>();
+        private SynchronizedCollection<string> _itemEquipAttempts = new SynchronizedCollection<string>();
         private readonly int _maxNbEquipAttempts = 5;
 
         public EquipManager(
@@ -43,27 +44,49 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             AutoEquip();
             _lootFilter.FilterLoot(_containers.GetAllBagItems());
             EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
+            //FightEvents.OnFightEnd += OnFightEndEvent;
         }
 
         public void Dispose()
         {
             EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+            //FightEvents.OnFightEnd -= OnFightEndEvent;
+        }
+
+        private void OnFightEndEvent(ulong guid)
+        {
+            _characterSheetManager.Scan();
+            _containers.Scan();
+            _containers.BagEquip();
+            _characterSheetManager.Scan();
+            AutoEquip();
+            _lootFilter.FilterLoot(_containers.GetAllBagItems());
         }
 
         private void OnEventsLuaWithArgs(string id, List<string> args)
         {
             switch (id)
             {
-                case "BAG_UPDATE":
-                    Logger.Log($"BAG_UPDATE");
+                case "UNIT_INVENTORY_CHANGED":
+                    Logger.LogDebug($"UNIT_INVENTORY_CHANGED");
+                    _characterSheetManager.Scan();
                     _containers.Scan();
                     _containers.BagEquip();
                     AutoEquip();
                     _lootFilter.FilterLoot(_containers.GetAllBagItems());
                     break;
-                case "UNIT_INVENTORY_CHANGED":
-                    Logger.Log($"UNIT_INVENTORY_CHANGED");
+                case "PLAYER_EQUIPMENT_CHANGED":
+                    Logger.LogDebug($"PLAYER_EQUIPMENT_CHANGED");
                     _characterSheetManager.Scan();
+                    break;
+                case "BAG_UPDATE":
+                    Logger.LogDebug($"BAG_UPDATE");
+                    //Stopwatch watch = Stopwatch.StartNew();
+                    _containers.Scan();
+                    //Logger.Log($"_containers.Scan() {watch.ElapsedMilliseconds}");
+                    _containers.BagEquip();
+                    AutoEquip();
+                    _lootFilter.FilterLoot(_containers.GetAllBagItems());
                     break;
             }
         }
@@ -76,6 +99,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             AutoEquipWeapons();
             AutoEquipRanged();
             CheckSwapWeapons();
+            AutoEquipAmmo();
         }
 
         private void AutoEquipArmor()
@@ -100,6 +124,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem)
         {
+            if (!CanEquipItem(armorItem))
+                return (null, null);
+
             if (armorSlot.Item == null || armorSlot.Item.WeightScore < armorItem.WeightScore)
             {
                 string reason = armorSlot.Item == null ?
@@ -128,6 +155,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsRingBetter(IWIMItem ringItem)
         {
+            if (!CanEquipItem(ringItem))
+                return (null, null);
+
             ISheetSlot fingerSlot1 = _characterSheetManager.FingerSlots[0];
             ISheetSlot fingerSlot2 = _characterSheetManager.FingerSlots[1];
             float ring1Score = fingerSlot1.Item != null ? fingerSlot1.Item.WeightScore : 0;
@@ -144,7 +174,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         private void AutoEquipTrinkets()
         {
-            // List potential replacement for this slot
             List<IWIMItem> potentialTrinkets = GetEquipableFromBags("INVTYPE_TRINKET");
             foreach (IWIMItem trinketItem in potentialTrinkets)
             {
@@ -162,6 +191,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem)
         {
+            if (!CanEquipItem(trinketItem))
+                return (null, null);
+
             ISheetSlot Trinket1 = _characterSheetManager.TrinketSlots[0];
             ISheetSlot Trinket2 = _characterSheetManager.TrinketSlots[1];
             float trinket1Score = Trinket1.Item != null ? Trinket1.Item.WeightScore : 0;
@@ -193,6 +225,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the reason why the item should be equipped, null if the item is not better
         public string IsRangedBetter(IWIMItem rangedWeapon)
         {
+            if (!CanEquipItem(rangedWeapon))
+                return null;
+
             ISheetSlot rangedSlot = _characterSheetManager.RangedSlot;
             if (!AutoEquipSettings.CurrentSettings.SwitchRanged)
             {
@@ -248,7 +283,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             // List potential replacement for this slot
             List<IWIMItem> potentialAmmo = _containers.GetAllBagItems()
-                .FindAll(i =>
+                .Where(i =>
                     i.ItemSubType == "Arrow" || i.ItemSubType == "Bullet"
                     && ObjectManager.Me.Level >= i.ItemMinLevel)
                 .OrderBy(i => i.ItemMinLevel)
@@ -289,7 +324,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 || rangedSlot.Item.ItemMinLevel > ammo.ItemMinLevel
                 || rangedSlot.Item.ItemSubType != ammo.ItemSubType
                 || !potentialAmmos.Exists(pa => pa.Name == rangedSlot.Item.Name) // out of current ammo
-                || !_containers.GetAllBagItems().Exists(i => i.ItemId == ammo.ItemId)) // ?
+                || !_containers.GetAllBagItems().Any(i => i.ItemId == ammo.ItemId)) // ammo didn't refresh after running out
             {
                 return rangedSlot.Item == null ? "Nothing equipped in this slot"
                     : $"Replacing {rangedSlot.Item.Name} ({rangedSlot.Item.WeightScore})";
@@ -340,9 +375,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (offHandSlot.Item != null)
                 listAllOffHandWeapons.Add(offHandSlot.Item);
 
-            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc))
+            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck))
                 listAllMainHandWeapons.Add(weaponToCheck);
-            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc))
+            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck))
                 listAllOffHandWeapons.Add(weaponToCheck);
 
             listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
@@ -452,14 +487,15 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         private bool WeaponIsIdeal(IWIMItem weapon)
         {
-            /*if (weapon == null || !ItemSkillsDictionary.ContainsKey(weapon.ItemSubType))
-                return false;*/
+            if (weapon == null || !ItemSkillsDictionary.ContainsKey(weapon.ItemSubType))
+                return false;
 
             if (ClassSpecManager.MySpec == ClassSpec.RogueAssassination
                 && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Daggers)
                 return false;
 
             if (_skillsManager.KnowTitansGrip
+                && ItemSkillsDictionary.ContainsKey(weapon.ItemSubType)
                 && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces))
@@ -492,7 +528,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private List<IWIMItem> GetEquipableWeaponsFromBags(ISheetSlot slot)
         {
             return _containers.GetAllBagItems()
-                .FindAll(i =>
+                .Where(i =>
                     CanEquipItem(i)
                     && (slot.InvTypes.Contains(i.ItemEquipLoc) || SuitableForTitansGrips(i)))
                 .ToList();
@@ -531,7 +567,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private List<IWIMItem> GetEquipableFromBags(string[] invTypes)
         {
             return _containers.GetAllBagItems()
-                .FindAll(i =>
+                .Where(i =>
                     invTypes.Contains(i.ItemEquipLoc)
                     && CanEquipItem(i))
                 .OrderByDescending(i => i.WeightScore)
@@ -541,7 +577,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private List<IWIMItem> GetEquipableFromBags(string invType)
         {
             return _containers.GetAllBagItems()
-                .FindAll(i =>
+                .Where(i =>
                     invType == i.ItemEquipLoc
                     && CanEquipItem(i))
                 .OrderByDescending(i => i.WeightScore)
@@ -595,7 +631,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     Lua.LuaDoString($"ClearCursor()");
                     return false;
                 }
-                _itemEquipAttempts.RemoveAll(i => i == item.ItemLink);
+                _itemEquipAttempts.Remove(item.ItemLink);
                 _lootFilter.AllowForFilter(item.ItemLink);
                 return true;
 
@@ -603,6 +639,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             return false;
         }
 
-        private int GetNbEquipAttempts(string itemLink) => _itemEquipAttempts.FindAll(i => i == itemLink).Count;
+        private int GetNbEquipAttempts(string itemLink) => _itemEquipAttempts.Where(i => i == itemLink).Count();
     }
 }

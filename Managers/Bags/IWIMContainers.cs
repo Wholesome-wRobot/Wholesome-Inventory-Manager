@@ -7,7 +7,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
     {
         bool HaveBulletsInBags { get; }
         bool HaveArrowsInBags { get; }
-        List<IWIMItem> GetAllBagItems();
+        SynchronizedCollection<IWIMItem> GetAllBagItems();
         void Scan();
         void BagEquip();
     }

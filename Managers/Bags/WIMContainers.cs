@@ -12,7 +12,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
 {
     internal class WIMContainers : IWIMContainers
     {
-        private List<IWIMContainer> _listContainers = new List<IWIMContainer>();
+        private SynchronizedCollection<IWIMContainer> _listContainers = new SynchronizedCollection<IWIMContainer>();
         private readonly ILootFilter _lootFilter;
         private readonly ICharacterSheetManager _characterSheetManager;
 
@@ -34,12 +34,28 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         {
             _listContainers.Clear();
 
+            string[] bagLinks = Lua.LuaDoString<string[]>($@"
+                local result = {{}};
+                for i=0,4,1
+                do
+                    local bagLink = GetContainerItemLink(0, 0-i);
+                    if (bagLink == nil) then
+                        table.insert(result, ""nil"");
+                    else
+                        table.insert(result, bagLink);
+                    end
+                end
+                return unpack(result);
+            ");
+
+            bagLinks = bagLinks.Reverse().ToArray();
+
             for (int i = 0; i < 5; i++)
             {
-                string bagName = Lua.LuaDoString<string>($"return GetBagName({i});");
-                if (!bagName.Equals(""))
+                string bagLink = bagLinks[i];
+                if (!bagLink.Equals("nil") || i == 0)
                 {
-                    _listContainers.Add(new WIMContainer(i));
+                    _listContainers.Add(new WIMContainer(i, bagLink));
                 }
             }
         }
@@ -83,14 +99,13 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
 
                 if (newBag.InBag == bagToReplace.Position)
                 {
-                    newBag = GetAllBagItems().Find(b => b.ItemLink == newBag.ItemLink);
+                    newBag = GetAllBagItems().FirstOrDefault(b => b.ItemLink == newBag.ItemLink);
                 }
 
                 MoveItemToBag(newBag, bagToReplace.Position);
 
                 _lootFilter.ProtectFromFilter(newBag.ItemLink);
                 Lua.LuaDoString($"EquipPendingItem(0);");
-                //Lua.LuaDoString($"StaticPopup1Button1:Click()");
             }
             Scan();
         }
@@ -109,12 +124,15 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             return result;
         }
 
-        private int GetNbBagEquipped() => _listContainers.FindAll(b => !b.IsAmmoPouch && !b.IsQuiver).Count;
+        private int GetNbBagEquipped()
+        {
+            return _listContainers.Where(b => !b.IsAmmoPouch && !b.IsQuiver).Count();
+        }
 
         private IWIMItem GetBiggestBagFromBags()
         {
             return GetAllBagItems()
-                    .FindAll(item => item.ItemType != "Recipe"
+                    .Where(item => item.ItemType != "Recipe"
                         && item.BagCapacity > 0
                         && item.AmmoPouchCapacity == 0
                         && item.QuiverCapacity == 0)
@@ -125,9 +143,9 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         private IWIMContainer GetSmallestEquippedBag()
         {
             return _listContainers
-                    .FindAll(b => !b.IsOriginalBackpack && !b.IsAmmoPouch && !b.IsQuiver)
-                    .OrderBy(bag => bag.Capacity)
-                    .FirstOrDefault();
+                .Where(b => !b.IsOriginalBackpack && !b.IsAmmoPouch && !b.IsQuiver)
+                .OrderBy(bag => bag.Capacity)
+                .FirstOrDefault();
         }
 
         private IWIMItem GetBiggestAmmoContainerFromBags()
@@ -137,14 +155,14 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             if (equippedRanged == TypeRanged.Bows.ToString() || equippedRanged == TypeRanged.Crossbows.ToString())
             {
                 bestAmmoContainerInBags = GetAllBagItems()
-                    .FindAll(item => item.QuiverCapacity > 0)
+                    .Where(item => item.QuiverCapacity > 0)
                     .OrderByDescending(item => item.QuiverCapacity)
                     .FirstOrDefault();
             }
             else if (equippedRanged == TypeRanged.Guns.ToString())
             {
                 bestAmmoContainerInBags = GetAllBagItems()
-                    .FindAll(item => item.AmmoPouchCapacity > 0)
+                    .Where(item => item.AmmoPouchCapacity > 0)
                     .OrderByDescending(item => item.AmmoPouchCapacity)
                     .FirstOrDefault();
             }
@@ -157,8 +175,8 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             {
                 bool ImHunterAndNeedAmmoBag = ObjectManager.Me.WowClass == WoWClass.Hunter && AutoEquipSettings.CurrentSettings.EquipQuiver;
                 int maxAmountOfBags = ImHunterAndNeedAmmoBag ? 4 : 5;
-                IWIMContainer equippedQuiver = _listContainers.Find(bag => bag.IsQuiver);
-                IWIMContainer equippedAmmoPouch = _listContainers.Find(bag => bag.IsAmmoPouch);
+                IWIMContainer equippedQuiver = _listContainers.FirstOrDefault(bag => bag.IsQuiver);
+                IWIMContainer equippedAmmoPouch = _listContainers.FirstOrDefault(bag => bag.IsAmmoPouch);
                 bool hasRangedWeaponEquipped = _characterSheetManager.RangedSlot.Item != null;
                 string equippedRanged = _characterSheetManager.RangedSlot.Item?.ItemSubType;
 
@@ -169,13 +187,13 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                     {
                         equippedQuiver.MoveToSlot(4);
                         Scan();
-                        equippedQuiver = _listContainers.Find(bag => bag.IsQuiver);
+                        equippedQuiver = _listContainers.FirstOrDefault(bag => bag.IsQuiver);
                     }
                     if (equippedAmmoPouch != null && equippedAmmoPouch.Position != 4)
                     {
                         equippedAmmoPouch.MoveToSlot(4);
                         Scan();
-                        equippedAmmoPouch = _listContainers.Find(bag => bag.IsAmmoPouch);
+                        equippedAmmoPouch = _listContainers.FirstOrDefault(bag => bag.IsAmmoPouch);
                     }
 
                     // We have an ammo container equipped
@@ -225,7 +243,6 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                                     MoveItemToBag(bestAmmoContainerInBags, availableSpot);
 
                                     Lua.LuaDoString($"EquipPendingItem(0);");
-                                    //Lua.LuaDoString($"StaticPopup1Button1:Click()");
                                     _lootFilter.ProtectFromFilter(bestAmmoContainerInBags.ItemLink);
 
                                     Scan();
@@ -268,11 +285,10 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                         if (biggestBag != null)
                         {
                             Logger.Log($"Equipping {biggestBag.Name}");
-                            int availableSpot = GetEmptyContainerSlots().First();
+                            int availableSpot = GetEmptyContainerSlots().FirstOrDefault();
                             MoveItemToBag(biggestBag, availableSpot);
 
                             Lua.LuaDoString($"EquipPendingItem(0);");
-                            //Lua.LuaDoString($"StaticPopup1Button1:Click()");
                             _lootFilter.ProtectFromFilter(biggestBag.ItemLink);
 
                             Scan();
@@ -300,12 +316,13 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             }
         }
 
-        public List<IWIMItem> GetAllBagItems()
+        public SynchronizedCollection<IWIMItem> GetAllBagItems()
         {
-            List<IWIMItem> result = new List<IWIMItem>();
+            SynchronizedCollection<IWIMItem> result = new SynchronizedCollection<IWIMItem>();
             foreach (WIMContainer container in _listContainers)
             {
-                result.AddRange(container.Items);
+                foreach (IWIMItem item in container.Items)
+                    result.Add(item);
             }
             return result;
         }
@@ -314,7 +331,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         {
             Lua.LuaDoString($"PickupContainerItem({bagPosition}, {bagSlot});"); // en fait un clique sur le slot de destination
             ToolBox.Sleep(100);
-            if (_listContainers.Find(bag => bag.Position == bagPosition).GetContainerItemlink(bagSlot) == itemToMove.ItemLink)
+            if (_listContainers.FirstOrDefault(bag => bag.Position == bagPosition).GetContainerItemlink(bagSlot) == itemToMove.ItemLink)
             {
                 return true;
             }
@@ -331,7 +348,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             ToolBox.Sleep(100);
         }
 
-        public bool HaveBulletsInBags => GetAllBagItems().Exists(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel);
-        public bool HaveArrowsInBags => GetAllBagItems().Exists(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel);
+        public bool HaveBulletsInBags => GetAllBagItems().FirstOrDefault(i => i.ItemSubType == "Bullet" && ObjectManager.Me.Level >= i.ItemMinLevel) != null;
+        public bool HaveArrowsInBags => GetAllBagItems().FirstOrDefault(i => i.ItemSubType == "Arrow" && ObjectManager.Me.Level >= i.ItemMinLevel) != null;
     }
 }

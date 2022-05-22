@@ -123,6 +123,9 @@ namespace Wholesome_Inventory_Manager.Managers.Quest
                                 }
                             }
                         }
+
+                        if (rewardPicked)
+                            break;
                     }
                 }
 

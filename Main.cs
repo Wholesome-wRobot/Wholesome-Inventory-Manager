@@ -24,8 +24,9 @@ public class Main : IPlugin
 
     public void Initialize()
     {
-        ClassSpecManager.Initialize();
+        LUASetup();
         AutoEquipSettings.Load();
+        ClassSpecManager.Initialize();
 
         if (AutoUpdater.CheckUpdate(version))
         {
@@ -50,8 +51,6 @@ public class Main : IPlugin
         _rollManager.Initialize();
         _questRewardManager = new QuestRewardManager(_equipManager, _characterSheetManager);
         _questRewardManager.Initialize();
-
-        LUASetup();
     }
 
     public void Dispose()

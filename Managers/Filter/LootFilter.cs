@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.Items;
 using wManager.Wow.ObjectManager;
 
@@ -8,7 +7,7 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
 {
     internal class LootFilter : ILootFilter
     {
-        private List<string> _protectedItems = new List<string>();
+        private SynchronizedCollection<string> _protectedItems = new SynchronizedCollection<string>();
 
         public void Initialize()
         {
@@ -18,7 +17,7 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
         {
         }
 
-        public void FilterLoot(List<IWIMItem> bagItems)
+        public void FilterLoot(SynchronizedCollection<IWIMItem> bagItems)
         {
             if (!AutoEquipSettings.CurrentSettings.LootFilterActivated) return;
 
