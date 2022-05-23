@@ -25,6 +25,7 @@ public class Main : IPlugin
     public void Initialize()
     {
         LUASetup();
+
         AutoEquipSettings.Load();
         ClassSpecManager.Initialize();
 
@@ -75,6 +76,9 @@ public class Main : IPlugin
 
     private void LUASetup()
     {
+        if (Lua.LuaDoString<bool>("return WEquipTooltip ~= nil;"))
+            return;
+
         // Create invisible tooltip to read tooltip info
         Lua.LuaDoString($@"
                 local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
@@ -84,7 +88,7 @@ public class Main : IPlugin
                 R: SetFontObject(GameFontNormal)
                 WEquipTooltip: AddFontStrings(L, R)
                 WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")"
-            );
+        );
 
         // Create function to read invisible tooltip lines
         Lua.LuaDoString($@"

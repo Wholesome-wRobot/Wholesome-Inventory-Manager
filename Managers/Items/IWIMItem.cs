@@ -26,7 +26,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         float WeaponSpeed { get; }
         int RewardSlot { get; }
         int RollId { get; }
-        bool HasBeenRolled { get; }
+        bool HasBeenRolled { get; set; }
         Dictionary<string, float> ItemStats { get; }
 
         void PickupFromBag();

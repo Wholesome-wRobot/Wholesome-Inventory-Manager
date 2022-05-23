@@ -27,6 +27,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         private static bool ContainsByItemLink(string itemlink) => _itemDb.Exists(it => it.ItemLink == itemlink);
+
         public static void ClearCache()
         {
             lock (_cacheLocker)

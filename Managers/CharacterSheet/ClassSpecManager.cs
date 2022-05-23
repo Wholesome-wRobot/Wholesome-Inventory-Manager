@@ -28,6 +28,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
             switch (id)
             {
                 case "CHARACTER_POINTS_CHANGED":
+                    ToolBox.PrintLuaTime($"CHARACTER_POINTS_CHANGED");
                     DetectSpec();
                     break;
             }

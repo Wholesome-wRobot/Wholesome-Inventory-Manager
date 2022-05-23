@@ -12,6 +12,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 {
     internal class WIMItem : IWIMItem
     {
+        private readonly object _tooltipLocker = new object();
+
         private int _uniqueIdCounter = 0;
 
         public uint ItemId { get; private set; }
@@ -36,7 +38,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public float WeaponSpeed { get; private set; } = 0;
         public int RewardSlot { get; private set; } = -1;
         public int RollId { get; private set; } = -1;
-        public bool HasBeenRolled { get; private set; }
+        public bool HasBeenRolled { get; set; }
         public Dictionary<string, float> ItemStats { get; private set; } = new Dictionary<string, float>() { };
 
 
@@ -80,7 +82,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             else
             {
                 string iteminfo = Lua.LuaDoString<string>($@"
-                    itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+                    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
                     itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
 
                     if (itemSellPrice == null) then
@@ -92,8 +94,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     end
 
                     return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
-                    '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
-                    '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
+                        '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
+                        '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
 
                 string[] infoArray = iteminfo.Split('§');
 
@@ -115,6 +117,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 ItemTexture = infoArray[9];
                 ItemSellPrice = int.Parse(infoArray[10]);
 
+
                 if (Main.WoWVersion <= ToolBox.WoWVersion.TBC)
                 {
                     RecordToolTipTBC();
@@ -127,7 +130,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
 
                 ItemCache.Add(this);
-                if (AutoEquipSettings.CurrentSettings.LogItemInfo)
+                //if (AutoEquipSettings.CurrentSettings.LogItemInfo)
                     LogItemInfo();
             }
         }
@@ -182,18 +185,27 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         private void RecordToolTipTBC()
         {
-
             if (ItemType != "Armor" && ItemType != "Weapon")
             {
                 return;
             }
 
-            // Record the info present in the tooltip
-            string lines = Lua.LuaDoString<string>($@"
-                    WEquipTooltip:ClearLines()
-                    WEquipTooltip:SetHyperlink(""{ItemLink}"")
-                    return EnumerateTooltipLines(WEquipTooltip: GetRegions())
+            string lines = null;
+            lock (_tooltipLocker)
+            {
+                // Record the info present in the tooltip
+                lines = Lua.LuaDoString<string>($@"
+                    WEquipTooltip:ClearLines();
+                    WEquipTooltip:SetHyperlink(""{ItemLink}"");
+                    return EnumerateTooltipLines(WEquipTooltip: GetRegions());
                 ");
+            }
+
+            if (lines == null)
+            {
+                Logger.LogError($"Failed to record tooltip for " + Name);
+                return;
+            }
 
             string[] allLines = lines.Split('|');
             foreach (string l in allLines)
@@ -272,12 +284,22 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         private void RecordToolTipWotLK()
         {
-            // Record the info present in the tooltip
-            string lines = Lua.LuaDoString<string>($@"
+            string lines = null;
+            lock(_tooltipLocker)
+            {
+                // Record the info present in the tooltip
+                lines = Lua.LuaDoString<string>($@"
                     WEquipTooltip:ClearLines()
                     WEquipTooltip:SetHyperlink(""{ItemLink}"")
                     return EnumerateTooltipLines(WEquipTooltip: GetRegions())
                 ");
+            }
+
+            if (lines == null)
+            {
+                Logger.LogError($"Failed to record tooltip for " + Name);
+                return;
+            }
 
             string[] allLines = lines.Split('|');
             foreach (string l in allLines)
@@ -421,81 +443,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 Lua.LuaDoString($"UseContainerItem({InBag}, {InBagSlot})");
             }
-        }
-
-        private bool EquipSelectRoll(int slotId, string reason)
-        {/*
-            WAELootFilter.ProtectFromFilter(ItemLink);
-
-            // ROLL
-            if (RollId >= 0)
-            {
-                WAEGroupRoll.Roll(RollId, this, reason, RollType.NEED);
-                HasBeenRolled = true;
-                WAEContainers.AllItems.Clear();
-                return true;
-            }
-
-            // SELECT REWARD
-            if (RewardSlot >= 0)
-            {
-                Lua.LuaDoString($"GetQuestReward({RewardSlot})");
-                Logger.Log($"Selecting quest reward {Name} [{reason}]");
-                WAEContainers.AllItems.Clear();
-                return true;
-            }
-            /*
-            // EQUIP
-            ISheetSlot slot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
-            if (slot.Item?.ItemLink == ItemLink)
-            {
-                return true;
-            }
-
-            if (ItemSubType != "Arrow"
-                && ItemSubType != "Bullet"
-                && (ObjectManager.Me.InCombatFlagOnly || ObjectManager.Me.IsCast))
-            {
-                return false;
-            }
-
-            if (InBag < 0 || InBagSlot < 0)
-            {
-                Logger.LogError($"Item {Name} is not recorded as being in a bag. Can't use.");
-            }
-            else
-            {
-                Logger.Log($"Equipping {Name} ({WeightScore}) [{reason}]");
-                _itemEquipAttempts.Add(ItemLink);
-                PickupFromBag();
-                ClickInInventory(slotId);
-                ToolBox.Sleep(100);
-                Lua.LuaDoString($"EquipPendingItem(0);");
-                //Lua.LuaDoString($"StaticPopup1Button1:Click()");
-                ToolBox.Sleep(200);
-                WAECharacterSheet.Scan();
-                WAEContainers.Scan();
-                ISheetSlot updatedSlot = WAECharacterSheet.AllSlots.Find(s => s.InventorySlotID == slotId);
-                if (updatedSlot.Item == null || updatedSlot.Item.ItemLink != ItemLink)
-                {
-                    if (GetNbEquipAttempts < _maxNbEquipAttempts)
-                    {
-                        Logger.LogError($"Failed to equip {Name}. Retrying soon ({GetNbEquipAttempts}).");
-                    }
-                    else
-                    {
-                        Logger.LogError($"Failed to equip {Name} after {GetNbEquipAttempts} attempts.");
-                    }
-
-                    Lua.LuaDoString($"ClearCursor()");
-                    return false;
-                }
-                _itemEquipAttempts.RemoveAll(i => i == ItemLink);
-                WAELootFilter.AllowForFilter(ItemLink);
-                return true;
-
-            }*/
-            return false;
         }
 
         public void LogItemInfo()

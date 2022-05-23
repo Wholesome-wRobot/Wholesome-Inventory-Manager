@@ -39,28 +39,21 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         public void Initialize()
         {
-            _containers.Scan();
-            _containers.BagEquip();
-            AutoEquip();
-            _lootFilter.FilterLoot(_containers.GetAllBagItems());
+            CheckAll();
             EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
-            //FightEvents.OnFightEnd += OnFightEndEvent;
+            FightEvents.OnFightEnd += OnFightEndEvent;
         }
 
         public void Dispose()
         {
             EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-            //FightEvents.OnFightEnd -= OnFightEndEvent;
+            FightEvents.OnFightEnd -= OnFightEndEvent;
         }
 
         private void OnFightEndEvent(ulong guid)
         {
-            _characterSheetManager.Scan();
-            _containers.Scan();
-            _containers.BagEquip();
-            _characterSheetManager.Scan();
-            AutoEquip();
-            _lootFilter.FilterLoot(_containers.GetAllBagItems());
+            ToolBox.PrintLuaTime($"FIGHT_END");
+            CheckAll();
         }
 
         private void OnEventsLuaWithArgs(string id, List<string> args)
@@ -68,38 +61,42 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             switch (id)
             {
                 case "UNIT_INVENTORY_CHANGED":
-                    Logger.LogDebug($"UNIT_INVENTORY_CHANGED");
-                    _characterSheetManager.Scan();
-                    _containers.Scan();
-                    _containers.BagEquip();
-                    AutoEquip();
-                    _lootFilter.FilterLoot(_containers.GetAllBagItems());
+                    ToolBox.PrintLuaTime($"UNIT_INVENTORY_CHANGED");
+                    CheckAll();
                     break;
                 case "PLAYER_EQUIPMENT_CHANGED":
-                    Logger.LogDebug($"PLAYER_EQUIPMENT_CHANGED");
+                    ToolBox.PrintLuaTime($"PLAYER_EQUIPMENT_CHANGED");
+                    //Logger.LogError($"SheetScan 1");
                     _characterSheetManager.Scan();
                     break;
                 case "BAG_UPDATE":
-                    Logger.LogDebug($"BAG_UPDATE");
-                    //Stopwatch watch = Stopwatch.StartNew();
-                    _containers.Scan();
-                    //Logger.Log($"_containers.Scan() {watch.ElapsedMilliseconds}");
-                    _containers.BagEquip();
-                    AutoEquip();
-                    _lootFilter.FilterLoot(_containers.GetAllBagItems());
+                    ToolBox.PrintLuaTime($"BAG_UPDATE");
+                    CheckAll();
                     break;
             }
         }
 
-        public void AutoEquip()
+        private void CheckAll()
         {
-            AutoEquipArmor();
-            AutoEquipRings();
-            AutoEquipTrinkets();
-            AutoEquipWeapons();
-            AutoEquipRanged();
-            CheckSwapWeapons();
+            if (!ObjectManager.Me.IsAlive)
+                return;
+
+            _characterSheetManager.Scan();
+            _containers.Scan();
+            
+            if (!ObjectManager.Me.InCombatFlagOnly)
+            {
+                _containers.BagEquip();
+                AutoEquipArmor();
+                AutoEquipRings();
+                AutoEquipTrinkets();
+                AutoEquipWeapons();
+                AutoEquipRanged();
+                CheckSwapWeapons();
+            }
+            
             AutoEquipAmmo();
+            _lootFilter.FilterLoot(_containers.GetAllBagItems());
         }
 
         private void AutoEquipArmor()

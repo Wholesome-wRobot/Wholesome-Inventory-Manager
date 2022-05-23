@@ -37,4 +37,9 @@ public class ToolBox
         TBC,
         WOTLK
     }
+
+    public static void PrintLuaTime(string suffix)
+    {
+        Lua.LuaDoString($@"DEFAULT_CHAT_FRAME:AddMessage(""{suffix} "" .. date(""%H:%M:%S""));");
+    }
 }

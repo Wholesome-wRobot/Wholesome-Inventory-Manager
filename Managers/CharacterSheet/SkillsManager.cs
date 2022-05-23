@@ -9,6 +9,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 {
     internal class SkillsManager : ISkillsManager
     {
+        private readonly object _SMlock = new object();
         public Dictionary<string, int> MySkills { get; } = new Dictionary<string, int>();
         public bool KnowTitansGrip { get; private set; }
         public Spell DualWield { get; private set; }
@@ -28,6 +29,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
             switch (id)
             {
                 case "SKILL_LINES_CHANGED":
+                    ToolBox.PrintLuaTime($"SKILL_LINES_CHANGED");
                     RecordSkills();
                     break;
             }
@@ -35,9 +37,11 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 
         public void RecordSkills()
         {
-            MySkills.Clear();
+            lock (_SMlock)
+            {
+                MySkills.Clear();
 
-            string luaListAllSkills = Lua.LuaDoString<string>($@"
+                string luaListAllSkills = Lua.LuaDoString<string>($@"
                     local result = ""$"";
                     for i = 1, GetNumSkillLines() do
                         local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier,
@@ -47,32 +51,33 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
                     end
                     return result");
 
-            List<string> skills = luaListAllSkills.Split('$').ToList();
+                List<string> skills = luaListAllSkills.Split('$').ToList();
 
-            foreach (string skill in skills)
-            {
-                if (skill.Length > 0)
+                foreach (string skill in skills)
                 {
-                    string[] skillPair = skill.Split('|');
-                    string skillName = skillPair[0]
-                        .Replace("Shield", "Shields")
-                        .Replace("Plate Mail", "Plate");
-                    if (skillName == "Axes" || skillName == "Swords" || skillName == "Maces")
-                        skillName = "One-Handed " + skillName;
+                    if (skill.Length > 0)
+                    {
+                        string[] skillPair = skill.Split('|');
+                        string skillName = skillPair[0]
+                            .Replace("Shield", "Shields")
+                            .Replace("Plate Mail", "Plate");
+                        if (skillName == "Axes" || skillName == "Swords" || skillName == "Maces")
+                            skillName = "One-Handed " + skillName;
 
-                    if (!MySkills.ContainsKey(skillName))
-                        MySkills.Add(skillName, int.Parse(skillPair[1]));
+                        if (!MySkills.ContainsKey(skillName))
+                            MySkills.Add(skillName, int.Parse(skillPair[1]));
+                    }
                 }
-            }
 
-            if (DualWield == null)
-            {
-                DualWield = new Spell("Dual Wield");
-            }
+                if (DualWield == null)
+                {
+                    DualWield = new Spell("Dual Wield");
+                }
 
-            if (!KnowTitansGrip && ClassSpecManager.MySpec == ClassSpec.WarriorFury)
-            {
-                KnowTitansGrip = WTTalent.GetTalentRank(2, 27) > 0;
+                if (!KnowTitansGrip && ClassSpecManager.MySpec == ClassSpec.WarriorFury)
+                {
+                    KnowTitansGrip = WTTalent.GetTalentRank(2, 27) > 0;
+                }
             }
         }
     }
