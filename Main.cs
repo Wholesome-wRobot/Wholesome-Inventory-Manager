@@ -1,4 +1,5 @@
-﻿using Wholesome_Inventory_Manager.Managers.Bags;
+﻿using System.Collections.Generic;
+using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
 using Wholesome_Inventory_Manager.Managers.Items;
@@ -10,7 +11,7 @@ using wManager.Wow.Helpers;
 public class Main : IPlugin
 {
     public static string PluginName = "Wholesome Inventory Manager";
-    public static string version = "2.0.18"; // Must match version in Version.txt
+    public static string version = "3.0.00"; // Must match version in Version.txt
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
@@ -48,14 +49,25 @@ public class Main : IPlugin
         _containers.Initialize();
         _equipManager = new EquipManager(_skillsManager, _characterSheetManager, _containers, _lootFilter);
         _equipManager.Initialize();
-        _rollManager = new RollManager(_equipManager, _characterSheetManager);
+        _rollManager = new RollManager(_equipManager, _characterSheetManager, _lootFilter);
         _rollManager.Initialize();
         _questRewardManager = new QuestRewardManager(_equipManager, _characterSheetManager);
         _questRewardManager.Initialize();
+
+        EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
+        EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => ClassSpecManager.DetectSpec());
+        EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => _skillsManager.RecordSkills());
+        EventsLua.AttachEventLua("UNIT_INVENTORY_CHANGED", e => _equipManager.CheckAll());
+        EventsLua.AttachEventLua("PLAYER_EQUIPMENT_CHANGED", e => _characterSheetManager.Scan());
+        EventsLua.AttachEventLua("BAG_UPDATE", e => _equipManager.CheckAll());
+        EventsLua.AttachEventLua("PLAYER_ENTERING_WORLD", e => LUASetup());
+        EventsLua.AttachEventLua("PLAYER_REGEN_ENABLED", e => _equipManager.CheckAll());
     }
 
     public void Dispose()
     {
+        EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+
         ClassSpecManager.Dispose();
         _questRewardManager?.Dispose();
         _rollManager?.Dispose();
@@ -65,6 +77,16 @@ public class Main : IPlugin
         _characterSheetManager?.Dispose();
         _skillsManager?.Dispose();
         Logger.Log("Disposed");
+    }
+
+    private void OnEventsLuaWithArgs(string id, List<string> args)
+    {
+        switch (id)
+        {
+            case "START_LOOT_ROLL":
+                _rollManager.CheckLootRoll(int.Parse(args[0]));
+                break;
+        }
     }
 
     public void Settings()
@@ -88,7 +110,7 @@ public class Main : IPlugin
                 R: SetFontObject(GameFontNormal)
                 WEquipTooltip: AddFontStrings(L, R)
                 WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")"
-        );
+            );
 
         // Create function to read invisible tooltip lines
         Lua.LuaDoString($@"

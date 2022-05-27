@@ -11,5 +11,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck);
         string IsRangedBetter(IWIMItem rangedWeapon);
         string IsAmmoBetter(IWIMItem ammo, List<IWIMItem> potentialAmmos);
+        void CheckAll();
     }
 }

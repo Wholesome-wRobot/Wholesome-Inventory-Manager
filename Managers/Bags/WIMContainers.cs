@@ -97,7 +97,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             {
                 Logger.Log($"Replacing {bagToReplace.BagItem.Name} with {newBag.Name}");
 
-                if (newBag.InBag == bagToReplace.Position)
+                if (newBag.ContainerId == bagToReplace.Position)
                 {
                     newBag = GetAllBagItems().FirstOrDefault(b => b.ItemLink == newBag.ItemLink);
                 }

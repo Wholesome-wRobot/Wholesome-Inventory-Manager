@@ -17,22 +17,9 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         public void Initialize()
         {
             RecordSkills();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
         public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-        }
-
-        private void OnEventsLuaWithArgs(string id, List<string> args)
-        {
-            switch (id)
-            {
-                case "SKILL_LINES_CHANGED":
-                    ToolBox.PrintLuaTime($"SKILL_LINES_CHANGED");
-                    RecordSkills();
-                    break;
-            }
         }
 
         public void RecordSkills()

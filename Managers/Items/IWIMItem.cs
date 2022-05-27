@@ -19,8 +19,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         int BagCapacity { get; }
         int QuiverCapacity { get; }
         int AmmoPouchCapacity { get; }
-        int InBag { get; }
-        int InBagSlot { get; }
+        int ContainerId { get; }
+        int ContainerSlot { get; }
         double UniqueId { get; }
         float WeightScore { get; }
         float WeaponSpeed { get; }

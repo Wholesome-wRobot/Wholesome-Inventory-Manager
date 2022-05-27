@@ -31,8 +31,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int BagCapacity { get; private set; }
         public int QuiverCapacity { get; private set; }
         public int AmmoPouchCapacity { get; private set; }
-        public int InBag { get; private set; } = -1;
-        public int InBagSlot { get; private set; } = -1;
+        public int ContainerId { get; private set; } = -1;
+        public int ContainerSlot { get; private set; } = -1;
         public double UniqueId { get; private set; }
         public float WeightScore { get; private set; } = 0;
         public float WeaponSpeed { get; private set; } = 0;
@@ -53,8 +53,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             ItemLink = itemLink;
             RewardSlot = rewardSlot;
             RollId = rollId;
-            InBag = inBag;
-            InBagSlot = inBagSlot;
+            ContainerId = inBag;
+            ContainerSlot = inBagSlot;
 
             if (ItemLink.Length < 10)
                 return;
@@ -130,7 +130,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
 
                 ItemCache.Add(this);
-                //if (AutoEquipSettings.CurrentSettings.LogItemInfo)
+                if (AutoEquipSettings.CurrentSettings.LogItemInfo)
                     LogItemInfo();
             }
         }
@@ -428,20 +428,20 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
 
             Logger.Log($"Deleting {Name} ({reason})");
-            Lua.LuaDoString($"PickupContainerItem({InBag}, {InBagSlot});");
+            Lua.LuaDoString($"PickupContainerItem({ContainerId}, {ContainerSlot});");
             Lua.LuaDoString("DeleteCursorItem();");
             ToolBox.Sleep(200);
         }
 
         private void Use()
         {
-            if (InBag < 0 || InBagSlot < 0)
+            if (ContainerId < 0 || ContainerSlot < 0)
             {
                 Logger.LogError($"Item {Name} is not recorded as being in a bag. Can't use.");
             }
             else
             {
-                Lua.LuaDoString($"UseContainerItem({InBag}, {InBagSlot})");
+                Lua.LuaDoString($"UseContainerItem({ContainerId}, {ContainerSlot})");
             }
         }
 
@@ -461,12 +461,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
                     | BagCapacity : {BagCapacity} | WeaponSpeed : {WeaponSpeed} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
-                    | InBag: {InBag} | InBagSlot: {InBagSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
+                    | InBag: {ContainerId} | InBagSlot: {ContainerSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
                     {stats}");
         }
 
         //private int GetNbEquipAttempts => _itemEquipAttempts.FindAll(i => i == ItemLink).Count;
         public void ClickInInventory(int slotId) => Lua.LuaDoString($"PickupInventoryItem({slotId});");
-        public void PickupFromBag() => Lua.LuaDoString($"ClearCursor(); PickupContainerItem({InBag}, {InBagSlot});");
+        public void PickupFromBag() => Lua.LuaDoString($"ClearCursor(); PickupContainerItem({ContainerId}, {ContainerSlot});");
     }
 }

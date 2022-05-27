@@ -2,5 +2,6 @@
 {
     internal interface IRollManager : ICycleable
     {
+        void CheckLootRoll(int rollId);
     }
 }

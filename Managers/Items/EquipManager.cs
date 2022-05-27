@@ -3,7 +3,6 @@ using System.Linq;
 using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
-using wManager.Events;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
@@ -20,6 +19,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private readonly Dictionary<string, bool> _wantedRanged = new Dictionary<string, bool>();
         private SynchronizedCollection<string> _itemEquipAttempts = new SynchronizedCollection<string>();
         private readonly int _maxNbEquipAttempts = 5;
+        private readonly object _equipManagerLock = new object();
 
         public EquipManager(
             ISkillsManager skillsManager,
@@ -40,63 +40,34 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public void Initialize()
         {
             CheckAll();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
-            FightEvents.OnFightEnd += OnFightEndEvent;
         }
 
         public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-            FightEvents.OnFightEnd -= OnFightEndEvent;
         }
 
-        private void OnFightEndEvent(ulong guid)
-        {
-            ToolBox.PrintLuaTime($"FIGHT_END");
-            CheckAll();
-        }
-
-        private void OnEventsLuaWithArgs(string id, List<string> args)
-        {
-            switch (id)
-            {
-                case "UNIT_INVENTORY_CHANGED":
-                    ToolBox.PrintLuaTime($"UNIT_INVENTORY_CHANGED");
-                    CheckAll();
-                    break;
-                case "PLAYER_EQUIPMENT_CHANGED":
-                    ToolBox.PrintLuaTime($"PLAYER_EQUIPMENT_CHANGED");
-                    //Logger.LogError($"SheetScan 1");
-                    _characterSheetManager.Scan();
-                    break;
-                case "BAG_UPDATE":
-                    ToolBox.PrintLuaTime($"BAG_UPDATE");
-                    CheckAll();
-                    break;
-            }
-        }
-
-        private void CheckAll()
+        public void CheckAll()
         {
             if (!ObjectManager.Me.IsAlive)
                 return;
 
-            _characterSheetManager.Scan();
-            _containers.Scan();
-            
-            if (!ObjectManager.Me.InCombatFlagOnly)
+            lock (_equipManagerLock)
             {
-                _containers.BagEquip();
-                AutoEquipArmor();
-                AutoEquipRings();
-                AutoEquipTrinkets();
-                AutoEquipWeapons();
-                AutoEquipRanged();
-                CheckSwapWeapons();
+                _characterSheetManager.Scan();
+                _containers.Scan();
+                if (!ObjectManager.Me.InCombatFlagOnly)
+                {
+                    _containers.BagEquip();
+                    AutoEquipArmor();
+                    AutoEquipRings();
+                    AutoEquipTrinkets();
+                    AutoEquipWeapons();
+                    AutoEquipRanged();
+                    CheckSwapWeapons();
+                }
+                AutoEquipAmmo();
+                _lootFilter.FilterLoot(_containers.GetAllBagItems());
             }
-            
-            AutoEquipAmmo();
-            _lootFilter.FilterLoot(_containers.GetAllBagItems());
         }
 
         private void AutoEquipArmor()
@@ -340,7 +311,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 (ISheetSlot, string) slotAndReason = IsWeaponBetter(weapon);
                 if (slotAndReason != (null, null) && EquipItem(slotAndReason.Item1, weapon, slotAndReason.Item2))
                 {
-                    // TODO, update bags and sheet?
+                    _characterSheetManager.Scan();
+                    _containers.Scan();
                 }
             }
         }
@@ -451,34 +423,36 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             float finalScoreSecondChoice2hander = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
             float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
             /*
-                Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
-                Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hander}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hander})");
-                Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
-                Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
-                Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
+            Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
+            Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hander}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hander})");
+            Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
+            Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
+            Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
             */
+            float[] scores = new float[4] { finalScore2hander, finalScoreSecondChoice2hander, finalScoreDualWield, finalScoreSecondDualWield };
+            float bestScore = scores.Max();
 
-            if (finalScore2hander > currentCombinedWeaponsScore && ideal2H != mainHandSlot.Item && ideal2H == weaponToCheck)
-                return (mainHandSlot, $"Better 2H score {finalScore2hander}/{currentCombinedWeaponsScore}");
-
-            if (finalScoreDualWield > currentCombinedWeaponsScore)
+            // One of the scores is better
+            if (bestScore > currentCombinedWeaponsScore)
             {
-                if (idealMainhand != null && idealMainhand != mainHandSlot.Item && idealMainhand == weaponToCheck)
+                // Main 2 hander
+                if (bestScore == scores[0] && ideal2H == weaponToCheck)
+                    return (mainHandSlot, $"Better 2H score {finalScore2hander}/{currentCombinedWeaponsScore}");
+                // Second choice 2 hander
+                if (bestScore == scores[1] && secondChoice2H == weaponToCheck)
+                    return (mainHandSlot, $"Better 2H score (unideal) {finalScoreSecondChoice2hander}/{currentCombinedWeaponsScore}");
+                // Main dual wield
+                if (bestScore == scores[2] && idealMainhand == weaponToCheck)
                     return (mainHandSlot, $"Better MH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-                if (idealOffHand != null && idealOffHand != offHandSlot.Item && idealOffHand == weaponToCheck)
+                if (bestScore == scores[2] && idealOffHand == weaponToCheck)
                     return (offHandSlot, $"Better OH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
+                // Second choice dual wield
+                if (bestScore == scores[3] && secondChoiceMainhand == weaponToCheck)
+                    return (mainHandSlot, $"Better MH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
+                if (bestScore == scores[3] && secondChoiceOffhand == weaponToCheck)
+                    return (offHandSlot, $"Better OH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
             }
 
-            if (finalScoreSecondChoice2hander > currentCombinedWeaponsScore && secondChoice2H != mainHandSlot.Item && secondChoice2H == weaponToCheck)
-                return (mainHandSlot, $"Better 2H score (unideal) {finalScore2hander}/{currentCombinedWeaponsScore}");
-
-            if (finalScoreSecondDualWield > currentCombinedWeaponsScore)
-            {
-                if (secondChoiceMainhand != null && secondChoiceMainhand != mainHandSlot.Item && secondChoiceMainhand == weaponToCheck)
-                    return (mainHandSlot, $"Better MH (unideal) for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-                if (secondChoiceOffhand != null && secondChoiceOffhand != offHandSlot.Item && secondChoiceOffhand == weaponToCheck)
-                    return (offHandSlot, $"Better OH (unideal) for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-            }
             return (null, null);
         }
 
@@ -598,7 +572,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 return false;
             }
 
-            if (item.InBag < 0 || item.InBagSlot < 0)
+            if (item.ContainerId < 0 || item.ContainerSlot < 0)
             {
                 Logger.LogError($"Item {item.Name} is not recorded as being in a bag. Can't use.");
             }
@@ -607,11 +581,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 Logger.Log($"Equipping {item.Name} ({item.WeightScore}) [{reason}]");
                 _itemEquipAttempts.Add(item.ItemLink);
                 item.PickupFromBag();
-                item.ClickInInventory(sheetSlot.InventorySlotID); // ?
+                item.ClickInInventory(sheetSlot.InventorySlotID);
                 ToolBox.Sleep(100);
                 Lua.LuaDoString($"EquipPendingItem(0);");
-
+                ToolBox.Sleep(200);
                 _characterSheetManager.Scan();
+                _containers.Scan();
 
                 if (sheetSlot.Item == null || sheetSlot.Item.ItemLink != item.ItemLink)
                 {
