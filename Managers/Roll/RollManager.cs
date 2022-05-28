@@ -32,7 +32,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 
         public void CheckLootRoll(int rollId)
         {
-            bool canNeed = Main.WoWVersion <= ToolBox.WoWVersion.TBC || Lua.LuaDoString<bool>($"local _, _, _, _, _, canNeed = GetLootRollItemInfo({rollId});", "canNeed");
+            bool canNeed = Main.WoWVersion <= ToolBox.WoWVersion.TBC || Lua.LuaDoString<bool>($"_, _, _, _, _, canNeed, _, _, _, _, _, _ = GetLootRollItemInfo({rollId});", "canNeed");
             string itemLink = Lua.LuaDoString<string>($"return GetLootRollItemLink({rollId});");
 
             if (itemLink.Length < 10)

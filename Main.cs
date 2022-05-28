@@ -11,7 +11,7 @@ using wManager.Wow.Helpers;
 public class Main : IPlugin
 {
     public static string PluginName = "Wholesome Inventory Manager";
-    public static string version = "3.0.00"; // Must match version in Version.txt
+    public static string version = "3.0.01"; // Must match version in Version.txt
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
