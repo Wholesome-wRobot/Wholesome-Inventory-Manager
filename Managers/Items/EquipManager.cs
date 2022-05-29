@@ -260,7 +260,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             foreach (IWIMItem ammo in potentialAmmo)
             {
                 string reasonToEquip = IsAmmoBetter(ammo, potentialAmmo);
-                if (reasonToEquip != null && EquipItem(rangedSlot, ammo, reasonToEquip))
+                if (reasonToEquip != null && EquipItem(ammoSlot, ammo, reasonToEquip))
                 {
                     // TODO, update bags and sheet?
                 }
@@ -271,6 +271,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public string IsAmmoBetter(IWIMItem ammo, List<IWIMItem> potentialAmmos)
         {
             ISheetSlot rangedSlot = _characterSheetManager.RangedSlot;
+            ISheetSlot ammoSlot = _characterSheetManager.AmmoSlot;
             if (rangedSlot.Item == null)
             {
                 return null;
@@ -288,14 +289,14 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 return null;
             }
 
-            if (rangedSlot.Item == null
-                || rangedSlot.Item.ItemMinLevel > ammo.ItemMinLevel
-                || rangedSlot.Item.ItemSubType != ammo.ItemSubType
-                || !potentialAmmos.Exists(pa => pa.Name == rangedSlot.Item.Name) // out of current ammo
+            if (ammoSlot.Item == null
+                || ammoSlot.Item.ItemMinLevel < ammo.ItemMinLevel
+                || ammoSlot.Item.ItemSubType != ammo.ItemSubType
+                || !potentialAmmos.Exists(pa => pa.Name == ammoSlot.Item.Name) // out of current ammo
                 || !_containers.GetAllBagItems().Any(i => i.ItemId == ammo.ItemId)) // ammo didn't refresh after running out
             {
                 return rangedSlot.Item == null ? "Nothing equipped in this slot"
-                    : $"Replacing {rangedSlot.Item.Name} ({rangedSlot.Item.WeightScore})";
+                    : $"Replacing {ammoSlot.Item.Name} (lvl {ammoSlot.Item.ItemMinLevel} -> {ammo.ItemMinLevel})";
             }
             return null;
         }
@@ -422,13 +423,13 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             float finalScoreSecondChoice2hander = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
             float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
-            /*
+            
             Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
             Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hander}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hander})");
             Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
             Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
             Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
-            */
+            
             float[] scores = new float[4] { finalScore2hander, finalScoreSecondChoice2hander, finalScoreDualWield, finalScoreSecondDualWield };
             float bestScore = scores.Max();
 
@@ -444,12 +445,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 // Main dual wield
                 if (bestScore == scores[2] && idealMainhand == weaponToCheck)
                     return (mainHandSlot, $"Better MH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-                if (bestScore == scores[2] && idealOffHand == weaponToCheck)
+                if (bestScore == scores[2] && idealOffHand == weaponToCheck && idealMainhand != null)
                     return (offHandSlot, $"Better OH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
                 // Second choice dual wield
                 if (bestScore == scores[3] && secondChoiceMainhand == weaponToCheck)
                     return (mainHandSlot, $"Better MH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
-                if (bestScore == scores[3] && secondChoiceOffhand == weaponToCheck)
+                if (bestScore == scores[3] && secondChoiceOffhand == weaponToCheck && secondChoiceMainhand != null)
                     return (offHandSlot, $"Better OH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
             }
 
