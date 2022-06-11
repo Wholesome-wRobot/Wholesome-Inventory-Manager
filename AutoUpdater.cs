@@ -25,7 +25,7 @@ public static class AutoUpdater
 
         double timeSinceLastUpdate = elapsedTicks - AutoEquipSettings.CurrentSettings.LastUpdateDate;
 
-        // If last update try was < 10 seconds ago, we exit to avoid looping
+        // If last update try was < 30 seconds ago, we exit to avoid looping
         if (timeSinceLastUpdate < 30)
         {
             Logger.Log($"Last update attempts was {timeSinceLastUpdate} seconds ago. Exiting updater.");
