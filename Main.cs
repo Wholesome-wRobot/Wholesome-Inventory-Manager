@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using robotManager.Helpful;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
@@ -11,7 +13,7 @@ using wManager.Wow.Helpers;
 public class Main : IPlugin
 {
     public static string PluginName = "Wholesome Inventory Manager";
-    public static string version = "3.0.03"; // Must match version in Version.txt
+    public static string version = FileVersionInfo.GetVersionInfo(Others.GetCurrentDirectory + @"\Plugins\Wholesome_Inventory_Manager.dll").FileVersion;
 
     public static ToolBox.WoWVersion WoWVersion = ToolBox.GetWoWVersion();
 
