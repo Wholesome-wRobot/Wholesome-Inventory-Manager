@@ -96,6 +96,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Compiled\Auto_Version.txt" />
     <Compile Include="Managers\Bags\ContainerSlot.cs" />
     <Compile Include="Managers\Bags\IContainerSlot.cs" />
     <Compile Include="Managers\Bags\IWIMContainer.cs" />
@@ -196,7 +197,7 @@
     <PostBuildEvent>copy /Y "$(TargetDir)\$(ProjectName).dll" "C:\Users\Nico\Desktop\$(ProjectName).dll"
 copy /Y "$(TargetDir)\$(ProjectName).dll" "$(SolutionDir)\Compiled\$(ProjectName).dll"
 copy /Y "$(TargetDir)\$(ProjectName).dll" "F:\WoW\WoW TBC\WRobot\Plugins\$(ProjectName).dll"
-echo Writing assembly version in Version.txt: @(VersionNumber)
-echo @(VersionNumber) &gt; $(ProjectDir)\Compiled\Version.txt</PostBuildEvent>
+echo Writing assembly version in Auto_Version.txt: @(VersionNumber)
+echo @(VersionNumber) &gt; $(ProjectDir)\Compiled\Auto_Version.txt</PostBuildEvent>
   </PropertyGroup>
 </Project>

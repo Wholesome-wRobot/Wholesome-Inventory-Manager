@@ -38,7 +38,7 @@ public static class AutoUpdater
             AutoEquipSettings.CurrentSettings.Save();
 
             string onlineDllLink = "https://github.com/Wholesome-wRobot/Wholesome_Inventory_Manager/raw/master/Compiled/Wholesome_Inventory_Manager.dll";
-            string onlineVersionLink = "https://raw.githubusercontent.com/Wholesome-wRobot/Wholesome_Inventory_Manager/master/Compiled/Version.txt";
+            string onlineVersionLink = "https://raw.githubusercontent.com/Wholesome-wRobot/Wholesome_Inventory_Manager/master/Compiled/Auto_Version.txt";
 
             var onlineVersionTxt = new WebClient { Encoding = Encoding.UTF8 }.DownloadString(onlineVersionLink);
             Version onlineVersion = new Version(onlineVersionTxt);
