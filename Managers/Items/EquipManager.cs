@@ -260,6 +260,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             foreach (IWIMItem ammo in potentialAmmo)
             {
                 string reasonToEquip = IsAmmoBetter(ammo, potentialAmmo);
+                
                 if (reasonToEquip != null && EquipItem(ammoSlot, ammo, reasonToEquip))
                 {
                     // TODO, update bags and sheet?
@@ -272,6 +273,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         {
             ISheetSlot rangedSlot = _characterSheetManager.RangedSlot;
             ISheetSlot ammoSlot = _characterSheetManager.AmmoSlot;
+            
             if (rangedSlot.Item == null)
             {
                 return null;
@@ -282,22 +284,23 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 wantedAmmo = "Arrow";
             if (rangedSlot.Item.ItemSubType == "Guns")
                 wantedAmmo = "Bullet";
-
+            
             // Not the right type of ammo
             if (wantedAmmo == null || wantedAmmo != ammo.ItemSubType)
             {
                 return null;
             }
-
+            
             if (ammoSlot.Item == null
                 || ammoSlot.Item.ItemMinLevel < ammo.ItemMinLevel
                 || ammoSlot.Item.ItemSubType != ammo.ItemSubType
                 || !potentialAmmos.Exists(pa => pa.Name == ammoSlot.Item.Name) // out of current ammo
                 || !_containers.GetAllBagItems().Any(i => i.ItemId == ammo.ItemId)) // ammo didn't refresh after running out
             {
-                return rangedSlot.Item == null ? "Nothing equipped in this slot"
+                return ammoSlot.Item == null ? "Nothing equipped in this slot"
                     : $"Replacing {ammoSlot.Item.Name} (lvl {ammoSlot.Item.ItemMinLevel} -> {ammo.ItemMinLevel})";
             }
+            
             return null;
         }
 
