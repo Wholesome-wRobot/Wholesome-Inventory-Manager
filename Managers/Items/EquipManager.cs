@@ -90,9 +90,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         // returns the slot in which the item should be equipped, null if the item is not better
-        public (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem)
+        public (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem, bool isRoll = false)
         {
-            if (!CanEquipItem(armorItem))
+            if (!CanEquipItem(armorItem, isRoll))
                 return (null, null);
 
             if (armorSlot.Item == null || armorSlot.Item.WeightScore < armorItem.WeightScore)
@@ -121,9 +121,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         // returns the slot in which the item should be equipped, null if the item is not better
-        public (ISheetSlot, string) IsRingBetter(IWIMItem ringItem)
+        public (ISheetSlot, string) IsRingBetter(IWIMItem ringItem, bool isRoll = false)
         {
-            if (!CanEquipItem(ringItem))
+            if (!CanEquipItem(ringItem, isRoll))
                 return (null, null);
 
             ISheetSlot fingerSlot1 = _characterSheetManager.FingerSlots[0];
@@ -157,9 +157,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         // returns the slot in which the item should be equipped, null if the item is not better
-        public (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem)
+        public (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem, bool isRoll = false)
         {
-            if (!CanEquipItem(trinketItem))
+            if (!CanEquipItem(trinketItem, isRoll))
                 return (null, null);
 
             ISheetSlot Trinket1 = _characterSheetManager.TrinketSlots[0];
@@ -191,9 +191,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         // returns the reason why the item should be equipped, null if the item is not better
-        public string IsRangedBetter(IWIMItem rangedWeapon)
+        public string IsRangedBetter(IWIMItem rangedWeapon, bool isRoll = false)
         {
-            if (!CanEquipItem(rangedWeapon))
+            if (!CanEquipItem(rangedWeapon, isRoll))
                 return null;
 
             ISheetSlot rangedSlot = _characterSheetManager.RangedSlot;
@@ -322,7 +322,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         }
 
         // returns the slot and reason why the item should be equipped, (null, null) if the item is not better
-        public (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck)
+        public (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck, bool isRoll = false)
         {
             //Logger.LogDebug($"************ Weapon scan debug *****************");
             ISheetSlot mainHandSlot = _characterSheetManager.WeaponSlots[0];
@@ -348,9 +348,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (offHandSlot.Item != null)
                 listAllOffHandWeapons.Add(offHandSlot.Item);
 
-            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck))
+            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
                 listAllMainHandWeapons.Add(weaponToCheck);
-            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck))
+            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
                 listAllOffHandWeapons.Add(weaponToCheck);
 
             listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
@@ -523,7 +523,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
         }
 
-        private bool CanEquipItem(IWIMItem item)
+        private bool CanEquipItem(IWIMItem item, bool isRoll = false)
         {
             if (item.ItemSubType == ""
                 || !Conditions.InGameAndConnectedAndProductStartedNotInPause
@@ -536,7 +536,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 || _skillsManager.MySkills.ContainsKey(item.ItemSubType) && _skillsManager.MySkills[item.ItemSubType] > 0
                 || item.ItemSubType == "Fist Weapons" && Skill.Has(SkillLine.FistWeapons);
 
-            return ObjectManager.Me.Level >= item.ItemMinLevel && skillCheckOK && GetNbEquipAttempts(item.ItemLink) < _maxNbEquipAttempts;
+            bool isLevelOK = ObjectManager.Me.Level >= item.ItemMinLevel || isRoll;
+
+            return isLevelOK && skillCheckOK && GetNbEquipAttempts(item.ItemLink) < _maxNbEquipAttempts;
         }
 
         private List<IWIMItem> GetEquipableFromBags(string[] invTypes)

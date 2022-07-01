@@ -5,11 +5,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 {
     internal interface IEquipManager : ICycleable
     {
-        (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem);
-        (ISheetSlot, string) IsRingBetter(IWIMItem ringItem);
-        (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem);
-        (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck);
-        string IsRangedBetter(IWIMItem rangedWeapon);
+        (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem, bool isRoll = false);
+        (ISheetSlot, string) IsRingBetter(IWIMItem ringItem, bool isRoll = false);
+        (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem, bool isRoll = false);
+        (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck, bool isRoll = false);
+        string IsRangedBetter(IWIMItem rangedWeapon, bool isRoll = false);
         string IsAmmoBetter(IWIMItem ammo, List<IWIMItem> potentialAmmos);
         void CheckAll();
     }

@@ -62,7 +62,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
                     || (itemToRoll.ItemSubType == "Miscellaneous" && ClassSpecManager.ImACaster()))
                 {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsWeaponBetter(itemToRoll);
+                    (ISheetSlot, string) slotAndReason = _equipManager.IsWeaponBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
                         Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
@@ -73,7 +73,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 // Ranged
                 if (_characterSheetManager.RangedSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
                 {
-                    string reason = _equipManager.IsRangedBetter(itemToRoll);
+                    string reason = _equipManager.IsRangedBetter(itemToRoll, true);
                     if (reason != null)
                     {
                         Roll(rollId, itemToRoll, reason, RollType.NEED);
@@ -84,7 +84,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 // Trinket
                 if (itemToRoll.ItemEquipLoc == "INVTYPE_TRINKET")
                 {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsTrinketBetter(itemToRoll);
+                    (ISheetSlot, string) slotAndReason = _equipManager.IsTrinketBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
                         Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
@@ -95,7 +95,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 // Ring
                 if (itemToRoll.ItemEquipLoc == "INVTYPE_FINGER")
                 {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsRingBetter(itemToRoll);
+                    (ISheetSlot, string) slotAndReason = _equipManager.IsRingBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
                         Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
@@ -108,7 +108,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 {
                     if (armorSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
                     {
-                        (ISheetSlot, string) slotAndReason = _equipManager.IsArmorBetter(armorSlot, itemToRoll);
+                        (ISheetSlot, string) slotAndReason = _equipManager.IsArmorBetter(armorSlot, itemToRoll, true);
                         if (slotAndReason != (null, null))
                         {
                             Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
