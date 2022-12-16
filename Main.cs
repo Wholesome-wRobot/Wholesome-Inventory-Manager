@@ -57,13 +57,6 @@ public class Main : IPlugin
         _questRewardManager.Initialize();
 
         EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
-        EventsLua.AttachEventLua("CHARACTER_POINTS_CHANGED", e => ClassSpecManager.DetectSpec());
-        EventsLua.AttachEventLua("SKILL_LINES_CHANGED", e => _skillsManager.RecordSkills());
-        EventsLua.AttachEventLua("UNIT_INVENTORY_CHANGED", e => _equipManager.CheckAll());
-        EventsLua.AttachEventLua("PLAYER_EQUIPMENT_CHANGED", e => _characterSheetManager.Scan());
-        EventsLua.AttachEventLua("BAG_UPDATE", e => _equipManager.CheckAll());
-        EventsLua.AttachEventLua("PLAYER_ENTERING_WORLD", e => LUASetup());
-        EventsLua.AttachEventLua("PLAYER_REGEN_ENABLED", e => _equipManager.CheckAll());
     }
 
     public void Dispose()
@@ -87,6 +80,27 @@ public class Main : IPlugin
         {
             case "START_LOOT_ROLL":
                 _rollManager.CheckLootRoll(int.Parse(args[0]));
+                break;
+            case "CHARACTER_POINTS_CHANGED":
+                ClassSpecManager.DetectSpec();
+                break;
+            case "SKILL_LINES_CHANGED":
+                _skillsManager.RecordSkills();
+                break;
+            case "UNIT_INVENTORY_CHANGED":
+                _equipManager.CheckAll();
+                break;
+            case "PLAYER_EQUIPMENT_CHANGED":
+                _characterSheetManager.Scan();
+                break;
+            case "BAG_UPDATE":
+                _equipManager.CheckAll();
+                break;
+            case "PLAYER_ENTERING_WORLD":
+                LUASetup();
+                break;
+            case "PLAYER_REGEN_ENABLED":
+                _equipManager.CheckAll();
                 break;
         }
     }
