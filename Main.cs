@@ -79,6 +79,7 @@ public class Main : IPlugin
         switch (id)
         {
             case "START_LOOT_ROLL":
+                Logger.Log($"ROLL DETECTED");
                 _rollManager.CheckLootRoll(int.Parse(args[0]));
                 break;
             case "CHARACTER_POINTS_CHANGED":
