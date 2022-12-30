@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
@@ -40,10 +41,22 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public void Initialize()
         {
             CheckAll();
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public void Dispose()
         {
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+        }
+
+        private void OnEventsLuaWithArgs(string id, List<string> args)
+        {
+            if (id == "BAG_UPDATE"
+                || id == "PLAYER_REGEN_ENABLED"
+                || id == "UNIT_INVENTORY_CHANGED" && args[0] == "player")
+            {
+                CheckAll();
+            }
         }
 
         public void CheckAll()
@@ -53,8 +66,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             lock (_equipManagerLock)
             {
+                Stopwatch watch = Stopwatch.StartNew();
+                
                 _characterSheetManager.Scan();
                 _containers.Scan();
+                
                 if (!ObjectManager.Me.InCombatFlagOnly)
                 {
                     _containers.BagEquip();
@@ -67,6 +83,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
                 AutoEquipAmmo();
                 _lootFilter.FilterLoot(_containers.GetAllBagItems());
+                if (watch.ElapsedMilliseconds > 100)
+                {
+                    Logger.LogError($"CheckAll took {watch.ElapsedMilliseconds}ms");
+                }
             }
         }
 
@@ -578,7 +598,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 return false;
             }
 
-            if (item.ContainerId < 0 || item.ContainerSlot < 0)
+            if (item.BagIndex < 0 || item.SlotIndex < 0)
             {
                 Logger.LogError($"Item {item.Name} is not recorded as being in a bag. Can't use.");
             }

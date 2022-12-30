@@ -12,8 +12,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 {
     internal class WIMItem : IWIMItem
     {
-        private readonly object _tooltipLocker = new object();
-
         private int _uniqueIdCounter = 0;
 
         public uint ItemId { get; private set; }
@@ -31,8 +29,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int BagCapacity { get; private set; }
         public int QuiverCapacity { get; private set; }
         public int AmmoPouchCapacity { get; private set; }
-        public int ContainerId { get; private set; } = -1;
-        public int ContainerSlot { get; private set; } = -1;
+        public int BagIndex { get; private set; } = -1;
+        public int SlotIndex { get; private set; } = -1;
         public double UniqueId { get; private set; }
         public float WeightScore { get; private set; } = 0;
         public float WeaponSpeed { get; private set; } = 0;
@@ -40,7 +38,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int RollId { get; private set; } = -1;
         public bool HasBeenRolled { get; set; }
         public Dictionary<string, float> ItemStats { get; private set; } = new Dictionary<string, float>() { };
-
 
         public WIMItem(
             string itemLink,
@@ -53,15 +50,56 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             ItemLink = itemLink;
             RewardSlot = rewardSlot;
             RollId = rollId;
-            ContainerId = inBag;
-            ContainerSlot = inBagSlot;
+            BagIndex = inBag;
+            SlotIndex = inBagSlot;
 
             if (ItemLink.Length < 10)
                 return;
 
-            if (ItemLink.Split(':').Length < 2)
+            IWIMItem existingCopy = ItemCache.Get(ItemLink);
+            if (existingCopy != null)
             {
-                Logger.LogError($"[{Name}] Couldn't parse item ID from item link {ItemLink}");
+                CloneFromDB(existingCopy);
+            }
+            else
+            {
+                string iteminfo = Lua.LuaDoString<string>($@"return ParseItemInfo(-1, -1, ""{ItemLink.Replace("\"", "\\\"")}"");");
+                string[] infoArray = iteminfo.Split('£');
+                RecordAllItemInfo(infoArray);
+            }
+        }
+
+        public WIMItem(
+            string[] itemInfo,
+            int bagIndex = -1,
+            int slotIndex = -1)
+        {
+            ItemLink = itemInfo[2];
+            UniqueId = ++_uniqueIdCounter;
+            BagIndex = bagIndex;
+            SlotIndex = slotIndex;
+
+            if (ItemLink.Length < 10)
+                return;
+
+            IWIMItem existingCopy = ItemCache.Get(ItemLink);
+            if (existingCopy != null)
+            {
+                CloneFromDB(existingCopy);
+            }
+            else
+            {
+                RecordAllItemInfo(itemInfo);
+            }
+
+        }
+
+        private void RecordAllItemInfo(string[] luaItemInfo)
+        {
+            if (luaItemInfo.Length < 11)
+            {
+                Logger.LogDebug($"Item {luaItemInfo[3]} doesn't have the correct number of info. Skipping.");
+                return;
             }
 
             if (uint.TryParse(ItemLink.Split(':')[1], out uint parsedItemId))
@@ -73,67 +111,36 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 Logger.LogError($"Couldn't parse item ID {ItemLink.Split(':')[1]}");
             }
 
-            IWIMItem existingCopy = ItemCache.Get(ItemLink);
+            Name = luaItemInfo[3];
+            ItemRarity = ToolBox.ParseInt(luaItemInfo[4]);
+            ItemLevel = ToolBox.ParseInt(luaItemInfo[5]);
+            ItemMinLevel = ToolBox.ParseInt(luaItemInfo[6]);
+            ItemType = luaItemInfo[7];
+            ItemSubType = luaItemInfo[8];
+            ItemStackCount = ToolBox.ParseInt(luaItemInfo[9]);
+            ItemEquipLoc = luaItemInfo[10];
+            ItemSellPrice = ToolBox.ParseInt(luaItemInfo[11]);
 
-            if (existingCopy != null)
+            string toolTip = luaItemInfo[12];
+
+            if (Main.WoWVersion <= ToolBox.WoWVersion.TBC)
             {
-                CloneFromDB(existingCopy);
+                RecordToolTipTBC(toolTip);
+                RecordBagSpaceTBC();
             }
             else
             {
-                string iteminfo = Lua.LuaDoString<string>($@"
-                    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-                    itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(""{ItemLink.Replace("\"", "\\\"")}"");
-
-                    if (itemSellPrice == null) then
-                        itemSellPrice = 0
-                    end
-
-                    if (itemEquipLoc == null) then
-                        itemEquipLoc = ''
-                    end
-
-                    return itemName..'§'..itemLink..'§'..itemRarity..'§'..itemLevel..
-                        '§'..itemMinLevel..'§'..itemType..'§'..itemSubType..'§'..itemStackCount..
-                        '§'..itemEquipLoc..'§'..itemTexture..'§'..itemSellPrice");
-
-                string[] infoArray = iteminfo.Split('§');
-
-                if (infoArray.Length < 11)
-                {
-                    Logger.LogDebug($"Item {itemLink} doesn't have the correct number of info. Skipping.");
-                    return;
-                }
-
-                Name = infoArray[0];
-                ItemLink = itemLink;
-                ItemRarity = int.Parse(infoArray[2]);
-                ItemLevel = int.Parse(infoArray[3]);
-                ItemMinLevel = int.Parse(infoArray[4]);
-                ItemType = infoArray[5];
-                ItemSubType = infoArray[6];
-                ItemStackCount = int.Parse(infoArray[7]);
-                ItemEquipLoc = infoArray[8];
-                ItemTexture = infoArray[9];
-                ItemSellPrice = int.Parse(infoArray[10]);
-
-
-                if (Main.WoWVersion <= ToolBox.WoWVersion.TBC)
-                {
-                    RecordToolTipTBC();
-                    RecordBagSpaceTBC();
-                }
-                else
-                {
-                    RecordToolTipWotLK();
-                    RecordStatsWotLK();
-                }
-
-                ItemCache.Add(this);
-                if (AutoEquipSettings.CurrentSettings.LogItemInfo)
-                    LogItemInfo();
+                RecordToolTipWotLK(toolTip);
+                RecordStatsWotLK();
             }
+
+            RecordWeightScore();
+
+            ItemCache.Add(this);
+            if (AutoEquipSettings.CurrentSettings.LogItemInfo)
+                LogItemInfo();
         }
+
         private void CloneFromDB(IWIMItem existingCopy)
         {
             Name = existingCopy.Name;
@@ -183,22 +190,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
         }
 
-        private void RecordToolTipTBC()
+        private void RecordToolTipTBC(string lines)
         {
             if (ItemType != "Armor" && ItemType != "Weapon")
             {
                 return;
-            }
-
-            string lines = null;
-            lock (_tooltipLocker)
-            {
-                // Record the info present in the tooltip
-                lines = Lua.LuaDoString<string>($@"
-                    WEquipTooltip:ClearLines();
-                    WEquipTooltip:SetHyperlink(""{ItemLink}"");
-                    return EnumerateTooltipLines(WEquipTooltip: GetRegions());
-                ");
             }
 
             if (lines == null)
@@ -279,22 +275,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                         Logger.LogError($"Ignored : {l}");*/
                 }
             }
-            RecordWeightScore();
         }
 
-        private void RecordToolTipWotLK()
+        private void RecordToolTipWotLK(string lines)
         {
-            string lines = null;
-            lock(_tooltipLocker)
-            {
-                // Record the info present in the tooltip
-                lines = Lua.LuaDoString<string>($@"
-                    WEquipTooltip:ClearLines()
-                    WEquipTooltip:SetHyperlink(""{ItemLink}"")
-                    return EnumerateTooltipLines(WEquipTooltip: GetRegions())
-                ");
-            }
-
             if (lines == null)
             {
                 Logger.LogError($"Failed to record tooltip for " + Name);
@@ -360,7 +344,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                         ItemStats.Add(statName, statValue);
                 }
             }
-            RecordWeightScore();
         }
 
         private void RecordWeightScore()
@@ -428,20 +411,20 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
 
             Logger.Log($"Deleting {Name} ({reason})");
-            Lua.LuaDoString($"PickupContainerItem({ContainerId}, {ContainerSlot});");
+            Lua.LuaDoString($"PickupContainerItem({BagIndex}, {SlotIndex});");
             Lua.LuaDoString("DeleteCursorItem();");
             ToolBox.Sleep(200);
         }
 
         private void Use()
         {
-            if (ContainerId < 0 || ContainerSlot < 0)
+            if (BagIndex < 0 || SlotIndex < 0)
             {
                 Logger.LogError($"Item {Name} is not recorded as being in a bag. Can't use.");
             }
             else
             {
-                Lua.LuaDoString($"UseContainerItem({ContainerId}, {ContainerSlot})");
+                Lua.LuaDoString($"UseContainerItem({BagIndex}, {SlotIndex})");
             }
         }
 
@@ -461,12 +444,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
                     | BagCapacity : {BagCapacity} | WeaponSpeed : {WeaponSpeed} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
-                    | InBag: {ContainerId} | InBagSlot: {ContainerSlot} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
+                    | InBag: {BagIndex} | InBagSlot: {SlotIndex} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
                     {stats}");
         }
 
         //private int GetNbEquipAttempts => _itemEquipAttempts.FindAll(i => i == ItemLink).Count;
         public void ClickInInventory(int slotId) => Lua.LuaDoString($"PickupInventoryItem({slotId});");
-        public void PickupFromBag() => Lua.LuaDoString($"ClearCursor(); PickupContainerItem({ContainerId}, {ContainerSlot});");
+        public void PickupFromBag() => Lua.LuaDoString($"ClearCursor(); PickupContainerItem({BagIndex}, {SlotIndex});");
     }
 }

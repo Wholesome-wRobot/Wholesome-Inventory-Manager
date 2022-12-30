@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wholesome_Inventory_Manager.Managers.Items;
 using wManager.Wow.ObjectManager;
 
@@ -9,6 +8,41 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
     {
         private SynchronizedCollection<string> _protectedItems = new SynchronizedCollection<string>();
         private object _filterLock = new object();
+        private readonly bool _versionIsHigherThanTBC = ToolBox.GetWoWVersion() > ToolBox.WoWVersion.TBC;
+        private readonly bool _deleteDeprecatedQuestItems;
+        private readonly int _deleteGoldValue;
+        private readonly int _deleteSilverValue;
+        private readonly int _deleteCopperValue;
+        private readonly int _valueThresholdInCopper;
+        private readonly bool _deleteItemWithNoValue;
+        private readonly bool _deleteGray;
+        private readonly bool _deleteWhite;
+        private readonly bool _deleteGreen;
+        private readonly bool _deleteBlue;
+        private readonly bool _keepGray;
+        private readonly bool _keepWhite;
+        private readonly bool _keepGreen;
+        private readonly bool _keepBlue;
+        private readonly bool _lootFilterActivated;
+
+        public LootFilter()
+        {
+            _deleteDeprecatedQuestItems = AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems;
+            _deleteGoldValue = AutoEquipSettings.CurrentSettings.DeleteGoldValue;
+            _deleteSilverValue = AutoEquipSettings.CurrentSettings.DeleteSilverValue;
+            _deleteCopperValue = AutoEquipSettings.CurrentSettings.DeleteCopperValue;
+            _valueThresholdInCopper = _deleteGoldValue * 10000 + _deleteSilverValue * 100 + _deleteCopperValue;
+            _deleteItemWithNoValue = AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue;
+            _deleteGray = AutoEquipSettings.CurrentSettings.DeleteGray;
+            _deleteWhite = AutoEquipSettings.CurrentSettings.DeleteWhite;
+            _deleteGreen = AutoEquipSettings.CurrentSettings.DeleteGreen;
+            _deleteBlue = AutoEquipSettings.CurrentSettings.DeleteBlue;
+            _keepGray = AutoEquipSettings.CurrentSettings.KeepGray;
+            _keepWhite = AutoEquipSettings.CurrentSettings.KeepWhite;
+            _keepGreen = AutoEquipSettings.CurrentSettings.KeepGreen;
+            _keepBlue = AutoEquipSettings.CurrentSettings.KeepBlue;
+            _lootFilterActivated = AutoEquipSettings.CurrentSettings.LootFilterActivated;
+        }
 
         public void Initialize()
         {
@@ -20,14 +54,10 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
 
         public void FilterLoot(SynchronizedCollection<IWIMItem> bagItems)
         {
-            if (!AutoEquipSettings.CurrentSettings.LootFilterActivated) return;
+            if (!_lootFilterActivated) return;
 
-            lock(_filterLock)
+            lock (_filterLock)
             {
-                int valueThresholdInCopper = AutoEquipSettings.CurrentSettings.DeleteGoldValue * 10000
-                    + AutoEquipSettings.CurrentSettings.DeleteSilverValue * 100
-                    + AutoEquipSettings.CurrentSettings.DeleteCopperValue;
-
                 foreach (IWIMItem item in bagItems)
                 {
                     // Skip Do Not Sell item
@@ -35,7 +65,7 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
                         continue;
 
                     // Deprecated quest
-                    if (AutoEquipSettings.CurrentSettings.DeleteDeprecatedQuestItems
+                    if (_deleteDeprecatedQuestItems
                         && item.ItemMinLevel > 1
                         && item.ItemType == "Quest"
                         && item.ItemSubType == "Quest"
@@ -53,44 +83,44 @@ namespace Wholesome_Inventory_Manager.Managers.Filter
                         continue;
 
                     // Value
-                    if (ToolBox.GetWoWVersion() > ToolBox.WoWVersion.TBC && item.ItemSellPrice == 0 && !AutoEquipSettings.CurrentSettings.DeleteItemWithNoValue)
+                    if (_versionIsHigherThanTBC && item.ItemSellPrice == 0 && !_deleteItemWithNoValue)
                         continue;
 
                     // Rarity
-                    if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.DeleteGray)
+                    if (item.ItemRarity == 0 && _deleteGray)
                     {
                         item.DeleteFromBag("Quality is Poor");
                         continue;
                     }
-                    else if (item.ItemRarity == 0 && AutoEquipSettings.CurrentSettings.KeepGray)
+                    else if (item.ItemRarity == 0 && _keepGray)
                         continue;
 
-                    if (item.ItemRarity == 1 && AutoEquipSettings.CurrentSettings.DeleteWhite)
+                    if (item.ItemRarity == 1 && _deleteWhite)
                     {
                         item.DeleteFromBag("Quality is Common");
                         continue;
                     }
-                    else if (item.ItemRarity == 1 && AutoEquipSettings.CurrentSettings.KeepWhite)
+                    else if (item.ItemRarity == 1 && _keepWhite)
                         continue;
 
-                    if (item.ItemRarity == 2 && AutoEquipSettings.CurrentSettings.DeleteGreen)
+                    if (item.ItemRarity == 2 && _deleteGreen)
                     {
                         item.DeleteFromBag("Quality is Uncommon");
                         continue;
                     }
-                    else if (item.ItemRarity == 2 && AutoEquipSettings.CurrentSettings.KeepGreen)
+                    else if (item.ItemRarity == 2 && _keepGreen)
                         continue;
 
-                    if (item.ItemRarity == 3 && AutoEquipSettings.CurrentSettings.DeleteBlue)
+                    if (item.ItemRarity == 3 && _deleteBlue)
                     {
                         item.DeleteFromBag("Quality is rare");
                         continue;
                     }
-                    else if (item.ItemRarity == 3 && AutoEquipSettings.CurrentSettings.KeepBlue)
+                    else if (item.ItemRarity == 3 && _keepBlue)
                         continue;
 
-                    if (item.ItemSellPrice < valueThresholdInCopper)
-                        item.DeleteFromBag($"Item value {item.ItemSellPrice} is lesser than setting {valueThresholdInCopper}");
+                    if (item.ItemSellPrice < _valueThresholdInCopper)
+                        item.DeleteFromBag($"Item value {item.ItemSellPrice} is lesser than setting {_valueThresholdInCopper}");
                 }
             }
         }

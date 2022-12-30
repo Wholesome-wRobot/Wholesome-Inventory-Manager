@@ -28,31 +28,51 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         public void Initialize()
         {
             Scan();
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public void Dispose()
         {
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+        }
+
+        private void OnEventsLuaWithArgs(string id, List<string> args)
+        {
+            if (id == "PLAYER_EQUIPMENT_CHANGED")
+            {
+                Scan();
+            }
         }
 
         public void Scan()
         {
-            List<string> allItemLinks = Lua.LuaDoString<string>($@"
-                                local allItems = """";
-                                for i=0, 19 do
-                                    local item = GetInventoryItemLink(""player"", i);
-                                    if item == nil then item = ""null"" end;
-                                    allItems = allItems..'$'..item;
-                                end
-                                return allItems;").Split('$').ToList();
-            allItemLinks.RemoveAt(0);
+            string[] allItemLinks = Lua.LuaDoString<string[]>($@"
+                    local allItems = {{}};
+                    for i=0, 19 do
+                        local item = GetInventoryItemLink(""player"", i);
+                        if item == nil then 
+                            table.insert(allItems, ""null"");
+                        else
+                            table.insert(allItems, item);
+                        end;
+                    end
+                    return unpack(allItems);
+                ");
 
-            for (int i = 0; i < allItemLinks.Count; i++)
+            if (allItemLinks.Length > 0 && !string.IsNullOrEmpty(allItemLinks[0]))
             {
-                ISheetSlot slotToRefresh = AllSlots.Find(s => s.InventorySlotID == i);
-                if (slotToRefresh != null)
+                for (int i = 0; i < allItemLinks.Length; i++)
                 {
-                    slotToRefresh.RefreshItem(allItemLinks[i]);
+                    ISheetSlot slotToRefresh = AllSlots.Find(s => s.InventorySlotID == i);
+                    if (slotToRefresh != null)
+                    {
+                        slotToRefresh.RefreshItem(allItemLinks[i]);
+                    }
                 }
+            }
+            else
+            {
+                Logger.LogError($"[CharacterSheet] LUA info was empty");
             }
         }
 

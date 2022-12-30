@@ -5,6 +5,19 @@ using wManager.Wow.Helpers;
 
 public class ToolBox
 {
+    public static int ParseInt(string str)
+    {
+        if (str != null && int.TryParse(str, out int val))
+        {
+            return val;
+        }
+        else
+        {
+            Logger.LogError($"ERROR: Unable to parse {str}");
+            return 0;
+        }
+    }
+
     public static void Restart()
     {
         new Thread(() =>

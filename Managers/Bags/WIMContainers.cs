@@ -34,29 +34,60 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         {
             _listContainers.Clear();
 
-            string[] bagLinks = Lua.LuaDoString<string[]>($@"
+            // This LUA command returns all items info in an array
+            string[] luaItemInfos = Lua.LuaDoString<string[]>($@"
                 local result = {{}};
-                for i=0,4,1
-                do
-                    local bagLink = GetContainerItemLink(0, 0-i);
-                    if (bagLink == nil) then
-                        table.insert(result, ""nil"");
+                for i=0, 4, 1 do
+                    local bagLink;
+                    if i == 0 then
+                        bagLink = ""|cff1eff00|Hitem:4500:0:0:0:0:0:0:0:0|h[Traveler's Backpack]|h|r"";
                     else
-                        table.insert(result, bagLink);
+                        bagLink = GetContainerItemLink(0, i-4);
+                    end
+                    -- bags 0 to 4 (right to left)
+                    if (bagLink ~= nil) then
+                        local containerNbSlots = GetContainerNumSlots(i)
+                        -- Add bag first
+                        table.insert(result, ParseItemInfo(i, 0, bagLink));
+                        -- Get all items in bag
+                        for j=1, containerNbSlots do
+                            local itemInfoTable = {{}};
+                            local itemLink = GetContainerItemLink(i, j);
+                            if itemLink == nil then 
+                                table.insert(result, table.concat({{ i, j, ""null"" }}, ""£""));
+                            else
+                                table.insert(result, ParseItemInfo(i, j, itemLink));
+                            end;
+                        end;
                     end
                 end
                 return unpack(result);
             ");
 
-            bagLinks = bagLinks.Reverse().ToArray();
-
-            for (int i = 0; i < 5; i++)
+            // Dump and unpack all items infos
+            List<string[]> allItemInfos = new List<string[]>();
+            if (luaItemInfos.Length > 0 && !string.IsNullOrEmpty(luaItemInfos[0]))
             {
-                string bagLink = bagLinks[i];
-                if (!bagLink.Equals("nil") || i == 0)
+                foreach (string luaItemInfo in luaItemInfos)
                 {
-                    _listContainers.Add(new WIMContainer(i, bagLink));
+                    allItemInfos.Add(luaItemInfo.Split('£'));
                 }
+
+                // Create bags
+                for (int i = 0; i < 5; i++)
+                {
+                    string[] bag = allItemInfos.Find(itemInfo => itemInfo[1] == "0" && ToolBox.ParseInt(itemInfo[0]) == i);
+                    if (bag != null)
+                    {
+                        List<string[]> itemsInThisBag = allItemInfos
+                            .FindAll(itemInfo => itemInfo[1] != "0" && ToolBox.ParseInt(itemInfo[0]) == i);
+                        _listContainers.Add(new WIMContainer(bag, itemsInThisBag, i));
+                    }
+                }
+            }
+            else
+            {
+                Logger.LogError($"[Containers] LUA info was empty");
             }
         }
 
@@ -83,7 +114,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                     IWIMItem itemToMove = bagToEmpty.Items[i];
                     itemToMove.PickupFromBag();
                     ToolBox.Sleep(100);
-                    MoveItemToBag(itemToMove, destination.BagPosition, destination.SlotIndex);
+                    MoveItemToBag(itemToMove, destination.BagIndex, destination.SlotIndex);
                     ToolBox.Sleep(100);
                 }
             }
@@ -97,12 +128,12 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             {
                 Logger.Log($"Replacing {bagToReplace.BagItem.Name} with {newBag.Name}");
 
-                if (newBag.ContainerId == bagToReplace.Position)
+                if (newBag.BagIndex == bagToReplace.Index)
                 {
                     newBag = GetAllBagItems().FirstOrDefault(b => b.ItemLink == newBag.ItemLink);
                 }
 
-                MoveItemToBag(newBag, bagToReplace.Position);
+                MoveItemToBag(newBag, bagToReplace.Index);
 
                 _lootFilter.ProtectFromFilter(newBag.ItemLink);
                 Lua.LuaDoString($"EquipPendingItem(0);");
@@ -183,13 +214,13 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                 if (AutoEquipSettings.CurrentSettings.EquipQuiver)
                 {
                     // Move ammoContainer to position 4
-                    if (equippedQuiver != null && equippedQuiver.Position != 4)
+                    if (equippedQuiver != null && equippedQuiver.Index != 4)
                     {
                         equippedQuiver.MoveToSlot(4);
                         Scan();
                         equippedQuiver = _listContainers.FirstOrDefault(bag => bag.IsQuiver);
                     }
-                    if (equippedAmmoPouch != null && equippedAmmoPouch.Position != 4)
+                    if (equippedAmmoPouch != null && equippedAmmoPouch.Index != 4)
                     {
                         equippedAmmoPouch.MoveToSlot(4);
                         Scan();
@@ -310,7 +341,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                     if (smallestEquippedBag != null
                         && biggestBagInBags != null
                         && smallestEquippedBag.Capacity < biggestBagInBags.BagCapacity
-                        && smallestEquippedBag.Position != 0)
+                        && smallestEquippedBag.Index != 0)
                         ReplaceBag(smallestEquippedBag, biggestBagInBags);
                 }
             }
@@ -331,7 +362,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         {
             Lua.LuaDoString($"PickupContainerItem({bagPosition}, {bagSlot});"); // en fait un clique sur le slot de destination
             ToolBox.Sleep(100);
-            if (_listContainers.FirstOrDefault(bag => bag.Position == bagPosition).GetContainerItemlink(bagSlot) == itemToMove.ItemLink)
+            if (_listContainers.FirstOrDefault(bag => bag.Index == bagPosition).GetContainerItemlink(bagSlot) == itemToMove.ItemLink)
             {
                 return true;
             }

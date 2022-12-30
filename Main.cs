@@ -27,8 +27,6 @@ public class Main : IPlugin
 
     public void Initialize()
     {
-        LUASetup();
-
         AutoEquipSettings.Load();
         ClassSpecManager.Initialize();
 
@@ -41,12 +39,14 @@ public class Main : IPlugin
 
         Logger.Log($"Launching version {version} on client {WoWVersion}");
 
+        LUASetup();
+
         _skillsManager = new SkillsManager();
         _skillsManager.Initialize();
         _characterSheetManager = new CharacterSheetManager();
         _characterSheetManager.Initialize();
         _lootFilter = new LootFilter();
-        _lootFilter.Initialize();
+        _lootFilter.Initialize();        
         _containers = new WIMContainers(_characterSheetManager, _lootFilter);
         _containers.Initialize();
         _equipManager = new EquipManager(_skillsManager, _characterSheetManager, _containers, _lootFilter);
@@ -54,7 +54,7 @@ public class Main : IPlugin
         _rollManager = new RollManager(_equipManager, _characterSheetManager, _lootFilter);
         _rollManager.Initialize();
         _questRewardManager = new QuestRewardManager(_equipManager, _characterSheetManager);
-        _questRewardManager.Initialize();
+        _questRewardManager.Initialize();        
 
         EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
     }
@@ -76,33 +76,9 @@ public class Main : IPlugin
 
     private void OnEventsLuaWithArgs(string id, List<string> args)
     {
-        switch (id)
+        if (id == "PLAYER_ENTERING_WORLD")
         {
-            case "START_LOOT_ROLL":
-                Logger.Log($"ROLL DETECTED");
-                _rollManager.CheckLootRoll(int.Parse(args[0]));
-                break;
-            case "CHARACTER_POINTS_CHANGED":
-                ClassSpecManager.DetectSpec();
-                break;
-            case "SKILL_LINES_CHANGED":
-                _skillsManager.RecordSkills();
-                break;
-            case "UNIT_INVENTORY_CHANGED":
-                _equipManager.CheckAll();
-                break;
-            case "PLAYER_EQUIPMENT_CHANGED":
-                _characterSheetManager.Scan();
-                break;
-            case "BAG_UPDATE":
-                _equipManager.CheckAll();
-                break;
-            case "PLAYER_ENTERING_WORLD":
-                LUASetup();
-                break;
-            case "PLAYER_REGEN_ENABLED":
-                _equipManager.CheckAll();
-                break;
+            LUASetup();
         }
     }
 
@@ -143,7 +119,22 @@ public class Main : IPlugin
                         end
                     end
                     return result
-                end"
-            );
+                end
+
+                function ParseItemInfo(i, j, paramItemLink)
+                    WEquipTooltip:ClearLines();
+                    WEquipTooltip:SetHyperlink(paramItemLink);
+                    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+                        itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(paramItemLink);  
+                    if (itemSellPrice == null) then
+                        itemSellPrice = 0;
+                    end
+                    if (itemEquipLoc == null) then
+                        itemEquipLoc = '';
+                    end      
+                    return table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
+                        itemSubType, itemStackCount, itemEquipLoc, itemSellPrice, EnumerateTooltipLines(WEquipTooltip: GetRegions()) }}, ""£"");
+                end
+            ");
     }
 }

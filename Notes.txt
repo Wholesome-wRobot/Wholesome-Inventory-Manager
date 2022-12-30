@@ -1,1 +1,39 @@
 ﻿
+                local result = {{}};
+                for i=0, 4, 1 do
+                    local bagLink;
+                    if i == 0 then
+                        bagLink = ""ORIGINALBP"";
+                    else
+                        bagLink = GetContainerItemLink(0, i-4);
+                    end
+                    -- bags 0 to 4 (right to left)
+                    if (bagLink ~= nil) then
+                        local bagPosition = i;
+                        local containerNbSlots = GetContainerNumSlots(i)
+                        -- Get all items in bag
+                        table.insert(result, table.concat({{ i, 0, bagLink, containerNbSlots }}, ""£""));
+                        local allItems = ""BAG"" .. bagPosition;
+                        for j=1, containerNbSlots do
+                            local itemInfoTable = {{}};
+                            local itemInfoString = """";
+                            local itemLink = GetContainerItemLink(bagPosition, j);
+                            if itemLink == nil then 
+                                itemInfoString = table.concat({{ i, j, ""null"" }}, ""£"")
+                            else
+                                local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+                                    itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemLink);
+                                    if (itemSellPrice == null) then
+                                        itemSellPrice = 0
+                                    end
+                                    if (itemEquipLoc == null) then
+                                        itemEquipLoc = ''
+                                    end
+                                itemInfoString = table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
+                                    itemSubType, itemStackCount, itemEquipLoc, itemSellPrice }}, ""£"")
+                            end;
+                            table.insert(result, itemInfoString);
+                        end;
+                    end
+                end
+                return unpack(result);

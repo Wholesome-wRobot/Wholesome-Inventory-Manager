@@ -1,6 +1,8 @@
-﻿using Wholesome_Inventory_Manager.Managers.Items;
+﻿using System.Collections.Generic;
+using Wholesome_Inventory_Manager.Managers.Items;
 using WholesomeToolbox;
 using wManager.Wow.Enums;
+using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
 
@@ -13,10 +15,20 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         public static void Initialize()
         {
             DetectSpec();
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public static void Dispose()
         {
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+        }
+
+        private static void OnEventsLuaWithArgs(string id, List<string> args)
+        {
+            if (id == "CHARACTER_POINTS_CHANGED")
+            {
+                DetectSpec();
+            }
         }
 
         public static void DetectSpec()

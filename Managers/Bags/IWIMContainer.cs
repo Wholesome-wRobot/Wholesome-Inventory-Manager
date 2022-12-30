@@ -6,7 +6,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
     internal interface IWIMContainer
     {
         IWIMItem BagItem { get; }
-        int Position { get; }
+        int Index { get; }
         int Capacity { get; }
         bool IsAmmoPouch { get; }
         bool IsQuiver { get; }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Wholesome_Inventory_Manager.Managers.Items;
 using wManager.Wow.Helpers;
 
@@ -6,7 +7,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
 {
     internal class WIMContainer : IWIMContainer
     {
-        public int Position { get; private set; }
+        public int Index { get; private set; }
         public int Capacity { get; private set; }
         public bool IsAmmoPouch { get; private set; }
         public bool IsQuiver { get; private set; }
@@ -15,13 +16,13 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         public SynchronizedCollection<IWIMItem> Items { get; private set; } = new SynchronizedCollection<IWIMItem>();
         public SynchronizedCollection<IContainerSlot> Slots { get; private set; } = new SynchronizedCollection<IContainerSlot>();
 
-        public WIMContainer(int position, string bagLink)
+        public WIMContainer(string[] itemInfoArray, List<string[]> bagItems, int bagIndex)
         {
-            Position = position;
-            Capacity = GetContainerNbSlots();
-            if (Position != 0)
+            Index = bagIndex;
+            Capacity = bagItems.Count;
+            if (Index != 0)
             {
-                BagItem = new WIMItem(bagLink);
+                BagItem = new WIMItem(itemInfoArray, Index, 0);
                 IsQuiver = BagItem.QuiverCapacity > 0;
                 IsAmmoPouch = BagItem.AmmoPouchCapacity > 0;
             }
@@ -30,48 +31,34 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                 IsOriginalBackpack = true;
             }
 
-            string[] allItems = GetAllItemLinks(Capacity).Split('$');
-            for (int i = 0; i < allItems.Length; i++)
+            for (int i = 0; i < Capacity; i++)
             {
-                IWIMItem item;
-                if (allItems[i] != "BAG")
+                string[] itemInfos = bagItems[i];
+                string itemLink = itemInfos[2];
+
+                if (itemLink != "null")
                 {
-                    if (allItems[i] != "null")
-                    {
-                        item = new WIMItem(allItems[i], inBagSlot: i, inBag: Position);
-                        Slots.Add(new ContainerSlot(i, position, item));
-                        Items.Add(item);
-                    }
-                    else
-                    {
-                        Slots.Add(new ContainerSlot(i, position, null));
-                    }
+                    IWIMItem item = new WIMItem(bagItems[i], Index, i + 1);
+                    Slots.Add(new ContainerSlot(i + 1, Index, item));
+                    Items.Add(item);
                 }
+                else
+                {
+                    Slots.Add(new ContainerSlot(i + 1, Index, null));
+                }
+
             }
         }
 
         public void MoveToSlot(int position)
         {
-            Lua.LuaDoString($"PickupBagFromSlot({Position + 19});");
+            Lua.LuaDoString($"PickupBagFromSlot({Index + 19});");
             ToolBox.Sleep(100);
             Lua.LuaDoString($"PutItemInBag({position + 19});");
         }
 
-        private string GetAllItemLinks(int capacity)
-        {
-            return Lua.LuaDoString<string>($@"
-                    local allItems = ""BAG"";
-                    for i=1,{capacity} do
-                        local item = GetContainerItemLink({Position}, i);
-                        if item == nil then item = ""null"" end;
-                        allItems = allItems .. ""$"" .. item
-                    end;
-                    return allItems;
-                ");
-        }
-
-        public int GetContainerNbSlots() => Lua.LuaDoString<int>($"return GetContainerNumSlots({Position});");
-        public int GetContainerNbFreeSlots() => Lua.LuaDoString<int>($"local numberOfFreeSlots, BagType = GetContainerNumFreeSlots({Position}); return numberOfFreeSlots;");
-        public string GetContainerItemlink(int slot) => Lua.LuaDoString<string>($"return GetContainerItemLink({Position}, {slot});");
+        public int GetContainerNbSlots() => Lua.LuaDoString<int>($"return GetContainerNumSlots({Index});");
+        public int GetContainerNbFreeSlots() => Lua.LuaDoString<int>($"local numberOfFreeSlots, BagType = GetContainerNumFreeSlots({Index}); return numberOfFreeSlots;");
+        public string GetContainerItemlink(int slot) => Lua.LuaDoString<string>($"return GetContainerItemLink({Index}, {slot});");
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
@@ -24,10 +25,27 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 
         public void Initialize()
         {
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public void Dispose()
         {
+            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
+        }
+
+        private void OnEventsLuaWithArgs(string id, List<string> args)
+        {
+            if (id == "START_LOOT_ROLL")
+            {
+                if (int.TryParse(args[0], out int rollId))
+                {
+                    CheckLootRoll(rollId);
+                }
+                else
+                {
+                    Logger.LogError($"Couldn't parse roll ID!");
+                }
+            }
         }
 
         public void CheckLootRoll(int rollId)
