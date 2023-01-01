@@ -83,7 +83,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
                 AutoEquipAmmo();
                 _lootFilter.FilterLoot(_containers.GetAllBagItems());
-                if (watch.ElapsedMilliseconds > 100)
+                if (watch.ElapsedMilliseconds > 200)
                 {
                     Logger.LogError($"CheckAll took {watch.ElapsedMilliseconds}ms");
                 }
