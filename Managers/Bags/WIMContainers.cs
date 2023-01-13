@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
@@ -143,16 +144,28 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
 
         private List<int> GetEmptyContainerSlots()
         {
-            List<int> result = new List<int>();
-            for (int i = 0; i < 5; i++)
+            List<int> emptys = new List<int>();
+            string[] result = Lua.LuaDoString<string[]>($@"
+                local result = {{}}
+                for i = 0, 4 do 
+                    if GetBagName(i) == nil then
+                        table.insert(result, i);
+                    end
+                end
+                return unpack(result);
+            ");
+            foreach(string ind in result)
             {
-                string bagName = Lua.LuaDoString<string>($"return GetBagName({i});");
-                if (bagName.Equals(""))
+                if (int.TryParse(ind, out int index))
                 {
-                    result.Add(i);
+                    emptys.Add(index);
+                }
+                else
+                {
+                    Logger.LogError($"Couldn't parse empty bag result {ind}");
                 }
             }
-            return result;
+            return emptys;
         }
 
         private int GetNbBagEquipped()
@@ -204,6 +217,8 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         {
             if (AutoEquipSettings.CurrentSettings.AutoEquipBags)
             {
+                Stopwatch watch = Stopwatch.StartNew();
+
                 bool ImHunterAndNeedAmmoBag = ObjectManager.Me.WowClass == WoWClass.Hunter && AutoEquipSettings.CurrentSettings.EquipQuiver;
                 int maxAmountOfBags = ImHunterAndNeedAmmoBag ? 4 : 5;
                 IWIMContainer equippedQuiver = _listContainers.FirstOrDefault(bag => bag.IsQuiver);

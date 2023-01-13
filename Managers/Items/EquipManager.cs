@@ -67,10 +67,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             lock (_equipManagerLock)
             {
                 Stopwatch watch = Stopwatch.StartNew();
-                
+
                 _characterSheetManager.Scan();
                 _containers.Scan();
-                
+
                 if (!ObjectManager.Me.InCombatFlagOnly)
                 {
                     _containers.BagEquip();

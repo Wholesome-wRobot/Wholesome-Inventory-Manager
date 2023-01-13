@@ -30,7 +30,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\WoW Wotlk\WRobot WOTLK\Plugins\</OutputPath>
+    <OutputPath>..\..\WoW Wotlk\WRobot\Plugins\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -194,8 +194,7 @@
 			$(PostBuildEventDependsOn);
 			PostBuildMacros;
 		</PostBuildEventDependsOn>
-    <PostBuildEvent>copy /Y "$(TargetDir)\$(ProjectName).dll" "C:\Users\Nico\Desktop\$(ProjectName).dll"
-copy /Y "$(TargetDir)\$(ProjectName).dll" "$(SolutionDir)\Compiled\$(ProjectName).dll"
+    <PostBuildEvent>copy /Y "$(TargetDir)\$(ProjectName).dll" "$(SolutionDir)\Compiled\$(ProjectName).dll"
 copy /Y "$(TargetDir)\$(ProjectName).dll" "D:\WoW\WoW TBC\WRobot\Plugins\$(ProjectName).dll"
 echo Writing assembly version in Auto_Version.txt: @(VersionNumber)
 echo @(VersionNumber) &gt; $(ProjectDir)\Compiled\Auto_Version.txt</PostBuildEvent>
