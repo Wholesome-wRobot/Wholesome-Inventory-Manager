@@ -39,9 +39,14 @@ public class ToolBox
 
     public static void Sleep(int milliseconds)
     {
-        int worldLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagWorld");
-        int homeLatency = Lua.LuaDoString<int>($"local down, up, lagHome, lagWorld = GetNetStats(); return lagHome");
-        Thread.Sleep(worldLatency + homeLatency + milliseconds);
+        int latency = Lua.LuaDoString<int>($@"
+            local result = 0;
+            local _, _, lagHome, lagWorld = GetNetStats();
+            if lagHome ~= nil then result = result + lagHome end;
+            if lagWorld ~= nil then result = result + lagWorld end;
+            return result;
+        ");
+        Thread.Sleep(latency + milliseconds);
     }
 
     public enum WoWVersion

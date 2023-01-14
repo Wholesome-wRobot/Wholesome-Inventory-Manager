@@ -50,7 +50,8 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MemoryRobot">
-      <HintPath>Dependencies\MemoryRobot.dll</HintPath>
+      <HintPath>..\..\WoW Wotlk\WRobot\Bin\MemoryRobot.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MoreLinq, Version=3.3.2.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
       <HintPath>packages\morelinq.3.3.2\lib\net451\MoreLinq.dll</HintPath>
@@ -59,10 +60,11 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RDManaged">
-      <HintPath>Dependencies\RDManaged.dll</HintPath>
+      <HintPath>..\..\WoW Wotlk\WRobot\Bin\RDManaged.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="robotManager">
-      <HintPath>Dependencies\robotManager.dll</HintPath>
+      <HintPath>..\..\WoW Wotlk\WRobot\Bin\robotManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -91,7 +93,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="wManager">
-      <HintPath>Dependencies\wManager.dll</HintPath>
+      <HintPath>..\..\WoW Wotlk\WRobot\Bin\wManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

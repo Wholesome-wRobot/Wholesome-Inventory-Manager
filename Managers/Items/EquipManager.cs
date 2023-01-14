@@ -602,15 +602,30 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 Logger.Log($"Equipping {item.Name} ({item.WeightScore}) [{reason}]");
                 _itemEquipAttempts.Add(item.ItemLink);
+
+                /*
                 item.PickupFromBag();
                 item.ClickInInventory(sheetSlot.InventorySlotID);
                 ToolBox.Sleep(100);
                 Lua.LuaDoString($"EquipPendingItem(0);");
                 ToolBox.Sleep(200);
-                _characterSheetManager.Scan();
-                _containers.Scan();
+                */
+                Lua.LuaDoString($@"
+                    ClearCursor();
+                    PickupContainerItem({item.BagIndex}, {item.SlotIndex});
+                    EquipCursorItem({sheetSlot.InventorySlotID});
+                    EquipPendingItem(0);
+                ");
 
-                if (sheetSlot.Item == null || sheetSlot.Item.ItemLink != item.ItemLink)
+                ToolBox.Sleep(100);
+
+                int itemIdInSlot = Lua.LuaDoString<int>($@"return GetInventoryItemID(""player"", {sheetSlot.InventorySlotID})");
+
+                //_characterSheetManager.Scan();
+                //_containers.Scan();
+
+                //if (sheetSlot.Item == null || sheetSlot.Item.ItemLink != item.ItemLink)
+                if (itemIdInSlot == 0 || itemIdInSlot != item.ItemId)
                 {
                     int nbEquipItem = GetNbEquipAttempts(item.ItemLink);
                     if (nbEquipItem < _maxNbEquipAttempts)
