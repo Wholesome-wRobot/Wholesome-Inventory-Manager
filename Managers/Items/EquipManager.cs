@@ -66,8 +66,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             lock (_equipManagerLock)
             {
-                Stopwatch watch = Stopwatch.StartNew();
-
                 _characterSheetManager.Scan();
                 _containers.Scan();
 
@@ -83,10 +81,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
                 AutoEquipAmmo();
                 _lootFilter.FilterLoot(_containers.GetAllBagItems());
-                if (watch.ElapsedMilliseconds > 200)
-                {
-                    Logger.LogError($"CheckAll took {watch.ElapsedMilliseconds}ms");
-                }
             }
         }
 
@@ -617,12 +611,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     EquipPendingItem(0);
                 ");
 
-                ToolBox.Sleep(100);
+                ToolBox.Sleep(200); // wait for UI to update
 
                 int itemIdInSlot = Lua.LuaDoString<int>($@"return GetInventoryItemID(""player"", {sheetSlot.InventorySlotID})");
 
-                //_characterSheetManager.Scan();
-                //_containers.Scan();
+                _characterSheetManager.Scan();
+                _containers.Scan();
 
                 //if (sheetSlot.Item == null || sheetSlot.Item.ItemLink != item.ItemLink)
                 if (itemIdInSlot == 0 || itemIdInSlot != item.ItemId)
