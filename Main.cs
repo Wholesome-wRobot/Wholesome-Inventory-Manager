@@ -39,7 +39,7 @@ public class Main : IPlugin
 
         Logger.Log($"Launching version {version} on client {WoWVersion}");
 
-        LUASetup();
+        ToolBox.LUASetup();
 
         _skillsManager = new SkillsManager();
         _skillsManager.Initialize();
@@ -78,7 +78,7 @@ public class Main : IPlugin
     {
         if (id == "PLAYER_ENTERING_WORLD")
         {
-            LUASetup();
+            ToolBox.LUASetup();
         }
     }
 
@@ -87,54 +87,5 @@ public class Main : IPlugin
         AutoEquipSettings.Load();
         AutoEquipSettings.CurrentSettings.ShowConfiguration();
         AutoEquipSettings.CurrentSettings.Save();
-    }
-
-    private void LUASetup()
-    {
-        if (Lua.LuaDoString<bool>("return WEquipTooltip ~= nil;"))
-            return;
-
-        // Create invisible tooltip to read tooltip info
-        Lua.LuaDoString($@"
-                local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
-                local L = L or tip: CreateFontString()
-                local R = R or tip: CreateFontString()
-                L: SetFontObject(GameFontNormal)
-                R: SetFontObject(GameFontNormal)
-                WEquipTooltip: AddFontStrings(L, R)
-                WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")"
-            );
-
-        // Create function to read invisible tooltip lines
-        Lua.LuaDoString($@"
-                function EnumerateTooltipLines(...)
-                    local result = """"
-                    for i = 1, select(""#"", ...) do
-                        local region = select(i, ...)
-                        if region and region:GetObjectType() == ""FontString"" then
-                            local text = region:GetText() or """"
-                            if text ~= """" then
-                                result = result .. ""|"" .. text
-                            end
-                        end
-                    end
-                    return result
-                end
-
-                function ParseItemInfo(i, j, paramItemLink)
-                    WEquipTooltip:ClearLines();
-                    WEquipTooltip:SetHyperlink(paramItemLink);
-                    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-                        itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(paramItemLink);  
-                    if (itemSellPrice == null) then
-                        itemSellPrice = 0;
-                    end
-                    if (itemEquipLoc == null) then
-                        itemEquipLoc = '';
-                    end      
-                    return table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
-                        itemSubType, itemStackCount, itemEquipLoc, itemSellPrice, EnumerateTooltipLines(WEquipTooltip: GetRegions()) }}, ""£"");
-                end
-            ");
     }
 }

@@ -89,6 +89,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             else
             {
                 Logger.LogError($"[Containers] LUA info was empty");
+                ToolBox.LUASetup();
             }
         }
 
@@ -163,6 +164,7 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                 else
                 {
                     Logger.LogError($"Couldn't parse empty bag result {ind}");
+                    ToolBox.LUASetup();
                 }
             }
             return emptys;

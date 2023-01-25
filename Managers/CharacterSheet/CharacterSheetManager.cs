@@ -73,6 +73,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
             else
             {
                 Logger.LogError($"[CharacterSheet] LUA info was empty");
+                ToolBox.LUASetup();
             }
         }
 
