@@ -370,7 +370,9 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
             foreach (WIMContainer container in _listContainers)
             {
                 foreach (IWIMItem item in container.Items)
+                {
                     result.Add(item);
+                }
             }
             return result;
         }

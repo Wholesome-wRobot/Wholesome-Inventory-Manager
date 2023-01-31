@@ -106,6 +106,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem, bool isRoll = false)
         {
+            if (isRoll
+                && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == armorItem.ItemLink))
+            {
+                return (null, null);
+            }
+
             if (!CanEquipItem(armorItem, isRoll))
                 return (null, null);
 
@@ -137,6 +143,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsRingBetter(IWIMItem ringItem, bool isRoll = false)
         {
+            if (isRoll
+                && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == ringItem.ItemLink))
+            {
+                return (null, null);
+            }
 
             if (!CanEquipItem(ringItem, isRoll))
             {
@@ -188,6 +199,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsTrinketBetter(IWIMItem trinketItem, bool isRoll = false)
         {
+            if (isRoll
+                && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == trinketItem.ItemLink))
+            {
+                return (null, null);
+            }
+
             if (!CanEquipItem(trinketItem, isRoll))
                 return (null, null);
 
@@ -232,6 +249,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the reason why the item should be equipped, null if the item is not better
         public string IsRangedBetter(IWIMItem rangedWeapon, bool isRoll = false)
         {
+            if (isRoll
+                && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == rangedWeapon.ItemLink))
+            {
+                return null;
+            }
+
             if (!CanEquipItem(rangedWeapon, isRoll))
                 return null;
 
@@ -366,6 +389,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         public (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck, bool isRoll = false)
         {
+            if (isRoll 
+                && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == weaponToCheck.ItemLink))
+            {
+                return (null, null);
+            }
+
             ISheetSlot mainHandSlot = _characterSheetManager.WeaponSlots[0];
             ISheetSlot offHandSlot = _characterSheetManager.WeaponSlots[1];
             float unIdealDebuff = 0.3f;
