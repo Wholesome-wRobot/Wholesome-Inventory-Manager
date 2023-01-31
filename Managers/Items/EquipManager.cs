@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Wholesome_Inventory_Manager.Managers.Bags;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
@@ -21,6 +20,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private SynchronizedCollection<string> _itemEquipAttempts = new SynchronizedCollection<string>();
         private readonly int _maxNbEquipAttempts = 5;
         private readonly object _equipManagerLock = new object();
+        private int nbWeaponCombnations = 0; // triggers a message in the log when new combos
 
         public EquipManager(
             ISkillsManager skillsManager,
@@ -308,7 +308,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (ammoSlot.Item.ItemMinLevel > ammo.ItemMinLevel) return "Finishing lower level ammo first";
             if (ammoSlot.Item.ItemSubType != ammo.ItemSubType) return $"Switching to {ammo.ItemSubType}";
             if (!potentialAmmos.Exists(pa => pa.Name == ammoSlot.Item.Name)
-                || !_containers.GetAllBagItems().Any(i => i.ItemId == ammo.ItemId)) 
+                || !_containers.GetAllBagItems().Any(i => i.ItemId == ammo.ItemId))
                 return $"We ran out of {ammoSlot.Item.Name}";
 
             return null;
@@ -331,15 +331,162 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
         }
 
+        private void AddWeaponsToCombinations(Dictionary<(string, string), float> dic, string mainHand, string offHand, float score)
+        {
+            if (!dic.ContainsKey((mainHand, offHand)))
+            {
+                dic.Add((mainHand, offHand), score);
+            }
+        }
+
+        public (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck, bool isRoll = false)
+        {
+            ISheetSlot mainHandSlot = _characterSheetManager.WeaponSlots[0];
+            ISheetSlot offHandSlot = _characterSheetManager.WeaponSlots[1];
+            float unIdealDebuff = 0.3f;
+            List<IWIMItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(mainHandSlot);
+            List<IWIMItem> listAllOffHandWeapons = GetEquipableWeaponsFromBags(offHandSlot);
+
+            if (mainHandSlot.Item != null)
+            {
+                listAllMainHandWeapons.Add(mainHandSlot.Item);
+                if (offHandSlot.InvTypes.Contains(mainHandSlot.Item.ItemEquipLoc))
+                {
+                    listAllOffHandWeapons.Add(mainHandSlot.Item);
+                }
+            }
+
+            if (offHandSlot.Item != null)
+            {
+                listAllOffHandWeapons.Add(offHandSlot.Item);
+                if (mainHandSlot.InvTypes.Contains(offHandSlot.Item.ItemEquipLoc))
+                {
+                    listAllMainHandWeapons.Add(offHandSlot.Item);
+                }
+            }
+
+            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            {
+                listAllMainHandWeapons.Add(weaponToCheck);
+            }
+
+            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            {
+                listAllOffHandWeapons.Add(weaponToCheck);
+            }
+
+            if (!_skillsManager.DualWield.KnownSpell)
+            {
+                listAllOffHandWeapons
+                    .RemoveAll(weapon => weapon.ItemSubType != "Miscellaneous"
+                        && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Shield);
+            }
+
+            if (!_skillsManager.KnowTitansGrip)
+            {
+                listAllOffHandWeapons
+                    .RemoveAll(weapon => TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
+            }
+
+            listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
+            listAllOffHandWeapons = listAllOffHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
+
+            Dictionary<(string, string), float> weaponCombinationsDic = new Dictionary<(string, string), float>();
+            (string MainHand, string OffHand) bestCombintation = (null, null);
+            float bestCombinationScore = 0;
+
+            // try all combinations
+            foreach (IWIMItem mainHandWeapon in listAllMainHandWeapons)
+            {
+                float mainHandWeaponScore = WeaponIsIdeal(mainHandWeapon) ? mainHandWeapon.WeightScore : mainHandWeapon.WeightScore * unIdealDebuff;
+
+                // Two handers
+                if (TwoHanders.Contains(ItemSkillsDictionary[mainHandWeapon.ItemSubType]))
+                {
+                    if (_skillsManager.KnowTitansGrip)
+                    {
+                        // Combine with offhand
+                        foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
+                        {
+                            if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                            {
+                                float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
+                                AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, "NULL", mainHandWeaponScore);
+                    }
+                }
+                // One handers
+                if (OneHanders.Contains(ItemSkillsDictionary[mainHandWeapon.ItemSubType]))
+                {
+                    AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, "NULL", mainHandWeaponScore);
+
+                    // Combine with offhand
+                    foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
+                    {
+                        if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                        {
+                            float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
+                            AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
+                        }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<(string MainHand, string OffHand), float> combination in weaponCombinationsDic)
+            {
+                if (combination.Value > bestCombinationScore)
+                {
+                    bestCombintation = (combination.Key.MainHand, combination.Key.OffHand);
+                    bestCombinationScore = combination.Value;
+                }
+
+                if (nbWeaponCombnations != weaponCombinationsDic.Count)
+                {
+                    Logger.Log($"Weapon combination {combination.Key.MainHand} + {combination.Key.OffHand} => {combination.Value}");
+                }
+            }
+
+            if (nbWeaponCombnations != weaponCombinationsDic.Count)
+            {
+                Logger.Log($"Best is : {bestCombintation.MainHand} + {bestCombintation.OffHand} => {bestCombinationScore}");
+            }
+
+            nbWeaponCombnations = weaponCombinationsDic.Count;
+
+            if (bestCombintation != (null, null))
+            {
+                if (weaponToCheck.Name == bestCombintation.MainHand
+                    && mainHandSlot.Item != weaponToCheck)
+                {
+                    return (mainHandSlot, $"Better weapons combination score {bestCombinationScore}");
+                }
+
+                if (weaponToCheck.Name == bestCombintation.OffHand
+                    && offHandSlot.Item != weaponToCheck)
+                {
+                    return (offHandSlot, $"Better weapons combination score {bestCombinationScore}");
+                }
+            }
+
+            return (null, null);
+        }
+
+        /*
         // returns the slot and reason why the item should be equipped, (null, null) if the item is not better
         public (ISheetSlot, string) IsWeaponBetter(IWIMItem weaponToCheck, bool isRoll = false)
         {
             //Logger.LogDebug($"************ Weapon scan debug *****************");
             ISheetSlot mainHandSlot = _characterSheetManager.WeaponSlots[0];
             ISheetSlot offHandSlot = _characterSheetManager.WeaponSlots[1];
+            float unIdealDebuff = 0.3f;
+            
             bool currentWeaponsAreIdeal = WeaponIsIdeal(mainHandSlot.Item) && WeaponIsIdeal(offHandSlot.Item)
-                || WeaponIsIdeal(mainHandSlot.Item) && offHandSlot.Item == null && AutoEquipSettings.CurrentSettings.EquipTwoHanders && !AutoEquipSettings.CurrentSettings.EquipOneHanders;
-            float unIdealDebuff = 0.6f;
+                || WeaponIsIdeal(mainHandSlot.Item) && offHandSlot.Item == null && AutoEquipSettings.CurrentSettings.EquipTwoHanders && !AutoEquipSettings.CurrentSettings.EquipOneHanders;   
 
             // Get current wepons combination score
             float currentMainHandScore = mainHandSlot.Item != null ? mainHandSlot.Item.WeightScore : 0f;
@@ -349,23 +496,58 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 currentCombinedWeaponsScore = currentCombinedWeaponsScore * unIdealDebuff;
             }
-
+            
             // Equip restricted to what we allow
             List<IWIMItem> listAllMainHandWeapons = GetEquipableWeaponsFromBags(mainHandSlot);
-            if (mainHandSlot.Item != null)
-                listAllMainHandWeapons.Add(mainHandSlot.Item);
             List<IWIMItem> listAllOffHandWeapons = GetEquipableWeaponsFromBags(offHandSlot);
+
+            if (mainHandSlot.Item != null)
+            {
+                listAllMainHandWeapons.Add(mainHandSlot.Item);
+                if (offHandSlot.InvTypes.Contains(mainHandSlot.Item.ItemEquipLoc))
+                {
+                    listAllOffHandWeapons.Add(mainHandSlot.Item);
+                }
+            }
+
             if (offHandSlot.Item != null)
+            {
                 listAllOffHandWeapons.Add(offHandSlot.Item);
+                if (mainHandSlot.InvTypes.Contains(offHandSlot.Item.ItemEquipLoc))
+                {
+                    listAllMainHandWeapons.Add(offHandSlot.Item);
+                }
+            }
 
             if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            {
                 listAllMainHandWeapons.Add(weaponToCheck);
+            }
+
             if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            {
                 listAllOffHandWeapons.Add(weaponToCheck);
+            }
+
+            Logger.LogError($"---------------------------------------");
+            Logger.LogError($"CHECKING {weaponToCheck.Name}");
+            if (!_skillsManager.DualWield.KnownSpell)
+            {
+                listAllOffHandWeapons
+                    .RemoveAll(weapon => weapon.ItemSubType != "Miscellaneous"
+                        && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Shield);
+            }
+
+            if (!_skillsManager.KnowTitansGrip)
+            {
+                listAllOffHandWeapons
+                    .RemoveAll(weapon => TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
+            }
 
             listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
             listAllOffHandWeapons = listAllOffHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
 
+            /*
             // Get ideal Two Hand
             IWIMItem ideal2H = listAllMainHandWeapons
                     .Where(w => TwoHanders.Contains(ItemSkillsDictionary[w.ItemSubType]))
@@ -406,7 +588,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             // Get ideal OffHand
             IWIMItem idealOffHand = listAllOffHandWeapons
-                .Where(w => WeaponIsIdeal(w) || offHandSlot.Item == null || !WeaponIsIdeal(offHandSlot.Item))
+                .Where(w => WeaponIsIdeal(w) || offHandSlot.Item == null || !WeaponIsIdeal(offHandSlot.Item) && offHandSlot.Item != w)
                 .Where(w => _skillsManager.DualWield.KnownSpell
                     || ItemSkillsDictionary[w.ItemSubType] == SkillLine.Shield
                     || !_skillsManager.DualWield.KnownSpell && w.ItemSubType == "Miscellaneous"
@@ -428,47 +610,51 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             float scoreIdealMainHand = idealMainhand == null ? 0 : idealMainhand.WeightScore;
             float scoreIdealOffhand = idealOffHand == null ? 0 : idealOffHand.GetOffHandWeightScore();
 
-            float scoreSecondChoiceMainHand = secondChoiceMainhand == null ? 0 : secondChoiceMainhand.WeightScore;
-            float scoreSecondOffhand = secondChoiceOffhand == null ? 0 : secondChoiceOffhand.GetOffHandWeightScore();
+            float scoreSecondChoiceMainHand = secondChoiceMainhand == null ? 0 : secondChoiceMainhand.WeightScore * unIdealDebuff;
+            float scoreSecondOffhand = secondChoiceOffhand == null ? 0 : secondChoiceOffhand.GetOffHandWeightScore() * unIdealDebuff;
 
             float finalScore2hander = ideal2H == null ? 0 : ideal2H.WeightScore;
             float finalScoreDualWield = scoreIdealMainHand + scoreIdealOffhand;
 
             float finalScoreSecondChoice2hander = secondChoice2H == null ? 0 : secondChoice2H.WeightScore * unIdealDebuff;
             float finalScoreSecondDualWield = (scoreSecondChoiceMainHand + scoreSecondOffhand) * unIdealDebuff;
-            /*
-            Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
-            Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hander}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hander})");
-            Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
-            Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
-            Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
             */
-            float[] scores = new float[4] { finalScore2hander, finalScoreSecondChoice2hander, finalScoreDualWield, finalScoreSecondDualWield };
-            float bestScore = scores.Max();
+        /*
+        Logger.LogDebug($"Current is preffered : {currentWeaponsAreIdeal} ({currentCombinedWeaponsScore})");
+        Logger.LogDebug($"2H 1 {ideal2H?.Name} ({finalScore2hander}) -- 2H 2 {secondChoice2H?.Name} ({finalScoreSecondChoice2hander})");
+        Logger.LogDebug($"1H 1 {idealMainhand?.Name} ({scoreIdealMainHand}) -- 1H 2 {secondChoiceMainhand?.Name} ({scoreSecondChoiceMainHand})");
+        Logger.LogDebug($"OFFHAND 1 {idealOffHand?.Name} ({scoreIdealOffhand}) -- OFFHAND 2 {secondChoiceOffhand?.Name} ({scoreSecondOffhand})");
+        Logger.LogDebug($"COMBINED 1 {idealMainhand?.Name} + {idealOffHand?.Name} ({finalScoreDualWield}) -- COMBINED 2 {secondChoiceMainhand?.Name} + {secondChoiceOffhand?.Name} ({finalScoreSecondDualWield})");
+        */
+        /*
+        float[] scores = new float[4] { finalScore2hander, finalScoreSecondChoice2hander, finalScoreDualWield, finalScoreSecondDualWield };
+        float bestScore = scores.Max();
 
-            // One of the scores is better
-            if (bestScore > currentCombinedWeaponsScore)
-            {
-                // Main 2 hander
-                if (bestScore == scores[0] && ideal2H == weaponToCheck)
-                    return (mainHandSlot, $"Better 2H score {finalScore2hander}/{currentCombinedWeaponsScore}");
-                // Second choice 2 hander
-                if (bestScore == scores[1] && secondChoice2H == weaponToCheck)
-                    return (mainHandSlot, $"Better 2H score (unideal) {finalScoreSecondChoice2hander}/{currentCombinedWeaponsScore}");
-                // Main dual wield
-                if (bestScore == scores[2] && idealMainhand == weaponToCheck)
-                    return (mainHandSlot, $"Better MH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-                if (bestScore == scores[2] && idealOffHand == weaponToCheck && idealMainhand != null)
-                    return (offHandSlot, $"Better OH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
-                // Second choice dual wield
-                if (bestScore == scores[3] && secondChoiceMainhand == weaponToCheck)
-                    return (mainHandSlot, $"Better MH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
-                if (bestScore == scores[3] && secondChoiceOffhand == weaponToCheck && secondChoiceMainhand != null)
-                    return (offHandSlot, $"Better OH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
-            }
-
-            return (null, null);
+        // One of the scores is better
+        if (bestScore > currentCombinedWeaponsScore)
+        {
+            // Main 2 hander
+            if (bestScore == scores[0] && ideal2H == weaponToCheck)
+                return (mainHandSlot, $"Better 2H score {finalScore2hander}/{currentCombinedWeaponsScore}");
+            // Second choice 2 hander
+            if (bestScore == scores[1] && secondChoice2H == weaponToCheck)
+                return (mainHandSlot, $"Better 2H score (unideal) {finalScoreSecondChoice2hander}/{currentCombinedWeaponsScore}");
+            // Main dual wield
+            if (bestScore == scores[2] && idealMainhand == weaponToCheck)
+                return (mainHandSlot, $"Better MH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
+            if (bestScore == scores[2] && idealOffHand == weaponToCheck && idealMainhand != null)
+                return (offHandSlot, $"Better OH for combined score {finalScoreDualWield}/{currentCombinedWeaponsScore}");
+            // Second choice dual wield
+            if (bestScore == scores[3] && secondChoiceMainhand == weaponToCheck)
+                return (mainHandSlot, $"Better MH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
+            if (bestScore == scores[3] && secondChoiceOffhand == weaponToCheck && secondChoiceMainhand != null)
+                return (offHandSlot, $"Better OH (unideal) for combined score {finalScoreSecondDualWield}/{currentCombinedWeaponsScore}");
         }
+
+        return (null, null);
+
+    }
+        */
 
         private bool WeaponIsIdeal(IWIMItem weapon)
         {
@@ -479,25 +665,32 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Daggers)
                 return false;
 
-            if (_skillsManager.KnowTitansGrip
-                && ItemSkillsDictionary.ContainsKey(weapon.ItemSubType)
-                && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
-                || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
-                || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces))
-                return true;
+            // Shields
+            if (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Shield)
+            {
+                return AutoEquipSettings.CurrentSettings.EquipShields;
+            }
 
-            if (AutoEquipSettings.CurrentSettings.EquipShields
-                && ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Shield)
-                return true;
+            // Two handers
+            if (TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
+            {
+                // Titan's grip
+                if (_skillsManager.KnowTitansGrip
+                    && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
+                    || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
+                    || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces))
+                {
+                    return true;
+                }
+                // Normal
+                return AutoEquipSettings.CurrentSettings.EquipTwoHanders;
+            }
 
-            if (AutoEquipSettings.CurrentSettings.EquipTwoHanders
-                && TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
-                return true;
-
-            if (AutoEquipSettings.CurrentSettings.EquipOneHanders
-                && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Shield
-                && OneHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
-                return true;
+            // One handers
+            if (OneHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
+            {
+                return AutoEquipSettings.CurrentSettings.EquipOneHanders;
+            }
 
             return false;
         }
@@ -597,13 +790,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 Logger.Log($"Equipping {item.Name} ({item.WeightScore}) [{reason}]");
                 _itemEquipAttempts.Add(item.ItemLink);
 
-                /*
-                item.PickupFromBag();
-                item.ClickInInventory(sheetSlot.InventorySlotID);
-                ToolBox.Sleep(100);
-                Lua.LuaDoString($"EquipPendingItem(0);");
-                ToolBox.Sleep(200);
-                */
                 Lua.LuaDoString($@"
                     ClearCursor();
                     PickupContainerItem({item.BagIndex}, {item.SlotIndex});

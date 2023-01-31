@@ -26,7 +26,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 
         private void OnEventsLuaWithArgs(string id, List<string> args)
         {
-            if (id == "SKILL_LINES_CHANGED")
+            if (id == "SKILL_LINES_CHANGED" || id == "CHARACTER_POINTS_CHANGED")
             {
                 RecordSkills();
             }
@@ -66,10 +66,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
                     }
                 }
 
-                if (DualWield == null)
-                {
-                    DualWield = new Spell("Dual Wield");
-                }
+                DualWield = new Spell("Dual Wield");
 
                 if (!KnowTitansGrip && ClassSpecManager.MySpec == ClassSpec.WarriorFury)
                 {
