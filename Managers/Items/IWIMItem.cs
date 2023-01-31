@@ -27,6 +27,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         int RewardSlot { get; }
         int RollId { get; }
         bool HasBeenRolled { get; set; }
+        bool IsUnique { get; set; }
         Dictionary<string, float> ItemStats { get; }
 
         void PickupFromBag();

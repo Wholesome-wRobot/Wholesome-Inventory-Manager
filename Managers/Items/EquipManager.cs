@@ -365,12 +365,16 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
             }
 
-            if (mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            if ((mainHandSlot.Item == null || mainHandSlot.Item.ItemLink != weaponToCheck.ItemLink)
+                && mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) 
+                && CanEquipItem(weaponToCheck, isRoll))
             {
                 listAllMainHandWeapons.Add(weaponToCheck);
             }
 
-            if (offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) && CanEquipItem(weaponToCheck, isRoll))
+            if ((offHandSlot.Item == null || offHandSlot.Item.ItemLink != weaponToCheck.ItemLink)
+                && offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) 
+                && CanEquipItem(weaponToCheck, isRoll))
             {
                 listAllOffHandWeapons.Add(weaponToCheck);
             }
@@ -408,7 +412,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                         // Combine with offhand
                         foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                         {
-                            if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                            if (!mainHandWeapon.IsUnique || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
                             {
                                 float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
                                 AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
@@ -428,7 +432,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     // Combine with offhand
                     foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                     {
-                        if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                        if (!mainHandWeapon.IsUnique || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
                         {
                             float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
                             AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
@@ -447,7 +451,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
                 if (nbWeaponCombnations != weaponCombinationsDic.Count)
                 {
-                    Logger.Log($"Weapon combination {combination.Key.MainHand} + {combination.Key.OffHand} => {combination.Value}");
+                    Logger.Log($"New weapon combination {combination.Key.MainHand} + {combination.Key.OffHand} => {combination.Value}");
                 }
             }
 
@@ -461,13 +465,13 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (bestCombintation != (null, null))
             {
                 if (weaponToCheck.Name == bestCombintation.MainHand
-                    && mainHandSlot.Item != weaponToCheck)
+                    && (mainHandSlot.Item == null || mainHandSlot.Item.ItemLink != weaponToCheck.ItemLink))
                 {
                     return (mainHandSlot, $"Better weapons combination score {bestCombinationScore}");
                 }
 
                 if (weaponToCheck.Name == bestCombintation.OffHand
-                    && offHandSlot.Item != weaponToCheck)
+                    && (offHandSlot.Item == null || offHandSlot.Item.ItemLink != weaponToCheck.ItemLink))
                 {
                     return (offHandSlot, $"Better weapons combination score {bestCombinationScore}");
                 }

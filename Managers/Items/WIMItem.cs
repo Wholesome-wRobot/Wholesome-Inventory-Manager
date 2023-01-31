@@ -37,6 +37,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int RewardSlot { get; private set; } = -1;
         public int RollId { get; private set; } = -1;
         public bool HasBeenRolled { get; set; }
+        public bool IsUnique { get; set; }
         public Dictionary<string, float> ItemStats { get; private set; } = new Dictionary<string, float>() { };
 
         public WIMItem(
@@ -212,9 +213,14 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     && !l.Contains("Socket")
                     && !l.Contains("Requires")
                     && !l.Contains(Name)
-                    && !l.Contains("Binds")
-                    && !l.Contains("Unique"))
+                    && !l.Contains("Binds"))
                 {
+                    if (l.Contains("Unique"))
+                    {
+                        IsUnique = true;
+                        continue;
+                    }
+
                     // Look for item stats
                     foreach (KeyValuePair<string, CharStat> statEnum in StatEnums)
                     {
@@ -258,8 +264,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                                 lineRecorded = true;
                             }
                             else
+                            {
                                 Logger.LogError($"No value found for {statEnum.Value}");
-
+                            }
                             break;
                         }
                     }
@@ -306,6 +313,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     else if (l.Contains(" Slot Ammo Pouch"))
                     {
                         AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
+                    }
+                    else if (l.Contains("Unique"))
+                    {
+                        IsUnique = true;
                     }
                 }
             }
