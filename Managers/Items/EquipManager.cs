@@ -137,20 +137,35 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsRingBetter(IWIMItem ringItem, bool isRoll = false)
         {
+
             if (!CanEquipItem(ringItem, isRoll))
+            {
                 return (null, null);
+            }
 
             ISheetSlot fingerSlot1 = _characterSheetManager.FingerSlots[0];
             ISheetSlot fingerSlot2 = _characterSheetManager.FingerSlots[1];
+
+            if (ringItem.UniqueEquipped)
+            {
+                if (fingerSlot1.GetItemLink == ringItem.ItemLink
+                    || fingerSlot2.GetItemLink == ringItem.ItemLink)
+                {
+                    return (null, null);
+                }
+            }
+
             float ring1Score = fingerSlot1.Item != null ? fingerSlot1.Item.WeightScore : 0;
             float ring2Score = fingerSlot2.Item != null ? fingerSlot2.Item.WeightScore : 0;
             ISheetSlot lowestScoreFingerSlot = ring1Score <= ring2Score ? fingerSlot1 : fingerSlot2;
+
             if (lowestScoreFingerSlot.Item == null || lowestScoreFingerSlot.Item.WeightScore < ringItem.WeightScore)
             {
                 string reason = lowestScoreFingerSlot.Item == null ?
                     "Nothing equipped in this slot" : $"Replacing {lowestScoreFingerSlot.Item.Name} ({lowestScoreFingerSlot.Item.WeightScore})";
                 return (lowestScoreFingerSlot, reason);
             }
+
             return (null, null);
         }
 
@@ -176,11 +191,21 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (!CanEquipItem(trinketItem, isRoll))
                 return (null, null);
 
-            ISheetSlot Trinket1 = _characterSheetManager.TrinketSlots[0];
-            ISheetSlot Trinket2 = _characterSheetManager.TrinketSlots[1];
-            float trinket1Score = Trinket1.Item != null ? Trinket1.Item.WeightScore : 0;
-            float trinket2Score = Trinket2.Item != null ? Trinket2.Item.WeightScore : 0;
-            ISheetSlot lowestScoreTrinketSlot = trinket1Score <= trinket2Score ? Trinket1 : Trinket2;
+            ISheetSlot trinketSlot1 = _characterSheetManager.TrinketSlots[0];
+            ISheetSlot trinketSlot2 = _characterSheetManager.TrinketSlots[1];
+
+            if (trinketItem.UniqueEquipped)
+            {
+                if (trinketSlot1.GetItemLink == trinketItem.ItemLink
+                    || trinketSlot2.GetItemLink == trinketItem.ItemLink)
+                {
+                    return (null, null);
+                }
+            }
+
+            float trinket1Score = trinketSlot1.Item != null ? trinketSlot1.Item.WeightScore : 0;
+            float trinket2Score = trinketSlot2.Item != null ? trinketSlot2.Item.WeightScore : 0;
+            ISheetSlot lowestScoreTrinketSlot = trinket1Score <= trinket2Score ? trinketSlot1 : trinketSlot2;
             if (lowestScoreTrinketSlot.Item == null || lowestScoreTrinketSlot.Item.WeightScore < trinketItem.WeightScore)
             {
                 string reason = lowestScoreTrinketSlot.Item == null ?
@@ -365,15 +390,15 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 }
             }
 
-            if ((mainHandSlot.Item == null || mainHandSlot.Item.ItemLink != weaponToCheck.ItemLink)
-                && mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) 
+            if (mainHandSlot.GetItemLink != weaponToCheck.ItemLink
+                && mainHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc)
                 && CanEquipItem(weaponToCheck, isRoll))
             {
                 listAllMainHandWeapons.Add(weaponToCheck);
             }
 
-            if ((offHandSlot.Item == null || offHandSlot.Item.ItemLink != weaponToCheck.ItemLink)
-                && offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc) 
+            if (offHandSlot.GetItemLink != weaponToCheck.ItemLink
+                && offHandSlot.InvTypes.Contains(weaponToCheck.ItemEquipLoc)
                 && CanEquipItem(weaponToCheck, isRoll))
             {
                 listAllOffHandWeapons.Add(weaponToCheck);
@@ -412,7 +437,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                         // Combine with offhand
                         foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                         {
-                            if (!mainHandWeapon.IsUnique || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                            if (!mainHandWeapon.UniqueEquipped || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
                             {
                                 float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
                                 AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
@@ -432,7 +457,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     // Combine with offhand
                     foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                     {
-                        if (!mainHandWeapon.IsUnique || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
+                        if (!mainHandWeapon.UniqueEquipped || mainHandWeapon.ItemLink != offHandWeapon.ItemLink)
                         {
                             float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
                             AddWeaponsToCombinations(weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
@@ -465,13 +490,13 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (bestCombintation != (null, null))
             {
                 if (weaponToCheck.Name == bestCombintation.MainHand
-                    && (mainHandSlot.Item == null || mainHandSlot.Item.ItemLink != weaponToCheck.ItemLink))
+                    && mainHandSlot.GetItemLink != weaponToCheck.ItemLink)
                 {
                     return (mainHandSlot, $"Better weapons combination score {bestCombinationScore}");
                 }
 
                 if (weaponToCheck.Name == bestCombintation.OffHand
-                    && (offHandSlot.Item == null || offHandSlot.Item.ItemLink != weaponToCheck.ItemLink))
+                    && offHandSlot.GetItemLink != weaponToCheck.ItemLink)
                 {
                     return (offHandSlot, $"Better weapons combination score {bestCombinationScore}");
                 }

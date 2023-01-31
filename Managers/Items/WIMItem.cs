@@ -29,6 +29,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int BagCapacity { get; private set; }
         public int QuiverCapacity { get; private set; }
         public int AmmoPouchCapacity { get; private set; }
+        public bool UniqueEquipped { get; set; }
         public int BagIndex { get; private set; } = -1;
         public int SlotIndex { get; private set; } = -1;
         public double UniqueId { get; private set; }
@@ -37,7 +38,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int RewardSlot { get; private set; } = -1;
         public int RollId { get; private set; } = -1;
         public bool HasBeenRolled { get; set; }
-        public bool IsUnique { get; set; }
         public Dictionary<string, float> ItemStats { get; private set; } = new Dictionary<string, float>() { };
 
         public WIMItem(
@@ -92,7 +92,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 RecordAllItemInfo(itemInfo);
             }
-
         }
 
         private void RecordAllItemInfo(string[] luaItemInfo)
@@ -163,6 +162,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             ItemStats = existingCopy.ItemStats;
             WeaponSpeed = existingCopy.WeaponSpeed;
             ItemId = existingCopy.ItemId;
+            UniqueEquipped = existingCopy.UniqueEquipped;
         }
 
         private void RecordBagSpaceTBC()
@@ -217,7 +217,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 {
                     if (l.Contains("Unique"))
                     {
-                        IsUnique = true;
+                        UniqueEquipped = true;
                         continue;
                     }
 
@@ -306,6 +306,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     {
                         BagCapacity = int.Parse(l.Replace(" Slot Bag", ""));
                     }
+                    if (l.Contains("Unique-Equipped"))
+                    {
+                        UniqueEquipped = true;
+                    }
                     else if (l.Contains(" Slot Quiver"))
                     {
                         QuiverCapacity = int.Parse(l.Replace(" Slot Quiver", ""));
@@ -313,10 +317,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     else if (l.Contains(" Slot Ammo Pouch"))
                     {
                         AmmoPouchCapacity = int.Parse(l.Replace(" Slot Ammo Pouch", ""));
-                    }
-                    else if (l.Contains("Unique"))
-                    {
-                        IsUnique = true;
                     }
                 }
             }

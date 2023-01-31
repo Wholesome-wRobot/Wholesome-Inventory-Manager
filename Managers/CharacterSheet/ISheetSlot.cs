@@ -7,6 +7,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         IWIMItem Item { get; }
         string[] InvTypes { get; }
         int InventorySlotID { get; }
+        string GetItemLink { get; }
 
         void RefreshItem(string itemLink);
     }

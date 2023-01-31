@@ -18,5 +18,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         {
             Item = itemLink != "null" ? new WIMItem(itemLink) : null;
         }
+
+        public string GetItemLink => Item == null ? null : Item.ItemLink;
     }
 }
