@@ -1,4 +1,5 @@
 ﻿using robotManager.Products;
+using System.Diagnostics;
 using System.Threading;
 using WholesomeToolbox;
 using wManager.Wow.Helpers;
@@ -63,49 +64,53 @@ public class ToolBox
 
     public static void LUASetup()
     {
-        if (Lua.LuaDoString<bool>("return WEquipTooltip ~= nil;"))
-            return;
-
-        // Create invisible tooltip to read tooltip info
-        Lua.LuaDoString($@"
-                local tip = WEquipTooltip or CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"")
-                local L = L or tip: CreateFontString()
-                local R = R or tip: CreateFontString()
-                L: SetFontObject(GameFontNormal)
-                R: SetFontObject(GameFontNormal)
-                WEquipTooltip: AddFontStrings(L, R)
-                WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"")"
-            );
-
         // Create function to read invisible tooltip lines
         Lua.LuaDoString($@"
-                function EnumerateTooltipLines(...)
-                    local result = """"
-                    for i = 1, select(""#"", ...) do
-                        local region = select(i, ...)
-                        if region and region:GetObjectType() == ""FontString"" then
-                            local text = region:GetText() or """"
-                            if text ~= """" then
-                                result = result .. ""|"" .. text
-                            end
-                        end
-                    end
-                    return result
+                if (WEquipTooltip == nil) then
+                    CreateFrame(""GAMETOOLTIP"", ""WEquipTooltip"");
+                    local L = L or WEquipTooltip: CreateFontString();
+                    local R = R or WEquipTooltip: CreateFontString();
+                    L: SetFontObject(GameFontNormal);
+                    R: SetFontObject(GameFontNormal);
+                    WEquipTooltip: AddFontStrings(L, R);
+                    WEquipTooltip: SetOwner(WorldFrame, ""ANCHOR_NONE"");
                 end
 
-                function ParseItemInfo(i, j, paramItemLink)
-                    WEquipTooltip:ClearLines();
-                    WEquipTooltip:SetHyperlink(paramItemLink);
-                    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-                        itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(paramItemLink);  
-                    if (itemSellPrice == null) then
-                        itemSellPrice = 0;
+                if (EnumerateTooltipLines == nil) then
+                    function EnumerateTooltipLines(...)
+                        local result = """"
+                        for i = 1, select(""#"", ...) do
+                            local region = select(i, ...)
+                            if region and region:GetObjectType() == ""FontString"" then
+                                local text = region:GetText() or """"
+                                if text ~= """" then
+                                    result = result .. ""|"" .. text
+                                end
+                            end
+                        end
+                        return result
                     end
-                    if (itemEquipLoc == null) then
-                        itemEquipLoc = '';
-                    end      
-                    return table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
-                        itemSubType, itemStackCount, itemEquipLoc, itemSellPrice, EnumerateTooltipLines(WEquipTooltip: GetRegions()) }}, ""£"");
+                end
+
+                if (ParseItemInfo == nil) then
+                    function ParseItemInfo(i, j, paramItemLink)
+                        WEquipTooltip:ClearLines();
+                        WEquipTooltip:SetHyperlink(paramItemLink);
+                        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
+                            itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(paramItemLink);
+                        local texture, count, locked, quality, readable, lootable, link = GetContainerItemInfo(i, j);
+                        if (count == null) then
+                            count = 1;
+                        end
+                        if (itemSellPrice == null) then
+                            itemSellPrice = 0;
+                        end
+                        if (itemEquipLoc == null) then
+                            itemEquipLoc = '';
+                        end      
+                        return table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
+                            itemSubType, itemStackCount, itemEquipLoc, itemSellPrice, count, EnumerateTooltipLines(WEquipTooltip: GetRegions()) }}, ""£"");
+                    end
                 end
             ");
     }

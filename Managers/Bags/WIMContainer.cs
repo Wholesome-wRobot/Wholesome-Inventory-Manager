@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using Wholesome_Inventory_Manager.Managers.Items;
 using wManager.Wow.Helpers;
 

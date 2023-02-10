@@ -1,39 +1,47 @@
-﻿
-                local result = {{}};
-                for i=0, 4, 1 do
-                    local bagLink;
-                    if i == 0 then
-                        bagLink = ""ORIGINALBP"";
-                    else
-                        bagLink = GetContainerItemLink(0, i-4);
-                    end
-                    -- bags 0 to 4 (right to left)
-                    if (bagLink ~= nil) then
-                        local bagPosition = i;
-                        local containerNbSlots = GetContainerNumSlots(i)
-                        -- Get all items in bag
-                        table.insert(result, table.concat({{ i, 0, bagLink, containerNbSlots }}, ""£""));
-                        local allItems = ""BAG"" .. bagPosition;
-                        for j=1, containerNbSlots do
-                            local itemInfoTable = {{}};
-                            local itemInfoString = """";
-                            local itemLink = GetContainerItemLink(bagPosition, j);
-                            if itemLink == nil then 
-                                itemInfoString = table.concat({{ i, j, ""null"" }}, ""£"")
-                            else
-                                local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType,
-                                    itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemLink);
-                                    if (itemSellPrice == null) then
-                                        itemSellPrice = 0
-                                    end
-                                    if (itemEquipLoc == null) then
-                                        itemEquipLoc = ''
-                                    end
-                                itemInfoString = table.concat({{ i, j, itemLink, itemName, itemRarity, itemLevel, itemMinLevel, itemType,
-                                    itemSubType, itemStackCount, itemEquipLoc, itemSellPrice }}, ""£"")
-                            end;
-                            table.insert(result, itemInfoString);
-                        end;
-                    end
-                end
-                return unpack(result);
+﻿local tip = WEquipTooltip or CreateFrame("GAMETOOLTIP", "WEquipTooltip")
+local L = L or tip: CreateFontString()
+local R = R or tip: CreateFontString()
+L: SetFontObject(GameFontNormal)
+R: SetFontObject(GameFontNormal)
+WEquipTooltip: AddFontStrings(L, R)
+WEquipTooltip: SetOwner(WorldFrame, "ANCHOR_NONE")
+
+
+function EnumerateTooltipLines(...)
+    local result = ""
+    for i = 1, select("#", ...) do
+        local region = select(i, ...)
+        if region and region:GetObjectType() == "FontString" then
+            local text = region:GetText() or ""
+            if text ~= "" then
+                result = result .. "|" .. text
+            end
+        end
+    end
+    return result
+end
+
+local result = {};
+for i=0, 4, 1 do
+    local bagLink = GetContainerItemLink(0, i-4);
+    -- bags 0 to 4 (right to left)
+    if (bagLink ~= nil or i == 0) then
+        local containerNbSlots = GetContainerNumSlots(i)
+        -- Get all items in bag
+        for j=1, containerNbSlots do
+            local itemLink = GetContainerItemLink(i, j);
+            if itemLink ~= nil then 
+                local name, link, quality, iLevel, reqLevel, class, subclass, maxStack, equipSlot, texture, vendorPrice = GetItemInfo(itemLink);
+                WEquipTooltip:ClearLines();
+                WEquipTooltip:SetHyperlink(link);
+                print(name)
+                print(EnumerateTooltipLines(WEquipTooltip:GetRegions()))
+                local _, count, _, _, _, _, _ = GetContainerItemInfo(i, j);
+                local entry = GetContainerItemID(i, j);
+
+                local iteminfo = name .. "£" .. link .. "£" .. quality .. "£" .. iLevel .. "£" .. reqLevel .. "£" .. class .. "£" .. subclass .. "£" .. maxStack .. "£" .. equipSlot .. "£" .. texture .. "£" .. vendorPrice .. "£" .. entry .. "£" .. i .. "£" .. j .. "£" .. count;
+                table.insert(result, iteminfo);
+            end;
+        end;
+    end
+end

@@ -16,6 +16,8 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
         private SynchronizedCollection<IWIMContainer> _listContainers = new SynchronizedCollection<IWIMContainer>();
         private readonly ILootFilter _lootFilter;
         private readonly ICharacterSheetManager _characterSheetManager;
+        private List<int> UnOccupiedBagSlots = new List<int>();
+        List<IWIMItem> _allItemsInBags = new List<IWIMItem>();
 
         public WIMContainers(ICharacterSheetManager characterSheetManager, ILootFilter lootFilter)
         {
@@ -74,7 +76,11 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                     allItemInfos.Add(luaItemInfo.Split('£'));
                 }
 
-                // Create bags
+                List<int> unOccupiedBagSlots = new List<int>();
+
+                _allItemsInBags.Clear();
+
+                // Create bags 0 to 4
                 for (int i = 0; i < 5; i++)
                 {
                     string[] bag = allItemInfos.Find(itemInfo => itemInfo[1] == "0" && ToolBox.ParseInt(itemInfo[0]) == i);
@@ -82,14 +88,55 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                     {
                         List<string[]> itemsInThisBag = allItemInfos
                             .FindAll(itemInfo => itemInfo[1] != "0" && ToolBox.ParseInt(itemInfo[0]) == i);
-                        _listContainers.Add(new WIMContainer(bag, itemsInThisBag, i));
+                        WIMContainer cont = new WIMContainer(bag, itemsInThisBag, i);
+                        _allItemsInBags.AddRange(cont.Items);
+                        _listContainers.Add(cont);
+                    }
+                    else
+                    {
+                        unOccupiedBagSlots.Add(i);
                     }
                 }
+
+                UnOccupiedBagSlots = unOccupiedBagSlots;
+
+                RestackItems();
             }
             else
             {
                 Logger.LogError($"[Containers] LUA info was empty");
                 ToolBox.LUASetup();
+            }
+        }
+
+        public void RestackItems()
+        {
+            if (!AutoEquipSettings.CurrentSettings.RestackItems || Fight.InFight)
+            {
+                return;
+            }
+
+            foreach (IWIMItem item in _allItemsInBags)
+            {
+                if (item.Count < item.MaxStack)
+                {
+                    IWIMItem otherItem = _allItemsInBags.Find(it =>
+                        it.ItemId == item.ItemId
+                        && it.Count < it.MaxStack
+                        && (it.SlotIndex != item.SlotIndex || it.BagIndex != item.BagIndex));
+
+                    if (otherItem != null)
+                    {
+                        Logger.Log($"Stacking {item.Name}");
+                        Lua.LuaDoString($@"
+                                ClearCursor();
+                                PickupContainerItem({otherItem.BagIndex}, {otherItem.SlotIndex});
+                                PickupContainerItem({item.BagIndex}, {item.SlotIndex});
+                                ClearCursor();
+                            ");
+                        return;
+                    }
+                }
             }
         }
 
@@ -141,33 +188,6 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                 Lua.LuaDoString($"EquipPendingItem(0);");
             }
             Scan();
-        }
-
-        private List<int> GetEmptyContainerSlots()
-        {
-            List<int> emptys = new List<int>();
-            string[] result = Lua.LuaDoString<string[]>($@"
-                local result = {{}}
-                for i = 0, 4 do 
-                    if GetBagName(i) == nil then
-                        table.insert(result, i);
-                    end
-                end
-                return unpack(result);
-            ");
-            foreach(string ind in result)
-            {
-                if (int.TryParse(ind, out int index))
-                {
-                    emptys.Add(index);
-                }
-                else
-                {
-                    Logger.LogError($"Couldn't parse empty bag result {ind}");
-                    ToolBox.LUASetup();
-                }
-            }
-            return emptys;
         }
 
         private int GetNbBagEquipped()
@@ -283,10 +303,10 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                             // We found an ammo container to equip
                             if (bestAmmoContainerInBags != null)
                             {
-                                if (GetEmptyContainerSlots().Count > 0)
+                                if (UnOccupiedBagSlots.Count > 0)
                                 {
                                     // There is an empty slot
-                                    int availableSpot = GetEmptyContainerSlots().Last();
+                                    int availableSpot = UnOccupiedBagSlots.Last();
                                     Logger.Log($"Equipping {bestAmmoContainerInBags.Name} in slot {availableSpot}");
                                     MoveItemToBag(bestAmmoContainerInBags, availableSpot);
 
@@ -322,30 +342,18 @@ namespace Wholesome_Inventory_Manager.Managers.Bags
                 // Bag equip if we have at least 1 empty slot
                 if (GetNbBagEquipped() < maxAmountOfBags)
                 {
-                    List<int> emptyContainerSlots = GetEmptyContainerSlots();
-                    int nbEmpty = emptyContainerSlots.Count;
-                    int nbloop = emptyContainerSlots.Count;
+                    IWIMItem biggestBag = GetBiggestBagFromBags();
 
-                    foreach (int emptySlotId in emptyContainerSlots)
+                    if (biggestBag != null)
                     {
-                        IWIMItem biggestBag = GetBiggestBagFromBags();
+                        Logger.Log($"Equipping {biggestBag.Name} in slot {UnOccupiedBagSlots.FirstOrDefault()}");
+                        int availableSpot = UnOccupiedBagSlots.FirstOrDefault();
+                        MoveItemToBag(biggestBag, availableSpot);
 
-                        if (biggestBag != null)
-                        {
-                            Logger.Log($"Equipping {biggestBag.Name}");
-                            int availableSpot = GetEmptyContainerSlots().FirstOrDefault();
-                            MoveItemToBag(biggestBag, availableSpot);
+                        Lua.LuaDoString($"EquipPendingItem(0);");
+                        _lootFilter.ProtectFromFilter(biggestBag.ItemLink);
 
-                            Lua.LuaDoString($"EquipPendingItem(0);");
-                            _lootFilter.ProtectFromFilter(biggestBag.ItemLink);
-
-                            Scan();
-                        }
-
-                        if (GetNbBagEquipped() >= maxAmountOfBags)
-                        {
-                            break;
-                        }
+                        Scan();
                     }
                 }
 

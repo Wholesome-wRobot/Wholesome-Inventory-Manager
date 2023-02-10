@@ -56,6 +56,9 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     // Group roll
     public bool AlwaysGreed { get; set; }
     public bool AlwaysPass { get; set; }
+    // MISC
+    public bool RestackItems { get; set; }
+    public bool UseScrolls { get; set; }
 
     public bool LogItemInfo { get; set; }
 
@@ -115,6 +118,9 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         // Group roll
         AlwaysGreed = false;
         AlwaysPass = false;
+
+        RestackItems = true;
+        UseScrolls = true;
 
         StatWeights = new List<StatWeight>();
     }

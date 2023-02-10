@@ -44,6 +44,10 @@ namespace Wholesome_Inventory_Manager.Settings
             AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
             AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
 
+            // Misc
+            RestackItems.IsChecked = AutoEquipSettings.CurrentSettings.RestackItems;
+            UseScrolls.IsChecked = AutoEquipSettings.CurrentSettings.UseScrolls;
+
             // STATS
             StatsPreset.ItemsSource = Enum.GetNames(typeof(ClassSpec));
             UpdateStats();
@@ -119,6 +123,18 @@ namespace Wholesome_Inventory_Manager.Settings
         private void SwitchRangedChanged(object sender, RoutedEventArgs e)
         {
             AutoEquipSettings.CurrentSettings.SwitchRanged = (bool)SwitchRanged.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void RestackItemsChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.RestackItems = (bool)RestackItems.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        public void UseScrollsChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.UseScrolls = (bool)UseScrolls.IsChecked;
             AutoEquipSettings.CurrentSettings.Save();
         }
 

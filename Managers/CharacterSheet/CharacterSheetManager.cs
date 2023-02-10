@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using wManager.Wow.Helpers;
 
 namespace Wholesome_Inventory_Manager.Managers.CharacterSheet

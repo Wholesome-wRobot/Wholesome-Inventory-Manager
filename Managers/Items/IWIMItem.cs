@@ -12,10 +12,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         int ItemMinLevel { get; }
         string ItemType { get; }
         string ItemSubType { get; }
-        int ItemStackCount { get; }
+        int MaxStack { get; }
         string ItemEquipLoc { get; }
         string ItemTexture { get; }
         int ItemSellPrice { get; }
+        int Count { get; }
         int BagCapacity { get; }
         int QuiverCapacity { get; }
         int AmmoPouchCapacity { get; }

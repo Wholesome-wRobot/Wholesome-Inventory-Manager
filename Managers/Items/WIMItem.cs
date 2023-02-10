@@ -22,10 +22,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public int ItemMinLevel { get; private set; }
         public string ItemType { get; private set; }
         public string ItemSubType { get; private set; }
-        public int ItemStackCount { get; private set; }
+        public int MaxStack { get; private set; }
         public string ItemEquipLoc { get; private set; }
         public string ItemTexture { get; private set; }
         public int ItemSellPrice { get; private set; }
+        public int Count { get; private set; }
         public int BagCapacity { get; private set; }
         public int QuiverCapacity { get; private set; }
         public int AmmoPouchCapacity { get; private set; }
@@ -40,6 +41,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public bool HasBeenRolled { get; set; }
         public Dictionary<string, float> ItemStats { get; private set; } = new Dictionary<string, float>() { };
 
+        // Ctor for Reward/Roll/Inventory refresh
         public WIMItem(
             string itemLink,
             int rewardSlot = -1,
@@ -70,6 +72,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
         }
 
+        // Ctor for items in bags
         public WIMItem(
             string[] itemInfo,
             int bagIndex = -1,
@@ -83,6 +86,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (ItemLink.Length < 10)
                 return;
 
+            Count = ToolBox.ParseInt(itemInfo[12]); // needs update every time
+
             IWIMItem existingCopy = ItemCache.Get(ItemLink);
             if (existingCopy != null)
             {
@@ -92,11 +97,24 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 RecordAllItemInfo(itemInfo);
             }
+
+            // SCROLL USE
+            if (AutoEquipSettings.CurrentSettings.UseScrolls)
+            {
+                string scrollSpell = ItemCache.GetScrollSpell(ItemId);
+                if (scrollSpell != null
+                    && ItemMinLevel < ObjectManager.Me.Level
+                    && !ObjectManager.Me.HaveBuff(scrollSpell))
+                {
+                    Logger.Log($"Using {Name}");
+                    Use();
+                }
+            }
         }
 
         private void RecordAllItemInfo(string[] luaItemInfo)
         {
-            if (luaItemInfo.Length < 11)
+            if (luaItemInfo.Length < 12)
             {
                 Logger.LogDebug($"Item {luaItemInfo[3]} doesn't have the correct number of info. Skipping.");
                 return;
@@ -110,18 +128,18 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             {
                 Logger.LogError($"Couldn't parse item ID {ItemLink.Split(':')[1]}");
             }
-
+            
             Name = luaItemInfo[3];
             ItemRarity = ToolBox.ParseInt(luaItemInfo[4]);
             ItemLevel = ToolBox.ParseInt(luaItemInfo[5]);
             ItemMinLevel = ToolBox.ParseInt(luaItemInfo[6]);
             ItemType = luaItemInfo[7];
             ItemSubType = luaItemInfo[8];
-            ItemStackCount = ToolBox.ParseInt(luaItemInfo[9]);
+            MaxStack = ToolBox.ParseInt(luaItemInfo[9]);
             ItemEquipLoc = luaItemInfo[10];
             ItemSellPrice = ToolBox.ParseInt(luaItemInfo[11]);
 
-            string toolTip = luaItemInfo[12];
+            string toolTip = luaItemInfo[13];
 
             if (Main.WoWVersion <= ToolBox.WoWVersion.TBC)
             {
@@ -138,7 +156,9 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             ItemCache.Add(this);
             if (AutoEquipSettings.CurrentSettings.LogItemInfo)
+            {
                 LogItemInfo();
+            }
         }
 
         private void CloneFromDB(IWIMItem existingCopy)
@@ -150,7 +170,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             ItemMinLevel = existingCopy.ItemMinLevel;
             ItemType = existingCopy.ItemType;
             ItemSubType = existingCopy.ItemSubType;
-            ItemStackCount = existingCopy.ItemStackCount;
+            MaxStack = existingCopy.MaxStack;
             ItemEquipLoc = existingCopy.ItemEquipLoc;
             ItemTexture = existingCopy.ItemTexture;
             ItemSellPrice = existingCopy.ItemSellPrice;
@@ -452,7 +472,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
 
             Logger.LogDebug($@"Name : {Name} | ItemLink : {ItemLink} | ItemRarity : {ItemRarity} | ItemLevel : {ItemLevel} | ItemMinLevel : {ItemMinLevel}
-                    | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {ItemStackCount} |ItemEquipLoc : {ItemEquipLoc}
+                    | ItemType : {ItemType} | ItemSubType : {ItemSubType} | ItemStackCount : {MaxStack} |ItemEquipLoc : {ItemEquipLoc}
                     | ItemSellPrice : {ItemSellPrice} | QuiverCapacity : {QuiverCapacity} | AmmoPouchCapacity : {AmmoPouchCapacity}
                     | BagCapacity : {BagCapacity} | WeaponSpeed : {WeaponSpeed} | UniqueId : {UniqueId} | Reward Slot: {RewardSlot} | RollID: {RollId} 
                     | InBag: {BagIndex} | InBagSlot: {SlotIndex} | ItemId: {ItemId} | WEIGHT SCORE : {WeightScore}
