@@ -453,6 +453,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 listAllOffHandWeapons
                     .RemoveAll(weapon => weapon.ItemSubType != "Miscellaneous"
                         && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Shield);
+                listAllOffHandWeapons
+                    .RemoveAll(weapon => weapon.Name == "Skinning Knife");
             }
 
             if (!_skillsManager.KnowTitansGrip)
