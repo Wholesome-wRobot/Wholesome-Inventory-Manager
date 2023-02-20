@@ -99,11 +99,14 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
 
             // SCROLL USE
-            if (AutoEquipSettings.CurrentSettings.UseScrolls)
+            if (AutoEquipSettings.CurrentSettings.UseScrolls
+                && !ObjectManager.Me.InCombatFlagOnly
+                && !ObjectManager.Me.HaveBuff("Food")
+                && !ObjectManager.Me.HaveBuff("Drink"))
             {
                 string scrollSpell = ItemCache.GetScrollSpell(ItemId);
                 if (scrollSpell != null
-                    && ItemMinLevel < ObjectManager.Me.Level
+                    && ItemMinLevel <= ObjectManager.Me.Level
                     && !ObjectManager.Me.HaveBuff(scrollSpell))
                 {
                     Logger.Log($"Using {Name}");
