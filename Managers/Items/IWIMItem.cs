@@ -22,7 +22,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         int AmmoPouchCapacity { get; }
         int BagIndex { get; }
         int SlotIndex { get; }
-        double UniqueId { get; }
+        ulong UniqueId { get; }
         float WeightScore { get; }
         float WeaponSpeed { get; }
         int RewardSlot { get; }

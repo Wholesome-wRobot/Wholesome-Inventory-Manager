@@ -12,7 +12,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 {
     internal class WIMItem : IWIMItem
     {
-        private int _uniqueIdCounter = 0;
+        private static ulong _uniqueIdCounter = 0;
 
         public uint ItemId { get; private set; }
         public string Name { get; private set; }
@@ -33,7 +33,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public bool UniqueEquipped { get; set; }
         public int BagIndex { get; private set; } = -1;
         public int SlotIndex { get; private set; } = -1;
-        public double UniqueId { get; private set; }
+        public ulong UniqueId { get; private set; }
         public float WeightScore { get; private set; } = 0;
         public float WeaponSpeed { get; private set; } = 0;
         public int RewardSlot { get; private set; } = -1;
