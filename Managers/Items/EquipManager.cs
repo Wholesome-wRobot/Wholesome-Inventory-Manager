@@ -457,8 +457,14 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     .RemoveAll(weapon => TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
             }
 
-            listAllMainHandWeapons = listAllMainHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
-            listAllOffHandWeapons = listAllOffHandWeapons.OrderByDescending(w => w.WeightScore).ToList();
+            listAllMainHandWeapons = listAllMainHandWeapons
+                .OrderBy(weapon => weapon.ItemLink)
+                .OrderByDescending(w => w.WeightScore)
+                .ToList();
+            listAllOffHandWeapons = listAllOffHandWeapons
+                .OrderBy(weapon => weapon.ItemLink)
+                .OrderByDescending(w => w.WeightScore)
+                .ToList();
 
             Dictionary<(string, string), float> weaponCombinationsDic = new Dictionary<(string, string), float>();
             (string MainHand, string OffHand) bestCombintation = (null, null);
