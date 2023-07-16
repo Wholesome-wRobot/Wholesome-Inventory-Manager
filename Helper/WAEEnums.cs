@@ -161,6 +161,15 @@ public class WAEEnums
         SkillLine.Maces
     };
 
+    public static List<SkillLine> OneHanderWeapons { get; set; } = new List<SkillLine>()
+    {
+        SkillLine.FistWeapons,
+        SkillLine.Daggers,
+        SkillLine.Swords,
+        SkillLine.Axes,
+        SkillLine.Maces
+    };
+
     public static List<SkillLine> TwoHanders { get; set; } = new List<SkillLine>()
     {
         SkillLine.TwoHandedAxes,

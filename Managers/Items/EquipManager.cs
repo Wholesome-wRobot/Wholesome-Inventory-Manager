@@ -457,8 +457,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
             if (!_skillsManager.KnowTitansGrip)
             {
-                listAllOffHandWeapons
-                    .RemoveAll(weapon => TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
+                listAllOffHandWeapons.RemoveAll(weapon => TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
+            }
+
+            if (!_skillsManager.DualWield.KnownSpell)
+            {
+                listAllOffHandWeapons.RemoveAll(weapon => OneHanderWeapons.Contains(ItemSkillsDictionary[weapon.ItemSubType]));
             }
 
             listAllMainHandWeapons = listAllMainHandWeapons
