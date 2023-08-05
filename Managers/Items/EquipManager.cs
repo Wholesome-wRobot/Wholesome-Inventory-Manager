@@ -401,10 +401,13 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             string mainHandName = mainHand == null ? "NULL" : mainHand.Name;
             string offHandName = offHand == null ? "NULL" : offHand.Name;
 
-            // If we have same combination but swapped, make sure the score is identical
+            // If we have same combination but swapped, make sure we only keep faster in offhand
             if (_weaponCombinationsDic.ContainsKey((offHandName, mainHandName)))
             {
-                score = _weaponCombinationsDic[(offHandName, mainHandName)];
+                if (offHand.WeaponSpeed < mainHand.WeaponSpeed)
+                {
+                    _weaponCombinationsDic.Remove((offHandName, mainHandName));
+                }
             }
 
             if (!_weaponCombinationsDic.ContainsKey((mainHandName, offHandName)))
