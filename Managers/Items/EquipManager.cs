@@ -120,13 +120,13 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 
         // returns the slot in which the item should be equipped, null if the item is not better
         public (ISheetSlot, string) IsArmorBetter(ISheetSlot armorSlot, IWIMItem armorItem, bool isRoll = false)
-        {            
+        {
             if (isRoll
                 && _containers.GetAllBagItems().ToList().Exists(item => item.ItemLink == armorItem.ItemLink))
             {
                 return (null, null);
             }
-            
+
             if (!CanEquipItem(armorItem, isRoll))
             {
                 return (null, null);
@@ -396,11 +396,20 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             }
         }
 
-        private void AddWeaponsToCombinations(Dictionary<(string, string), float> dic, string mainHand, string offHand, float score)
+        private void AddWeaponsToCombinations(IWIMItem mainHand, IWIMItem offHand, float score)
         {
-            if (!dic.ContainsKey((mainHand, offHand)))
+            string mainHandName = mainHand == null ? "NULL" : mainHand.Name;
+            string offHandName = offHand == null ? "NULL" : offHand.Name;
+
+            // If we have same combination but swapped, make sure the score is identical
+            if (_weaponCombinationsDic.ContainsKey((offHandName, mainHandName)))
             {
-                dic.Add((mainHand, offHand), score);
+                score = _weaponCombinationsDic[(offHandName, mainHandName)];
+            }
+
+            if (!_weaponCombinationsDic.ContainsKey((mainHandName, offHandName)))
+            {
+                _weaponCombinationsDic.Add((mainHandName, offHandName), score);
             }
         }
 
@@ -434,8 +443,8 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 allEquippableWeapons.Add(offHandSlot.Item);
             }
             // If roll, add roll item
-            if (isRoll 
-                && CanEquipItem(weaponToCheck, true) 
+            if (isRoll
+                && CanEquipItem(weaponToCheck, true)
                 && !allEquippableWeapons.Exists(w => w.ItemLink == weaponToCheck.ItemLink))
             {
                 allEquippableWeapons.Add(weaponToCheck);
@@ -490,34 +499,34 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                         // Combine with offhand
                         foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                         {
-                            bool canEquip2SameWeapons = !mainHandWeapon.UniqueEquipped 
+                            bool canEquip2SameWeapons = !mainHandWeapon.UniqueEquipped
                                 && allEquippableWeapons.Count(item => item.ItemLink == offHandWeapon.ItemLink) > 1;
                             if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink || canEquip2SameWeapons)
                             {
                                 float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
-                                AddWeaponsToCombinations(_weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
+                                AddWeaponsToCombinations(mainHandWeapon, offHandWeapon, mainHandWeaponScore + offHandWeaponScore);
                             }
                         }
                     }
                     else
                     {
-                        AddWeaponsToCombinations(_weaponCombinationsDic, mainHandWeapon.Name, "NULL", mainHandWeaponScore);
+                        AddWeaponsToCombinations(mainHandWeapon, null, mainHandWeaponScore);
                     }
                 }
                 // One handers
                 if (OneHanders.Contains(ItemSkillsDictionary[mainHandWeapon.ItemSubType]))
                 {
-                    AddWeaponsToCombinations(_weaponCombinationsDic, mainHandWeapon.Name, "NULL", mainHandWeaponScore);
+                    AddWeaponsToCombinations(mainHandWeapon, null, mainHandWeaponScore);
 
                     // Combine with offhand
                     foreach (IWIMItem offHandWeapon in listAllOffHandWeapons)
                     {
-                        bool canEquip2SameWeapons = !mainHandWeapon.UniqueEquipped 
+                        bool canEquip2SameWeapons = !mainHandWeapon.UniqueEquipped
                             && allEquippableWeapons.Count(item => item.ItemLink == offHandWeapon.ItemLink) > 1;
                         if (mainHandWeapon.ItemLink != offHandWeapon.ItemLink || canEquip2SameWeapons)
                         {
                             float offHandWeaponScore = WeaponIsIdeal(offHandWeapon) ? offHandWeapon.WeightScore * 0.8f : offHandWeapon.WeightScore * unIdealDebuff;
-                            AddWeaponsToCombinations(_weaponCombinationsDic, mainHandWeapon.Name, offHandWeapon.Name, mainHandWeaponScore + offHandWeaponScore);
+                            AddWeaponsToCombinations(mainHandWeapon, offHandWeapon, mainHandWeaponScore + offHandWeaponScore);
                         }
                     }
                 }
