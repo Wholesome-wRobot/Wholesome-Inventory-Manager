@@ -490,6 +490,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             (string MainHand, string OffHand) bestCombintation = (null, null);
             float bestCombinationScore = 0;
 
+            _weaponCombinationsDic.Clear();
             // try all combinations
             foreach (IWIMItem mainHandWeapon in listAllMainHandWeapons)
             {
