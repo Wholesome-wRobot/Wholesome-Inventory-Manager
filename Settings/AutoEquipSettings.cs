@@ -11,7 +11,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 {    public static AutoEquipSettings CurrentSettings { get; set; }
     public bool FirstLaunch { get; set; }
     public List<StatWeight> StatWeights { get; set; }
-    public ClassSpec SpecSelectedByUser { get; set; }
+    public ClassSpec SelectedSpec { get; set; }
 
     // Gear
     public bool AutoEquipGear { get; set; }
@@ -68,6 +68,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     {
         FirstLaunch = true; 
         AutoDetectStatWeights = true;
+        SelectedSpec = ClassSpec.None;
         LogItemInfo = false;
 
         // Filter Loot

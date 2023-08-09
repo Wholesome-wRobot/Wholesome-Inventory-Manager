@@ -14,7 +14,7 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 
         public static void Initialize()
         {
-            DetectSpec();
+            AutoDetectSpec();
             EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
@@ -27,13 +27,15 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         {
             if (id == "CHARACTER_POINTS_CHANGED")
             {
-                DetectSpec();
+                AutoDetectSpec();
             }
         }
 
-        public static void DetectSpec()
+        public static void AutoDetectSpec()
         {
-            ClassSpec initialSpec = MySpec;
+            if (!AutoEquipSettings.CurrentSettings.AutoDetectStatWeights) return;
+
+            ClassSpec initialSpec = AutoEquipSettings.CurrentSettings.SelectedSpec;
 
             switch (ObjectManager.Me.WowClass)
             {
@@ -152,22 +154,22 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
             }
 
             // Update stat weights in case of auto detect
-            if (AutoEquipSettings.CurrentSettings.AutoDetectStatWeights && initialSpec != MySpec)
+            if (initialSpec != MySpec)
             {
+                Logger.Log($"Auto detected specialization {MySpec}");
                 ItemCache.ClearCache(); // to Rescan all items
                 SettingsPresets.ChangeStatsWeightSettings(MySpec);
+                AutoEquipSettings.CurrentSettings.SelectedSpec = MySpec;
             }
 
             // Set other default plugin settings according to detected class for first launch
-            if (AutoEquipSettings.CurrentSettings.FirstLaunch && initialSpec != MySpec)
+            if (AutoEquipSettings.CurrentSettings.FirstLaunch)
             {
                 Logger.Log("First Launch");
                 SettingsPresets.ChangeAutoEquipSetting(MySpec);
                 AutoEquipSettings.CurrentSettings.FirstLaunch = false;
                 AutoEquipSettings.CurrentSettings.Save();
             }
-
-            AutoEquipSettings.CurrentSettings.SpecSelectedByUser = MySpec;
         }
 
         public static bool ImACaster()

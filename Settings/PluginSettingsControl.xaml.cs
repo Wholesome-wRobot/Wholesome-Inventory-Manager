@@ -11,9 +11,10 @@ namespace Wholesome_Inventory_Manager.Settings
         {
             InitializeComponent();
 
-            if (AutoEquipSettings.CurrentSettings.SpecSelectedByUser == ClassSpec.None)
+            if (AutoEquipSettings.CurrentSettings.SelectedSpec == ClassSpec.None
+                && AutoEquipSettings.CurrentSettings.AutoDetectStatWeights)
             {
-                ClassSpecManager.DetectSpec();
+                ClassSpecManager.AutoDetectSpec();
             }
 
             DiscordLink.RequestNavigate += (sender, e) =>
@@ -232,9 +233,8 @@ namespace Wholesome_Inventory_Manager.Settings
 
         private void AutoDetectStatsPresetChanged(object sender, RoutedEventArgs e)
         {
-            Logger.Log("SETTING CHANGED");
-            AutoEquipSettings.CurrentSettings.SpecSelectedByUser = (ClassSpec)Enum.Parse(typeof(ClassSpec), StatsPreset.SelectedIndex.ToString());
-            SettingsPresets.ChangeStatsWeightSettings(AutoEquipSettings.CurrentSettings.SpecSelectedByUser);
+            AutoEquipSettings.CurrentSettings.SelectedSpec = (ClassSpec)Enum.Parse(typeof(ClassSpec), StatsPreset.SelectedIndex.ToString());
+            SettingsPresets.ChangeStatsWeightSettings(AutoEquipSettings.CurrentSettings.SelectedSpec);
             UpdateStats();
             AutoEquipSettings.CurrentSettings.Save();
         }
@@ -243,8 +243,7 @@ namespace Wholesome_Inventory_Manager.Settings
         {
             AutoEquipSettings.CurrentSettings.AutoDetectStatWeights = (bool)AutoDetectStatWeights.IsChecked;
             GroupStats.IsEnabled = !(bool)AutoDetectStatWeights.IsChecked;
-            ClassSpecManager.DetectSpec();
-            SettingsPresets.ChangeStatsWeightSettings(AutoEquipSettings.CurrentSettings.SpecSelectedByUser);
+            ClassSpecManager.AutoDetectSpec();
             UpdateStats();
             AutoEquipSettings.CurrentSettings.Save();
         }
@@ -426,7 +425,7 @@ namespace Wholesome_Inventory_Manager.Settings
 
         private void UpdateStats()
         {
-            StatsPreset.SelectedValue = AutoEquipSettings.CurrentSettings.SpecSelectedByUser.ToString();
+            StatsPreset.SelectedValue = AutoEquipSettings.CurrentSettings.SelectedSpec.ToString();
 
             // Base stats
             StaminaWeight.Value = AutoEquipSettings.CurrentSettings.GetStat(CharStat.Stamina);
