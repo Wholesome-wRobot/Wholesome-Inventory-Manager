@@ -580,33 +580,41 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (weapon == null || !ItemSkillsDictionary.ContainsKey(weapon.ItemSubType))
                 return false;
 
-            if (ClassSpecManager.MySpec == ClassSpec.RogueAssassination
-                && ItemSkillsDictionary[weapon.ItemSubType] != SkillLine.Daggers)
+            SkillLine weaponSubType = ItemSkillsDictionary[weapon.ItemSubType];
+
+            if (_skillsManager.PrioritizeDaggers
+                && weaponSubType != SkillLine.Daggers)
                 return false;
 
             // Shields
-            if (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Shield)
+            if (weaponSubType == SkillLine.Shield)
             {
                 return AutoEquipSettings.CurrentSettings.EquipShields;
             }
 
             // Two handers
-            if (TwoHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
+            if (TwoHanders.Contains(weaponSubType))
             {
                 // Titan's grip
-                if (_skillsManager.KnowTitansGrip
-                    && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
-                    || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
-                    || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces))
-                {
+                if (_skillsManager.KnowTitansGrip)
+                    return weaponSubType == SkillLine.TwoHandedSwords
+                    || weaponSubType == SkillLine.TwoHandedAxes
+                    || weaponSubType == SkillLine.TwoHandedMaces
+                    || weaponSubType == SkillLine.Polearms;
+
+                // Arms
+                if (_skillsManager.HasArmsMacesSpecialization && weaponSubType == SkillLine.TwoHandedMaces
+                    || _skillsManager.HasArmsAxesSpecialization && weaponSubType == SkillLine.TwoHandedAxes
+                    || _skillsManager.HasArmsAxesSpecialization && weaponSubType == SkillLine.Polearms
+                    || _skillsManager.HasArmsSwordsSpecialization && weaponSubType == SkillLine.TwoHandedSwords)
                     return true;
-                }
+
                 // Normal
                 return AutoEquipSettings.CurrentSettings.EquipTwoHanders;
             }
 
             // One handers
-            if (OneHanders.Contains(ItemSkillsDictionary[weapon.ItemSubType]))
+            if (OneHanders.Contains(weaponSubType))
             {
                 return AutoEquipSettings.CurrentSettings.EquipOneHanders;
             }
@@ -619,6 +627,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             return _skillsManager.KnowTitansGrip
                 && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
+                || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Polearms
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces);
         }
 

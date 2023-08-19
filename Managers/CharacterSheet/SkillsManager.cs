@@ -3,7 +3,7 @@ using System.Linq;
 using WholesomeToolbox;
 using wManager.Wow.Class;
 using wManager.Wow.Helpers;
-using static WAEEnums;
+using wManager.Wow.ObjectManager;
 
 namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 {
@@ -11,8 +11,12 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
     {
         private readonly object _SMlock = new object();
         public Dictionary<string, int> MySkills { get; } = new Dictionary<string, int>();
-        public bool KnowTitansGrip { get; private set; }
         public Spell DualWield { get; private set; }
+        public bool KnowTitansGrip { get; private set; }
+        public bool HasArmsAxesSpecialization { get; private set; }
+        public bool HasArmsMacesSpecialization { get; private set; }
+        public bool HasArmsSwordsSpecialization { get; private set; }
+        public bool PrioritizeDaggers { get; private set; }
 
         public void Initialize()
         {
@@ -68,9 +72,18 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 
                 DualWield = new Spell("Dual Wield");
 
-                if (!KnowTitansGrip && ClassSpecManager.MySpec == ClassSpec.WarriorFury)
+                if (ObjectManager.Me.WowClass == wManager.Wow.Enums.WoWClass.Warrior)
                 {
                     KnowTitansGrip = WTTalent.GetTalentRank(2, 27) > 0;
+                    HasArmsAxesSpecialization = WTTalent.GetTalentRank(1, 13) > 0;
+                    HasArmsMacesSpecialization = WTTalent.GetTalentRank(1, 15) > 0;
+                    HasArmsSwordsSpecialization = WTTalent.GetTalentRank(1, 16) > 0;
+                }
+
+                if (ObjectManager.Me.WowClass == wManager.Wow.Enums.WoWClass.Rogue
+                    && WTTalent.GetSpec() == 1)
+                {
+                    PrioritizeDaggers = true;
                 }
             }
         }

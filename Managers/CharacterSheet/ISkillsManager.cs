@@ -7,7 +7,11 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
     {
         Dictionary<string, int> MySkills { get; }
         void RecordSkills();
-        bool KnowTitansGrip { get; }
         Spell DualWield { get; }
+        bool KnowTitansGrip { get; }
+        bool HasArmsAxesSpecialization { get; }
+        bool HasArmsMacesSpecialization { get; }
+        bool HasArmsSwordsSpecialization { get; }
+        bool PrioritizeDaggers { get; }
     }
 }
