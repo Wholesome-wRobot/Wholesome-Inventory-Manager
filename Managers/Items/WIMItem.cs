@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using robotManager.Helpful;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -12,6 +13,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
 {
     internal class WIMItem : IWIMItem
     {
+        private static Timer _scrollTimer = new Timer();
         private static ulong _uniqueIdCounter = 0;
 
         public uint ItemId { get; private set; }
@@ -102,13 +104,15 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             if (AutoEquipSettings.CurrentSettings.UseScrolls
                 && !ObjectManager.Me.InCombatFlagOnly
                 && !ObjectManager.Me.HaveBuff("Food")
-                && !ObjectManager.Me.HaveBuff("Drink"))
+                && !ObjectManager.Me.HaveBuff("Drink")
+                && _scrollTimer.IsReady)
             {
                 string scrollSpell = ItemCache.GetScrollSpell(ItemId);
                 if (scrollSpell != null
                     && ItemMinLevel <= ObjectManager.Me.Level
                     && !ObjectManager.Me.HaveBuff(scrollSpell))
                 {
+                    _scrollTimer.Reset(5000);
                     Logger.Log($"Using {Name}");
                     Use();
                 }

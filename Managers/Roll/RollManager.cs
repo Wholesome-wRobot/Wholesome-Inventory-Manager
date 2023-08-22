@@ -1,11 +1,14 @@
-﻿using System;
+﻿using robotManager.Helpful;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
 using Wholesome_Inventory_Manager.Managers.Filter;
 using Wholesome_Inventory_Manager.Managers.Items;
 using wManager.Wow.Helpers;
+using Timer = robotManager.Helpful.Timer;
 
 namespace Wholesome_Inventory_Manager.Managers.Roll
 {
@@ -15,6 +18,8 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         private readonly ICharacterSheetManager _characterSheetManager;
         private readonly ILootFilter _lootFilter;
         private readonly Random _rand = new Random();
+        private static readonly Timer _rollFailSafeCoolDown = new Timer(15 * 1000);
+        private CancellationTokenSource _failSafeToken;
 
         public RollManager(IEquipManager equipManager, ICharacterSheetManager characterSheetManager, ILootFilter lootFilter)
         {
@@ -26,10 +31,40 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         public void Initialize()
         {
             EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
+            _failSafeToken = new CancellationTokenSource();
+            
+            Task.Factory.StartNew(() =>
+            {
+                while (!_failSafeToken.IsCancellationRequested)
+                {
+                    if (_rollFailSafeCoolDown.IsReady)
+                    {
+                        // Any roll is available after 15s cooldown, meaning a roll failed (mostly because of lvl up)
+                        // Greed it because we can't get the roll ID/item when the event is missed
+                        bool safeRolled = Lua.LuaDoString<bool>($@"
+                            local saferolled = false;
+                            for i=1,10 do
+                                local greedButton = _G['GroupLootFrame' .. i .. 'GreedButton'];
+                                if greedButton ~= nil and greedButton:IsVisible() then
+                                    greedButton:Click();
+                                    StaticPopup1Button1:Click();
+                                    saferolled = true;
+                                end
+                            end
+                            return saferolled;
+                        ");
+
+                        if (safeRolled) 
+                            Logger.LogError($"We missed a roll, defaulted to greed");
+                    }
+                    Thread.Sleep(5000);
+                }
+            }, _failSafeToken.Token);
         }
 
         public void Dispose()
         {
+            _failSafeToken?.Cancel();
             EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
         }
 
@@ -37,6 +72,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         {
             if (id == "START_LOOT_ROLL")
             {
+                _rollFailSafeCoolDown.Reset();
                 if (int.TryParse(args[0], out int rollId))
                 {
                     CheckLootRoll(rollId);
