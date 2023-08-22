@@ -1,7 +1,9 @@
-﻿namespace Wholesome_Inventory_Manager.Managers.Roll
+﻿using System.Collections.Generic;
+
+namespace Wholesome_Inventory_Manager.Managers.Roll
 {
     internal interface IRollManager : ICycleable
     {
-        void CheckLootRoll(int rollId);
+        void CheckLootRoll(List<string> args);
     }
 }

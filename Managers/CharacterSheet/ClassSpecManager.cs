@@ -1,76 +1,68 @@
-﻿using System.Collections.Generic;
-using Wholesome_Inventory_Manager.Managers.Items;
+﻿using Wholesome_Inventory_Manager.Managers.Items;
 using WholesomeToolbox;
 using wManager.Wow.Enums;
-using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
 using static WAEEnums;
 
 namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
 {
-    internal static class ClassSpecManager
+    internal class ClassSpecManager : IClassSpecManager
     {
-        public static ClassSpec MySpec { get; private set; }
+        private bool _iAmCaster;
+        public bool IAmCaster => _iAmCaster;
 
-        public static void Initialize()
+        public void Initialize()
         {
             AutoDetectSpec();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
-        public static void Dispose()
+        public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
         }
 
-        private static void OnEventsLuaWithArgs(string id, List<string> args)
+        public void AutoDetectSpec()
         {
-            if (id == "CHARACTER_POINTS_CHANGED")
-            {
-                AutoDetectSpec();
-            }
-        }
+            ClassSpec initialSpec = AutoEquipSettings.CurrentSettings.SelectedSpec;
+            _iAmCaster = IsCaster(initialSpec);
 
-        public static void AutoDetectSpec()
-        {
             if (!AutoEquipSettings.CurrentSettings.AutoDetectStatWeights) return;
 
-            ClassSpec initialSpec = AutoEquipSettings.CurrentSettings.SelectedSpec;
+            ClassSpec mySpec = ClassSpec.None;
 
             switch (ObjectManager.Me.WowClass)
             {
                 case (WoWClass.Warlock):
                     if (WTTalent.GetSpec() == 2)
-                        MySpec = ClassSpec.WarlockDemonology;
+                        mySpec = ClassSpec.WarlockDemonology;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.WarlockDestruction;
+                        mySpec = ClassSpec.WarlockDestruction;
                     else
-                        MySpec = ClassSpec.WarlockAffliction;
+                        mySpec = ClassSpec.WarlockAffliction;
                     break;
 
                 case (WoWClass.DeathKnight):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.DeathKnightBloodDPS;
+                        mySpec = ClassSpec.DeathKnightBloodDPS;
                     else if (WTTalent.GetSpec() == 2)
-                        MySpec = ClassSpec.DeathKnightFrostDPS;
+                        mySpec = ClassSpec.DeathKnightFrostDPS;
                     else
-                        MySpec = ClassSpec.DeathKnightUnholy;
+                        mySpec = ClassSpec.DeathKnightUnholy;
                     break;
 
                 case (WoWClass.Druid):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.DruidBalance;
+                        mySpec = ClassSpec.DruidBalance;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.DruidRestoration;
+                        mySpec = ClassSpec.DruidRestoration;
                     else
                     {
                         // TBC FERAL
                         if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.TBC)
                         {
                             if (WTTalent.GetTalentRank(2, 7) > 0) // Feral Charge
-                                MySpec = ClassSpec.DruidFeralTank;
+                                mySpec = ClassSpec.DruidFeralTank;
                             else
-                                MySpec = ClassSpec.DruidFeralDPS;
+                                mySpec = ClassSpec.DruidFeralDPS;
                         }
                         // WOTLK FERAL
                         if (ToolBox.GetWoWVersion() == ToolBox.WoWVersion.WOTLK)
@@ -78,116 +70,118 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
                             if (WTTalent.GetTalentRank(2, 5) > 2 // Thick Hide
                                 || WTTalent.GetTalentRank(2, 16) > 0 // Natural Reaction
                                 || WTTalent.GetTalentRank(2, 22) > 0) // Protector of the Pack
-                                MySpec = ClassSpec.DruidFeralTank;
+                                mySpec = ClassSpec.DruidFeralTank;
                             else
-                                MySpec = ClassSpec.DruidFeralDPS;
+                                mySpec = ClassSpec.DruidFeralDPS;
                         }
                     }
                     break;
 
                 case (WoWClass.Hunter):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.HunterBeastMastery;
+                        mySpec = ClassSpec.HunterBeastMastery;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.HunterSurvival;
+                        mySpec = ClassSpec.HunterSurvival;
                     else
-                        MySpec = ClassSpec.HunterMarksman;
+                        mySpec = ClassSpec.HunterMarksman;
                     break;
 
                 case (WoWClass.Mage):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.MageArcane;
+                        mySpec = ClassSpec.MageArcane;
                     else if (WTTalent.GetSpec() == 2)
-                        MySpec = ClassSpec.MageFire;
+                        mySpec = ClassSpec.MageFire;
                     else
-                        MySpec = ClassSpec.MageFrost;
+                        mySpec = ClassSpec.MageFrost;
                     break;
 
                 case (WoWClass.Paladin):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.PaladinHoly;
+                        mySpec = ClassSpec.PaladinHoly;
                     else if (WTTalent.GetSpec() == 2)
-                        MySpec = ClassSpec.PaladinProtection;
+                        mySpec = ClassSpec.PaladinProtection;
                     else
-                        MySpec = ClassSpec.PaladinRetribution;
+                        mySpec = ClassSpec.PaladinRetribution;
                     break;
 
                 case (WoWClass.Priest):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.PriestDiscipline;
+                        mySpec = ClassSpec.PriestDiscipline;
                     else if (WTTalent.GetSpec() == 2)
-                        MySpec = ClassSpec.PriestHoly;
+                        mySpec = ClassSpec.PriestHoly;
                     else
-                        MySpec = ClassSpec.PriestShadow;
+                        mySpec = ClassSpec.PriestShadow;
                     break;
 
                 case (WoWClass.Rogue):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.RogueAssassination;
+                        mySpec = ClassSpec.RogueAssassination;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.RogueSubtelty;
+                        mySpec = ClassSpec.RogueSubtelty;
                     else
-                        MySpec = ClassSpec.RogueCombat;
+                        mySpec = ClassSpec.RogueCombat;
                     break;
 
                 case (WoWClass.Shaman):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.ShamanElemental;
+                        mySpec = ClassSpec.ShamanElemental;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.ShamanRestoration;
+                        mySpec = ClassSpec.ShamanRestoration;
                     else
-                        MySpec = ClassSpec.ShamanEnhancement;
+                        mySpec = ClassSpec.ShamanEnhancement;
                     break;
 
                 case (WoWClass.Warrior):
                     if (WTTalent.GetSpec() == 1)
-                        MySpec = ClassSpec.WarriorArms;
+                        mySpec = ClassSpec.WarriorArms;
                     else if (WTTalent.GetSpec() == 3)
-                        MySpec = ClassSpec.WarriorTank;
+                        mySpec = ClassSpec.WarriorTank;
                     else
-                        MySpec = ClassSpec.WarriorFury;
+                        mySpec = ClassSpec.WarriorFury;
                     break;
 
                 default:
-                    MySpec = ClassSpec.None;
+                    mySpec = ClassSpec.None;
                     break;
             }
 
             // Update stat weights in case of auto detect
-            if (initialSpec != MySpec)
+            if (initialSpec != mySpec)
             {
-                Logger.Log($"Auto detected specialization {MySpec}");
+                Logger.Log($"Auto detected specialization {mySpec}");
                 ItemCache.ClearCache(); // to Rescan all items
-                SettingsPresets.ChangeStatsWeightSettings(MySpec);
-                AutoEquipSettings.CurrentSettings.SelectedSpec = MySpec;
+                SettingsPresets.ChangeStatsWeightSettings(mySpec);
+                AutoEquipSettings.CurrentSettings.SelectedSpec = mySpec;
             }
 
             // Set other default plugin settings according to detected class for first launch
             if (AutoEquipSettings.CurrentSettings.FirstLaunch)
             {
                 Logger.Log("First Launch");
-                SettingsPresets.ChangeAutoEquipSetting(MySpec);
+                SettingsPresets.ChangeAutoEquipSetting(mySpec);
                 AutoEquipSettings.CurrentSettings.FirstLaunch = false;
                 AutoEquipSettings.CurrentSettings.Save();
             }
+
+            _iAmCaster = IsCaster(mySpec);
         }
 
-        public static bool ImACaster()
+        private bool IsCaster(ClassSpec mySpec)
         {
-            return MySpec == ClassSpec.DruidBalance
-                || MySpec == ClassSpec.DruidRestoration
-                || MySpec == ClassSpec.MageArcane
-                || MySpec == ClassSpec.MageFire
-                || MySpec == ClassSpec.MageFrost
-                || MySpec == ClassSpec.PaladinHoly
-                || MySpec == ClassSpec.PriestDiscipline
-                || MySpec == ClassSpec.PriestHoly
-                || MySpec == ClassSpec.PriestShadow
-                || MySpec == ClassSpec.ShamanElemental
-                || MySpec == ClassSpec.ShamanRestoration
-                || MySpec == ClassSpec.WarlockAffliction
-                || MySpec == ClassSpec.WarlockDemonology
-                || MySpec == ClassSpec.WarlockDestruction;
+            return mySpec == ClassSpec.DruidBalance
+              || mySpec == ClassSpec.DruidRestoration
+              || mySpec == ClassSpec.MageArcane
+              || mySpec == ClassSpec.MageFire
+              || mySpec == ClassSpec.MageFrost
+              || mySpec == ClassSpec.PaladinHoly
+              || mySpec == ClassSpec.PriestDiscipline
+              || mySpec == ClassSpec.PriestHoly
+              || mySpec == ClassSpec.PriestShadow
+              || mySpec == ClassSpec.ShamanElemental
+              || mySpec == ClassSpec.ShamanRestoration
+              || mySpec == ClassSpec.WarlockAffliction
+              || mySpec == ClassSpec.WarlockDemonology
+              || mySpec == ClassSpec.WarlockDestruction;
         }
     }
 }

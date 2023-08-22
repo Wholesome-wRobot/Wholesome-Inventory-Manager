@@ -7,14 +7,16 @@ namespace Wholesome_Inventory_Manager.Settings
 {
     public partial class PluginSettingsControl
     {
-        internal PluginSettingsControl()
+        private readonly IClassSpecManager _classSpecManager = new ClassSpecManager();
+
+        internal PluginSettingsControl(IClassSpecManager classSpecManager)
         {
             InitializeComponent();
 
             if (AutoEquipSettings.CurrentSettings.SelectedSpec == ClassSpec.None
                 && AutoEquipSettings.CurrentSettings.AutoDetectStatWeights)
             {
-                ClassSpecManager.AutoDetectSpec();
+                _classSpecManager.AutoDetectSpec();
             }
 
             DiscordLink.RequestNavigate += (sender, e) =>
@@ -243,7 +245,7 @@ namespace Wholesome_Inventory_Manager.Settings
         {
             AutoEquipSettings.CurrentSettings.AutoDetectStatWeights = (bool)AutoDetectStatWeights.IsChecked;
             GroupStats.IsEnabled = !(bool)AutoDetectStatWeights.IsChecked;
-            ClassSpecManager.AutoDetectSpec();
+            _classSpecManager.AutoDetectSpec();
             UpdateStats();
             AutoEquipSettings.CurrentSettings.Save();
         }

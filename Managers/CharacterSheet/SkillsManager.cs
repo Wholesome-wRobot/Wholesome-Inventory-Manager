@@ -21,19 +21,9 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         public void Initialize()
         {
             RecordSkills();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
         public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-        }
-
-        private void OnEventsLuaWithArgs(string id, List<string> args)
-        {
-            if (id == "SKILL_LINES_CHANGED" || id == "CHARACTER_POINTS_CHANGED")
-            {
-                RecordSkills();
-            }
         }
 
         public void RecordSkills()

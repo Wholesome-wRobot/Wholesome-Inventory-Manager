@@ -24,11 +24,14 @@ public class Main : IPlugin
     private IWIMContainers _containers;
     private ILootFilter _lootFilter;
     private IQuestRewardManager _questRewardManager;
+    private IClassSpecManager _classSpecManager;
+
+    private bool _shouldBagUpdate = false;
+    private Timer _bagUpdateTimer = new Timer(500);
 
     public void Initialize()
     {
-        AutoEquipSettings.Load();
-        ClassSpecManager.Initialize();
+        AutoEquipSettings.Load(_classSpecManager);
 
         if (AutoUpdater.CheckUpdate(version))
         {
@@ -41,6 +44,8 @@ public class Main : IPlugin
 
         ToolBox.LUASetup();
 
+        _classSpecManager = new ClassSpecManager();
+        _classSpecManager.Initialize();
         _skillsManager = new SkillsManager();
         _skillsManager.Initialize();
         _characterSheetManager = new CharacterSheetManager();
@@ -51,7 +56,7 @@ public class Main : IPlugin
         _containers.Initialize();
         _equipManager = new EquipManager(_skillsManager, _characterSheetManager, _containers, _lootFilter);
         _equipManager.Initialize();
-        _rollManager = new RollManager(_equipManager, _characterSheetManager, _lootFilter);
+        _rollManager = new RollManager(_equipManager, _characterSheetManager, _lootFilter, _classSpecManager);
         _rollManager.Initialize();
         _questRewardManager = new QuestRewardManager(_equipManager, _characterSheetManager);
         _questRewardManager.Initialize();        
@@ -63,7 +68,7 @@ public class Main : IPlugin
     {
         EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
 
-        ClassSpecManager.Dispose();
+        _classSpecManager?.Dispose();
         _questRewardManager?.Dispose();
         _rollManager?.Dispose();
         _equipManager?.Dispose();
@@ -76,15 +81,45 @@ public class Main : IPlugin
 
     private void OnEventsLuaWithArgs(string id, List<string> args)
     {
-        if (id == "PLAYER_ENTERING_WORLD")
+        switch (id)
         {
-            ToolBox.LUASetup();
+            case "PLAYER_ENTERING_WORLD":
+                ToolBox.LUASetup();
+                break;
+            case "START_LOOT_ROLL":
+                _rollManager.CheckLootRoll(args);
+                break;
+            case "PLAYER_EQUIPMENT_CHANGED":
+                _characterSheetManager.Scan();
+                break;
+            case "CHARACTER_POINTS_CHANGED":
+                _skillsManager.RecordSkills();
+                _classSpecManager.AutoDetectSpec();
+                break;
+            case "SKILL_LINES_CHANGED":
+                _skillsManager.RecordSkills();
+                break;
+            case "BAG_UPDATE":
+            case "PLAYER_REGEN_ENABLED":
+                _shouldBagUpdate = true;
+                break;
+            case "UNIT_INVENTORY_CHANGED":
+                if (args[0] == "player")
+                    _shouldBagUpdate = true;
+                break;
+        }
+
+        if (_shouldBagUpdate && _bagUpdateTimer.IsReady)
+        {
+            _shouldBagUpdate = false;
+            _equipManager.CheckAll();
+            _bagUpdateTimer.Reset();
         }
     }
 
     public void Settings()
     {
-        AutoEquipSettings.Load();
+        AutoEquipSettings.Load(_classSpecManager);
         AutoEquipSettings.CurrentSettings.ShowConfiguration();
         AutoEquipSettings.CurrentSettings.Save();
     }

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using wManager;
+using wManager.Wow.Class;
 using wManager.Wow.Enums;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
@@ -69,6 +70,11 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             else
             {
                 string iteminfo = Lua.LuaDoString<string>($@"return ParseItemInfo(-1, -1, ""{ItemLink.Replace("\"", "\\\"")}"");");
+                if (string.IsNullOrEmpty(iteminfo))
+                {
+                    Logger.LogError($"Couldn't parse item info for {ItemLink}");
+                    return;
+                }
                 string[] infoArray = iteminfo.Split('£');
                 RecordAllItemInfo(infoArray);
             }

@@ -1,5 +1,4 @@
-﻿using robotManager.Helpful;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,26 +16,34 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         private readonly IEquipManager _equipManager;
         private readonly ICharacterSheetManager _characterSheetManager;
         private readonly ILootFilter _lootFilter;
+        private readonly IClassSpecManager _classSpecManager;
         private readonly Random _rand = new Random();
         private static readonly Timer _rollFailSafeCoolDown = new Timer(15 * 1000);
         private CancellationTokenSource _failSafeToken;
 
-        public RollManager(IEquipManager equipManager, ICharacterSheetManager characterSheetManager, ILootFilter lootFilter)
+        public RollManager(
+            IEquipManager equipManager,
+            ICharacterSheetManager characterSheetManager,
+            ILootFilter lootFilter,
+            IClassSpecManager classSpecManager)
         {
             _equipManager = equipManager;
             _characterSheetManager = characterSheetManager;
             _lootFilter = lootFilter;
+            _classSpecManager = classSpecManager;
         }
 
         public void Initialize()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
             _failSafeToken = new CancellationTokenSource();
-            
+
             Task.Factory.StartNew(() =>
             {
                 while (!_failSafeToken.IsCancellationRequested)
                 {
+                    if (_rollFailSafeCoolDown.IsReady)
+                        Thread.Sleep(1000); // wait an extra second since the event can take a little time
+
                     if (_rollFailSafeCoolDown.IsReady)
                     {
                         // Any roll is available after 15s cooldown, meaning a roll failed (mostly because of lvl up)
@@ -54,9 +61,10 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                             return saferolled;
                         ");
 
-                        if (safeRolled) 
+                        if (safeRolled)
                             Logger.LogError($"We missed a roll, defaulted to greed");
                     }
+
                     Thread.Sleep(5000);
                 }
             }, _failSafeToken.Token);
@@ -65,116 +73,107 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         public void Dispose()
         {
             _failSafeToken?.Cancel();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
         }
 
-        private void OnEventsLuaWithArgs(string id, List<string> args)
+        public void CheckLootRoll(List<string> args)
         {
-            if (id == "START_LOOT_ROLL")
+            _rollFailSafeCoolDown.Reset();
+            if (int.TryParse(args[0], out int rollId))
             {
-                _rollFailSafeCoolDown.Reset();
-                if (int.TryParse(args[0], out int rollId))
+                bool canNeed = Main.WoWVersion <= ToolBox.WoWVersion.TBC || Lua.LuaDoString<bool>($"local _, _, _, _, _, canNeed = GetLootRollItemInfo({rollId}); return canNeed;");
+                string itemLink = Lua.LuaDoString<string>($"return GetLootRollItemLink({rollId});");
+
+                if (string.IsNullOrEmpty(itemLink) || itemLink.Length < 10)
                 {
-                    CheckLootRoll(rollId);
+                    Logger.LogError($"Couldn't get item link of roll {rollId}, skipping");
+                    return;
                 }
-                else
+
+                IWIMItem itemToRoll = new WIMItem(itemLink, rollId: rollId);
+
+                if (AutoEquipSettings.CurrentSettings.AlwaysPass)
                 {
-                    Logger.LogError($"Couldn't parse roll ID!");
+                    Roll(rollId, itemToRoll, "Always pass", RollType.PASS);
+                    return;
                 }
-            }
-        }
 
-        public void CheckLootRoll(int rollId)
-        {
-            bool canNeed = Main.WoWVersion <= ToolBox.WoWVersion.TBC || Lua.LuaDoString<bool>($"local _, _, _, _, _, canNeed = GetLootRollItemInfo({rollId}); return canNeed;");
-            string itemLink = Lua.LuaDoString<string>($"return GetLootRollItemLink({rollId});");
-
-            if (itemLink.Length < 10)
-            {
-                Logger.LogError($"Couldn't get item link of roll {rollId}, skipping");
-                return;
-            }
-
-            IWIMItem itemToRoll = new WIMItem(itemLink, rollId: rollId);
-
-            if (AutoEquipSettings.CurrentSettings.AlwaysPass)
-            {
-                Roll(rollId, itemToRoll, "Always pass", RollType.PASS);
-                return;
-            }
-
-            if (AutoEquipSettings.CurrentSettings.AlwaysGreed)
-            {
-                Roll(rollId, itemToRoll, "Always greed", RollType.GREED);
-                return;
-            }
-
-            if (canNeed && itemToRoll.ItemEquipLoc != "" && itemToRoll.ItemSubType != "Bag")
-            {
-                // Weapons
-                if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
-                    || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
-                    || (itemToRoll.ItemSubType == "Miscellaneous" && ClassSpecManager.ImACaster()))
+                if (AutoEquipSettings.CurrentSettings.AlwaysGreed)
                 {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsWeaponBetter(itemToRoll, true);
-                    if (slotAndReason != (null, null))
+                    Roll(rollId, itemToRoll, "Always greed", RollType.GREED);
+                    return;
+                }
+
+                if (canNeed && itemToRoll.ItemEquipLoc != "" && itemToRoll.ItemSubType != "Bag")
+                {
+                    // Weapons
+                    if (WAEEnums.TwoHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
+                        || WAEEnums.OneHanders.Contains(WAEEnums.ItemSkillsDictionary[itemToRoll.ItemSubType])
+                        || (itemToRoll.ItemSubType == "Miscellaneous" && _classSpecManager.IAmCaster))
                     {
-                        Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
-                        return;
-                    }
-                }
-
-                // Ranged
-                if (_characterSheetManager.RangedSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
-                {
-                    string reason = _equipManager.IsRangedBetter(itemToRoll, true);
-                    if (reason != null)
-                    {
-                        Roll(rollId, itemToRoll, reason, RollType.NEED);
-                        return;
-                    }
-                }
-
-                // Trinket
-                if (itemToRoll.ItemEquipLoc == "INVTYPE_TRINKET")
-                {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsTrinketBetter(itemToRoll, true);
-                    if (slotAndReason != (null, null))
-                    {
-                        Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
-                        return;
-                    }
-                }
-
-                // Ring
-                if (itemToRoll.ItemEquipLoc == "INVTYPE_FINGER")
-                {
-                    (ISheetSlot, string) slotAndReason = _equipManager.IsRingBetter(itemToRoll, true);
-                    if (slotAndReason != (null, null))
-                    {
-                        Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
-                        return;
-                    }
-                }
-
-                // Armor
-                foreach (ISheetSlot armorSlot in _characterSheetManager.ArmorSlots)
-                {
-                    if (armorSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
-                    {
-                        (ISheetSlot, string) slotAndReason = _equipManager.IsArmorBetter(armorSlot, itemToRoll, true);
+                        (ISheetSlot, string) slotAndReason = _equipManager.IsWeaponBetter(itemToRoll, true);
                         if (slotAndReason != (null, null))
                         {
                             Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
                             return;
                         }
                     }
+
+                    // Ranged
+                    if (_characterSheetManager.RangedSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
+                    {
+                        string reason = _equipManager.IsRangedBetter(itemToRoll, true);
+                        if (reason != null)
+                        {
+                            Roll(rollId, itemToRoll, reason, RollType.NEED);
+                            return;
+                        }
+                    }
+
+                    // Trinket
+                    if (itemToRoll.ItemEquipLoc == "INVTYPE_TRINKET")
+                    {
+                        (ISheetSlot, string) slotAndReason = _equipManager.IsTrinketBetter(itemToRoll, true);
+                        if (slotAndReason != (null, null))
+                        {
+                            Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                            return;
+                        }
+                    }
+
+                    // Ring
+                    if (itemToRoll.ItemEquipLoc == "INVTYPE_FINGER")
+                    {
+                        (ISheetSlot, string) slotAndReason = _equipManager.IsRingBetter(itemToRoll, true);
+                        if (slotAndReason != (null, null))
+                        {
+                            Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                            return;
+                        }
+                    }
+
+                    // Armor
+                    foreach (ISheetSlot armorSlot in _characterSheetManager.ArmorSlots)
+                    {
+                        if (armorSlot.InvTypes.Contains(itemToRoll.ItemEquipLoc))
+                        {
+                            (ISheetSlot, string) slotAndReason = _equipManager.IsArmorBetter(armorSlot, itemToRoll, true);
+                            if (slotAndReason != (null, null))
+                            {
+                                Roll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                if (!itemToRoll.HasBeenRolled)
+                {
+                    Roll(rollId, itemToRoll, "", RollType.GREED);
                 }
             }
-
-            if (!itemToRoll.HasBeenRolled)
+            else
             {
-                Roll(rollId, itemToRoll, "", RollType.GREED);
+                Logger.LogError($"Couldn't parse roll ID!");
             }
         }
 

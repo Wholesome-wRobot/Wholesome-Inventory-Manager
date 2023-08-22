@@ -22,8 +22,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         private readonly int _maxNbEquipAttempts = 5;
         private readonly object _equipManagerLock = new object();
         private int nbWeaponCombnations = 0; // triggers a message in the log when new combos
-        private Timer _bagUpdateTimer = new Timer();
-        private bool _bagShouldUpdate = false;
         private readonly Dictionary<(string, string), float> _weaponCombinationsDic = new Dictionary<(string, string), float>();
 
         public EquipManager(
@@ -45,33 +43,10 @@ namespace Wholesome_Inventory_Manager.Managers.Items
         public void Initialize()
         {
             CheckAll();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-        }
-
-        private void OnEventsLuaWithArgs(string id, List<string> args)
-        {
-            if (id == "BAG_UPDATE")
-            {
-                _bagShouldUpdate = true;
-            }
-
-            if (_bagShouldUpdate == true && _bagUpdateTimer.IsReady)
-            {
-                CheckAll();
-                _bagShouldUpdate = false;
-                _bagUpdateTimer = new Timer(200); // avoid bag update spam
-            }
-
-            if (id == "PLAYER_REGEN_ENABLED"
-                || id == "UNIT_INVENTORY_CHANGED" && args[0] == "player")
-            {
-                CheckAll();
-            }
         }
 
         public void CheckAll()

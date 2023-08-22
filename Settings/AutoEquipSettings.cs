@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Wholesome_Inventory_Manager.Managers.CharacterSheet;
+using Wholesome_Inventory_Manager.Settings;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
-using Wholesome_Inventory_Manager.Settings;
-using System.Collections.Generic;
 using static WAEEnums;
 
 [Serializable]
 public class AutoEquipSettings : robotManager.Helpful.Settings
-{    public static AutoEquipSettings CurrentSettings { get; set; }
+{
+    private static IClassSpecManager _classSpecManager;
+
+    public static AutoEquipSettings CurrentSettings { get; set; }
     public bool FirstLaunch { get; set; }
     public List<StatWeight> StatWeights { get; set; }
     public ClassSpec SelectedSpec { get; set; }
@@ -66,7 +70,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     internal AutoEquipSettings()
     {
-        FirstLaunch = true; 
+        FirstLaunch = true;
         AutoDetectStatWeights = true;
         SelectedSpec = ClassSpec.None;
         LogItemInfo = false;
@@ -128,7 +132,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
 
     public void ShowConfiguration()
     {
-        PluginSettingsControl settingsWindow = new PluginSettingsControl();
+        PluginSettingsControl settingsWindow = new PluginSettingsControl(_classSpecManager);
         settingsWindow.MaxWidth = 520;
         settingsWindow.MaxHeight = 650;
         settingsWindow.MinWidth = 520;
@@ -192,10 +196,11 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         }
     }
 
-    internal static bool Load()
+    internal static bool Load(IClassSpecManager classSpecManager)
     {
         try
         {
+            _classSpecManager = classSpecManager;
             if (File.Exists(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName)))
             {
                 CurrentSettings = Load<AutoEquipSettings>(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName));

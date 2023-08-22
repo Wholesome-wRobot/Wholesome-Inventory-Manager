@@ -27,20 +27,10 @@ namespace Wholesome_Inventory_Manager.Managers.CharacterSheet
         public void Initialize()
         {
             Scan();
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs += OnEventsLuaWithArgs;
         }
 
         public void Dispose()
         {
-            EventsLuaWithArgs.OnEventsLuaStringWithArgs -= OnEventsLuaWithArgs;
-        }
-
-        private void OnEventsLuaWithArgs(string id, List<string> args)
-        {
-            if (id == "PLAYER_EQUIPMENT_CHANGED")
-            {
-                Scan();
-            }
         }
 
         public void Scan()

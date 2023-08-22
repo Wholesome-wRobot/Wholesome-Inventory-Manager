@@ -108,6 +108,7 @@
     <Compile Include="Managers\CharacterSheet\CharacterSheetManager.cs" />
     <Compile Include="Managers\CharacterSheet\ClassSpecManager.cs" />
     <Compile Include="Managers\CharacterSheet\ICharacterSheetManager.cs" />
+    <Compile Include="Managers\CharacterSheet\IClassSpecManager.cs" />
     <Compile Include="Managers\Filter\ILootFilter.cs" />
     <Compile Include="Managers\Filter\LootFilter.cs" />
     <Compile Include="Managers\ICycleable.cs" />
