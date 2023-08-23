@@ -45,14 +45,26 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     {
                         if (_rollFailSafeCoolDown.IsReady)
                         {
-                            Thread.Sleep(5000);
+                            bool rollInProgress = Lua.LuaDoString<bool>($@"
+                                for i=1,5 do
+                                    local greedButton = _G['GroupLootFrame' .. i .. 'GreedButton'];
+                                    if greedButton ~= nil and greedButton:IsVisible() then
+                                        return true;
+                                    end
+                                end
+                                return false
+                            ");
+
+                            if (rollInProgress)
+                                Thread.Sleep(5000);
+
                             if (!_rollFailSafeCoolDown.IsReady) continue;
 
                             // Any roll is available after 15s cooldown, meaning a roll failed (mostly because of lvl up)
                             // Greed it because we can't get the roll ID/item when the event is missed
                             bool safeRolled = Lua.LuaDoString<bool>($@"
                                 local saferolled = false;
-                                for i=1,10 do
+                                for i=1,5 do
                                     local greedButton = _G['GroupLootFrame' .. i .. 'GreedButton'];
                                     if greedButton ~= nil and greedButton:IsVisible() then
                                         greedButton:Click();
@@ -83,7 +95,6 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 
         public void CheckLootRoll(List<string> args)
         {
-            Logger.Log($"Resetting roll timer");
             _rollFailSafeCoolDown.Reset();
             if (int.TryParse(args[0], out int rollId))
             {
