@@ -56,27 +56,31 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                             ");
 
                             if (rollInProgress)
+                            {
                                 Thread.Sleep(5000);
+                                if (!_rollFailSafeCoolDown.IsReady)
+                                {
+                                    continue;
+                                }
 
-                            if (!_rollFailSafeCoolDown.IsReady) continue;
-
-                            // Any roll is available after 15s cooldown, meaning a roll failed (mostly because of lvl up)
-                            // Greed it because we can't get the roll ID/item when the event is missed
-                            bool safeRolled = Lua.LuaDoString<bool>($@"
-                                local saferolled = false;
-                                for i=1,5 do
-                                    local greedButton = _G['GroupLootFrame' .. i .. 'GreedButton'];
-                                    if greedButton ~= nil and greedButton:IsVisible() then
-                                        greedButton:Click();
-                                        StaticPopup1Button1:Click();
-                                        saferolled = true;
+                                // Any roll is available after 15s (+5) cooldown, meaning a roll failed (mostly because of lvl up)
+                                // Greed it because we can't get the roll ID/item when the event is missed
+                                bool safeRolled = Lua.LuaDoString<bool>($@"
+                                    local saferolled = false;
+                                    for i=1,5 do
+                                        local greedButton = _G['GroupLootFrame' .. i .. 'GreedButton'];
+                                        if greedButton ~= nil and greedButton:IsVisible() then
+                                            greedButton:Click();
+                                            StaticPopup1Button1:Click();
+                                            saferolled = true;
+                                        end
                                     end
-                                end
-                                return saferolled;
-                            ");
+                                    return saferolled;
+                                ");
 
-                            if (safeRolled)
-                                Logger.LogError($"We missed a roll, defaulted to greed");
+                                if (safeRolled)
+                                    Logger.LogError($"We missed a roll, defaulted to greed");
+                            }
                         }
                         Thread.Sleep(5000);
                     }
