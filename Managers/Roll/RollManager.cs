@@ -125,6 +125,12 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     return;
                 }
 
+                if (!WAEEnums.ItemSkillsDictionary.ContainsKey(itemToRoll.ItemSubType))
+                {
+                    Roll(rollId, itemToRoll, "Irrelevant ItemSubType", RollType.GREED);
+                    return;
+                }
+
                 if (canNeed && itemToRoll.ItemEquipLoc != "" && itemToRoll.ItemSubType != "Bag")
                 {
                     // Weapons
