@@ -86,9 +86,11 @@ public class Main : IPlugin
             case "PLAYER_ENTERING_WORLD":
                 ToolBox.LUASetup();
                 break;
+                /*
             case "START_LOOT_ROLL":
                 _rollManager.CheckLootRoll(args);
                 break;
+                */
             case "PLAYER_EQUIPMENT_CHANGED":
                 _characterSheetManager.Scan();
                 break;
