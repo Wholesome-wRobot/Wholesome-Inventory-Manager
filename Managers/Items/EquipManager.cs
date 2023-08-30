@@ -578,11 +578,12 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                     || weaponSubType == SkillLine.Polearms;
 
                 // Arms
-                if (_skillsManager.HasArmsMacesSpecialization && weaponSubType == SkillLine.TwoHandedMaces
-                    || _skillsManager.HasArmsAxesSpecialization && weaponSubType == SkillLine.TwoHandedAxes
-                    || _skillsManager.HasArmsAxesSpecialization && weaponSubType == SkillLine.Polearms
-                    || _skillsManager.HasArmsSwordsSpecialization && weaponSubType == SkillLine.TwoHandedSwords)
-                    return true;
+                if (_skillsManager.HasArmsMacesSpecialization) 
+                    return weaponSubType == SkillLine.TwoHandedMaces;
+                if (_skillsManager.HasArmsAxesSpecialization) 
+                    return weaponSubType == SkillLine.TwoHandedAxes || weaponSubType == SkillLine.Polearms;
+                if (_skillsManager.HasArmsSwordsSpecialization) 
+                    return weaponSubType == SkillLine.TwoHandedSwords;
 
                 // Normal
                 return AutoEquipSettings.CurrentSettings.EquipTwoHanders;
