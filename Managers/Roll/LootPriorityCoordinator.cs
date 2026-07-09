@@ -20,7 +20,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             "WholesomeInventoryManager",
             "LootRollCache");
 
-        public bool TryWriteIntent(int rollId, int itemId, LootPriorityRole role, bool wantsNeed)
+        public bool TryWriteIntent(int rollId, LootPriorityRole role)
         {
             try
             {
@@ -30,14 +30,12 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 LootRollIntent intent = new LootRollIntent
                 {
                     RollId = rollId,
-                    ItemId = itemId,
                     CharacterName = ObjectManager.Me.Name,
                     Role = role,
-                    WantsNeed = wantsNeed,
                     CreatedAtUtc = DateTime.UtcNow
                 };
 
-                string fileName = $"{SafeFileName(intent.CharacterName)}_{rollId}_{itemId}.json";
+                string fileName = $"{SafeFileName(intent.CharacterName)}_{rollId}.json";
                 string finalPath = Path.Combine(CacheDirectory, fileName);
                 string tempPath = finalPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
 
@@ -56,14 +54,14 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             }
         }
 
-        public bool HasHigherPriorityNeed(int rollId, int itemId, LootPriorityRole currentRole)
+        public bool HasHigherPriorityNeed(int rollId, LootPriorityRole currentRole)
         {
             try
             {
                 CleanupOldIntents();
 
-                return ReadValidIntents(rollId, itemId)
-                    .Any(intent => intent.WantsNeed && IsHigherPriority(intent.Role, currentRole));
+                return ReadValidIntents(rollId)
+                    .Any(intent => intent.Role < currentRole);
             }
             catch (Exception e)
             {
@@ -72,12 +70,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             }
         }
 
-        public bool CanBeOutranked(LootPriorityRole role)
-        {
-            return role != LootPriorityRole.Tank;
-        }
-
-        private IEnumerable<LootRollIntent> ReadValidIntents(int rollId, int itemId)
+        private IEnumerable<LootRollIntent> ReadValidIntents(int rollId)
         {
             if (!Directory.Exists(CacheDirectory))
                 return Enumerable.Empty<LootRollIntent>();
@@ -90,8 +83,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 LootRollIntent intent = ReadIntent(filePath);
                 if (intent == null
                     || intent.CreatedAtUtc < oldestValidDate
-                    || intent.RollId != rollId
-                    || intent.ItemId != itemId)
+                    || intent.RollId != rollId)
                 {
                     continue;
                 }
@@ -140,26 +132,9 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             {
                 File.Delete(filePath);
             }
-            catch
+            catch (Exception e)
             {
-            }
-        }
-
-        private bool IsHigherPriority(LootPriorityRole candidateRole, LootPriorityRole currentRole)
-        {
-            return GetPriority(candidateRole) < GetPriority(currentRole);
-        }
-
-        private int GetPriority(LootPriorityRole role)
-        {
-            switch (role)
-            {
-                case LootPriorityRole.Tank:
-                    return 1;
-                case LootPriorityRole.Healer:
-                    return 2;
-                default:
-                    return 3;
+                Logger.LogError("LootPriorityCoordinator > TryDelete(): " + e.Message);
             }
         }
 
