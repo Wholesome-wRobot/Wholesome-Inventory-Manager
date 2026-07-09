@@ -101,6 +101,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
@@ -440,13 +441,49 @@
                                        OnLabel="" 
                                        OffLabel=""/>
 
+                        <TextBlock Grid.Row="17"
+                               Grid.Column="0"
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Text="Loot priority"
+                               FontSize="13"  />
+                        <mah:ToggleSwitch  Grid.Row="17"
+                                       Grid.Column="1"
+                                       Margin="0,10,0,10"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       IsChecked="False"
+                                       Click="EnableLootPriorityChanged"
+                                       x:Name="EnableLootPriority"
+                                       ToolTip="Requires all party WRobot instances to run on this computer with loot priority enabled. Falls back to default roll logic if coordination data cannot be read."
+                                       OnLabel=""
+                                       OffLabel=""/>
+
+                        <TextBlock Grid.Row="17"
+                               Grid.Column="2"
+                               Margin="5,0,5,0"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Text="Loot role"
+                               FontSize="13"  />
+                        <ComboBox Grid.Row="17"
+                                  Grid.Column="3"
+                                  Margin="0,10,0,10"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center"
+                                  x:Name="LootRole"
+                                  Width="75"
+                                  SelectionChanged="LootRoleChanged"
+                                  ToolTip="Used only by the Tank/Healer Loot Priority feature."/>
+
                          <!-- MISC -->
-                        <Separator  Grid.Row="17" 
+                        <Separator  Grid.Row="18"
                                        Grid.Column="0"
                                        Grid.ColumnSpan="4"
                                        Margin="5,10,0,10" />
                         
-                        <TextBlock Grid.Row="18" 
+                        <TextBlock Grid.Row="19"
                                Grid.Column="0" 
                                Grid.ColumnSpan="4"
                                Margin="0,0,0,0" 
@@ -455,14 +492,14 @@
                                Text="Misc" 
                                FontSize="20" Foreground="#FFC9C9C9"  />
 
-                        <TextBlock Grid.Row="19" 
+                        <TextBlock Grid.Row="20"
                                Grid.Column="0" 
                                Margin="5,0,5,0" 
                                HorizontalAlignment="Right" 
                                VerticalAlignment="Center"  
                                Text="Restack Items" 
                                FontSize="13"  />
-                        <mah:ToggleSwitch  Grid.Row="19" 
+                        <mah:ToggleSwitch  Grid.Row="20"
                                        Grid.Column="1"  
                                        Margin="0,10,0,10"
                                        HorizontalAlignment="Left"  
@@ -474,14 +511,14 @@
                                        OnLabel="" 
                                        OffLabel=""/>
 
-                        <TextBlock Grid.Row="19" 
+                        <TextBlock Grid.Row="20"
                                Grid.Column="2" 
                                Margin="5,0,5,0" 
                                HorizontalAlignment="Right" 
                                VerticalAlignment="Center"  
                                Text="Use Scrolls" 
                                FontSize="13"  />
-                        <mah:ToggleSwitch  Grid.Row="19" 
+                        <mah:ToggleSwitch  Grid.Row="20"
                                        Grid.Column="3"  
                                        Margin="0,10,0,10"
                                        HorizontalAlignment="Left"  

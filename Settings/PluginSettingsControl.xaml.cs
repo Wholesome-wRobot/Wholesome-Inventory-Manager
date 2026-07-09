@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
+using Wholesome_Inventory_Manager.Managers.Roll;
 using static WAEEnums;
 
 namespace Wholesome_Inventory_Manager.Settings
@@ -46,6 +47,10 @@ namespace Wholesome_Inventory_Manager.Settings
             // Group loot
             AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
             AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
+            EnableLootPriority.IsChecked = AutoEquipSettings.CurrentSettings.EnableLootPriority;
+            LootRole.ItemsSource = Enum.GetNames(typeof(LootPriorityRole));
+            LootRole.SelectedItem = AutoEquipSettings.CurrentSettings.LootRole.ToString();
+            UpdateLootRoleEnabled();
 
             // Misc
             RestackItems.IsChecked = AutoEquipSettings.CurrentSettings.RestackItems;
@@ -115,6 +120,27 @@ namespace Wholesome_Inventory_Manager.Settings
         {
             AutoEquipSettings.CurrentSettings.AlwaysGreed = (bool)AlwaysGreed.IsChecked;
             AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void EnableLootPriorityChanged(object sender, RoutedEventArgs e)
+        {
+            AutoEquipSettings.CurrentSettings.EnableLootPriority = (bool)EnableLootPriority.IsChecked;
+            UpdateLootRoleEnabled();
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void LootRoleChanged(object sender, RoutedEventArgs e)
+        {
+            if (LootRole.SelectedItem == null)
+                return;
+
+            AutoEquipSettings.CurrentSettings.LootRole = (LootPriorityRole)Enum.Parse(typeof(LootPriorityRole), LootRole.SelectedItem.ToString());
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void UpdateLootRoleEnabled()
+        {
+            LootRole.IsEnabled = EnableLootPriority.IsChecked == true;
         }
 
         private void AutoSelectQuestRewardsChanged(object sender, RoutedEventArgs e)
