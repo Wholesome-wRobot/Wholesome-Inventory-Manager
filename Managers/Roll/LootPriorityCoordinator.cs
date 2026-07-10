@@ -30,12 +30,11 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 LootRollIntent intent = new LootRollIntent
                 {
                     RollId = rollId,
-                    CharacterName = ObjectManager.Me.Name,
                     Role = role,
                     CreatedAtUtc = DateTime.UtcNow
                 };
 
-                string fileName = $"{SafeFileName(intent.CharacterName)}_{rollId}.json";
+                string fileName = $"{SafeFileName(ObjectManager.Me.Name)}_{rollId}.json";
                 string finalPath = Path.Combine(CacheDirectory, fileName);
                 string tempPath = finalPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
 
@@ -54,18 +53,18 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             }
         }
 
-        public bool HasHigherPriorityNeed(int rollId, LootPriorityRole currentRole)
+        public bool SomeoneHasHigherPriorityNeed(int rollId, LootPriorityRole currentRole)
         {
             try
             {
                 CleanupOldIntents();
 
                 return ReadValidIntents(rollId)
-                    .Any(intent => intent.Role < currentRole);
+                    .Any(intent => intent.Role > currentRole);
             }
             catch (Exception e)
             {
-                Logger.LogError("LootPriorityCoordinator > HasHigherPriorityNeed(): " + e.Message);
+                Logger.LogError("LootPriorityCoordinator > SomeoneHasHigherPriorityNeed(): " + e.Message);
                 return false;
             }
         }
@@ -100,8 +99,9 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             {
                 return _serializer.Deserialize<LootRollIntent>(File.ReadAllText(filePath));
             }
-            catch
+            catch (Exception e)
             {
+                Logger.LogError("LootPriorityCoordinator > ReadIntent(): " + e.Message);
                 return null;
             }
         }

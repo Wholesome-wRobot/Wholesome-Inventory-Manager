@@ -2,8 +2,8 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 {
     public enum LootPriorityRole
     {
-        Tank = 1,
-        Healer = 2,
-        DPS = 3
+        Normal = 1,
+        High = 2,
+        Highest = 3
     }
 }

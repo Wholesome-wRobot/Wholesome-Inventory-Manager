@@ -47,10 +47,8 @@ namespace Wholesome_Inventory_Manager.Settings
             // Group loot
             AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
             AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
-            EnableLootPriority.IsChecked = AutoEquipSettings.CurrentSettings.EnableLootPriority;
-            LootRole.ItemsSource = Enum.GetNames(typeof(LootPriorityRole));
-            LootRole.SelectedItem = AutoEquipSettings.CurrentSettings.LootRole.ToString();
-            UpdateLootRoleEnabled();
+            LootPriority.ItemsSource = Enum.GetNames(typeof(LootPriorityRole));
+            LootPriority.SelectedItem = AutoEquipSettings.CurrentSettings.LootPriority.ToString();
 
             // Misc
             RestackItems.IsChecked = AutoEquipSettings.CurrentSettings.RestackItems;
@@ -122,25 +120,13 @@ namespace Wholesome_Inventory_Manager.Settings
             AutoEquipSettings.CurrentSettings.Save();
         }
 
-        private void EnableLootPriorityChanged(object sender, RoutedEventArgs e)
+        private void LootPriorityChanged(object sender, RoutedEventArgs e)
         {
-            AutoEquipSettings.CurrentSettings.EnableLootPriority = (bool)EnableLootPriority.IsChecked;
-            UpdateLootRoleEnabled();
-            AutoEquipSettings.CurrentSettings.Save();
-        }
-
-        private void LootRoleChanged(object sender, RoutedEventArgs e)
-        {
-            if (LootRole.SelectedItem == null)
+            if (LootPriority.SelectedItem == null)
                 return;
 
-            AutoEquipSettings.CurrentSettings.LootRole = (LootPriorityRole)Enum.Parse(typeof(LootPriorityRole), LootRole.SelectedItem.ToString());
+            AutoEquipSettings.CurrentSettings.LootPriority = (LootPriorityRole)Enum.Parse(typeof(LootPriorityRole), LootPriority.SelectedItem.ToString());
             AutoEquipSettings.CurrentSettings.Save();
-        }
-
-        private void UpdateLootRoleEnabled()
-        {
-            LootRole.IsEnabled = EnableLootPriority.IsChecked == true;
         }
 
         private void AutoSelectQuestRewardsChanged(object sender, RoutedEventArgs e)

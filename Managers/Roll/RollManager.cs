@@ -183,20 +183,16 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 
         private void DoNeedRoll(int rollId, IWIMItem itemToRoll, string reason)
         {
-            if (!AutoEquipSettings.CurrentSettings.EnableLootPriority)
+            LootPriorityRole lootPriority = AutoEquipSettings.CurrentSettings.LootPriority;
+            bool hasFailedToWriteIntent = lootPriority != LootPriorityRole.Normal
+                && !_lootPriorityCoordinator.TryWriteIntent(rollId, lootPriority);
+            if (hasFailedToWriteIntent)
             {
                 DoRoll(rollId, itemToRoll, reason, RollType.NEED);
                 return;
             }
 
-            LootPriorityRole lootRole = AutoEquipSettings.CurrentSettings.LootRole;
-            if (lootRole != LootPriorityRole.DPS && !_lootPriorityCoordinator.TryWriteIntent(rollId, lootRole))
-            {
-                DoRoll(rollId, itemToRoll, reason, RollType.NEED);
-                return;
-            }
-
-            if (lootRole == LootPriorityRole.Tank)
+            if (lootPriority == LootPriorityRole.Highest)
             {
                 DoRoll(rollId, itemToRoll, reason, RollType.NEED);
                 return;
@@ -207,7 +203,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
 
             Task.Delay(waitTime).ContinueWith(t =>
             {
-                if (_lootPriorityCoordinator.HasHigherPriorityNeed(rollId, lootRole))
+                if (_lootPriorityCoordinator.SomeoneHasHigherPriorityNeed(rollId, lootPriority))
                 {
                     DoRoll(rollId, itemToRoll, "Higher priority role wants NEED", RollType.GREED);
                     return;
