@@ -574,8 +574,7 @@ namespace Wholesome_Inventory_Manager.Managers.Items
                 if (_skillsManager.KnowTitansGrip)
                     return weaponSubType == SkillLine.TwoHandedSwords
                     || weaponSubType == SkillLine.TwoHandedAxes
-                    || weaponSubType == SkillLine.TwoHandedMaces
-                    || weaponSubType == SkillLine.Polearms;
+                    || weaponSubType == SkillLine.TwoHandedMaces;
 
                 // Arms
                 if (_skillsManager.HasArmsMacesSpecialization) 
@@ -603,7 +602,6 @@ namespace Wholesome_Inventory_Manager.Managers.Items
             return _skillsManager.KnowTitansGrip
                 && (ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedSwords
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedAxes
-                || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.Polearms
                 || ItemSkillsDictionary[weapon.ItemSubType] == SkillLine.TwoHandedMaces);
         }
 

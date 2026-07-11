@@ -64,7 +64,7 @@ public class ToolBox
         Lua.LuaDoString($@"DEFAULT_CHAT_FRAME:AddMessage(""{suffix} "" .. date(""%H:%M:%S""));");
     }
 
-    public static void TryDelete(string filePath)
+    public static void TryDeleteFile(string filePath)
     {
         try
         {

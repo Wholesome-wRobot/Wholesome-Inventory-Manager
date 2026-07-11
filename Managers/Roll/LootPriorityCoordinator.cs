@@ -116,12 +116,12 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             {
                 LootRollIntent intent = ReadIntent(filePath);
                 if (intent == null || intent.CreatedAtUtc < oldestValidDate)
-                    ToolBox.TryDelete(filePath);
+                    ToolBox.TryDeleteFile(filePath);
             }
 
             foreach (string filePath in Directory.GetFiles(CacheDirectory, "*.tmp"))
             {
-                ToolBox.TryDelete(filePath);
+                ToolBox.TryDeleteFile(filePath);
             }
         }
     }
