@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
+using Wholesome_Inventory_Manager.Managers.Roll;
 using Wholesome_Inventory_Manager.Settings;
 using wManager.Wow.Helpers;
 using wManager.Wow.ObjectManager;
@@ -60,6 +61,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     // Group roll
     public bool AlwaysGreed { get; set; }
     public bool AlwaysPass { get; set; }
+    public LootPriority LootPriority { get; set; }
     // MISC
     public bool RestackItems { get; set; }
     public bool UseScrolls { get; set; }
@@ -123,6 +125,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         // Group roll
         AlwaysGreed = false;
         AlwaysPass = false;
+        LootPriority = LootPriority.Normal;
 
         RestackItems = true;
         UseScrolls = true;
@@ -204,6 +207,8 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
             if (File.Exists(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName)))
             {
                 CurrentSettings = Load<AutoEquipSettings>(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName));
+                if (!Enum.IsDefined(typeof(LootPriority), CurrentSettings.LootPriority))
+                    CurrentSettings.LootPriority = LootPriority.Normal;
                 return true;
             }
             CurrentSettings = new AutoEquipSettings();

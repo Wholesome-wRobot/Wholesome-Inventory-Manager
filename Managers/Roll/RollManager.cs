@@ -17,6 +17,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
         private readonly ICharacterSheetManager _characterSheetManager;
         private readonly ILootFilter _lootFilter;
         private readonly IClassSpecManager _classSpecManager;
+        private readonly LootPriorityCoordinator _lootPriorityCoordinator = new LootPriorityCoordinator();
         private readonly Random _rand = new Random();
         private CancellationTokenSource _rollLoopToken;
         private readonly List<Roll> _alreadyRolled = new List<Roll>();
@@ -121,7 +122,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     (ISheetSlot, string) slotAndReason = _equipManager.IsWeaponBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
-                        DoRoll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                        DoNeedRoll(rollId, itemToRoll, slotAndReason.Item2);
                         return;
                     }
                 }
@@ -132,7 +133,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     string reason = _equipManager.IsRangedBetter(itemToRoll, true);
                     if (reason != null)
                     {
-                        DoRoll(rollId, itemToRoll, reason, RollType.NEED);
+                        DoNeedRoll(rollId, itemToRoll, reason);
                         return;
                     }
                 }
@@ -143,7 +144,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     (ISheetSlot, string) slotAndReason = _equipManager.IsTrinketBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
-                        DoRoll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                        DoNeedRoll(rollId, itemToRoll, slotAndReason.Item2);
                         return;
                     }
                 }
@@ -154,7 +155,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                     (ISheetSlot, string) slotAndReason = _equipManager.IsRingBetter(itemToRoll, true);
                     if (slotAndReason != (null, null))
                     {
-                        DoRoll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                        DoNeedRoll(rollId, itemToRoll, slotAndReason.Item2);
                         return;
                     }
                 }
@@ -167,7 +168,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                         (ISheetSlot, string) slotAndReason = _equipManager.IsArmorBetter(armorSlot, itemToRoll, true);
                         if (slotAndReason != (null, null))
                         {
-                            DoRoll(rollId, itemToRoll, slotAndReason.Item2, RollType.NEED);
+                            DoNeedRoll(rollId, itemToRoll, slotAndReason.Item2);
                             return;
                         }
                     }
@@ -178,6 +179,38 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             {
                 DoRoll(rollId, itemToRoll, "", RollType.GREED);
             }
+        }
+
+        private void DoNeedRoll(int rollId, IWIMItem itemToRoll, string reason)
+        {
+            LootPriority lootPriority = AutoEquipSettings.CurrentSettings.LootPriority;
+            bool hasFailedToWriteIntent = lootPriority != LootPriority.Normal
+                && !_lootPriorityCoordinator.TryWriteIntent(rollId, lootPriority);
+            if (hasFailedToWriteIntent)
+            {
+                DoRoll(rollId, itemToRoll, reason, RollType.NEED);
+                return;
+            }
+
+            if (lootPriority == LootPriority.Highest)
+            {
+                DoRoll(rollId, itemToRoll, reason, RollType.NEED);
+                return;
+            }
+
+            int waitTime = 5000 + _rand.Next(0, 3001);
+            Logger.Log($"Waiting {waitTime}ms for loot priority before rolling NEED on {itemToRoll.Name}");
+
+            Task.Delay(waitTime).ContinueWith(t =>
+            {
+                if (_lootPriorityCoordinator.SomeoneHasHigherLootPriority(rollId, lootPriority))
+                {
+                    DoRoll(rollId, itemToRoll, "Higher priority role wants NEED", RollType.GREED);
+                    return;
+                }
+
+                DoRoll(rollId, itemToRoll, reason, RollType.NEED);
+            });
         }
 
         private void DoRoll(int rollId, IWIMItem itemToRoll, string reason, RollType rollType)

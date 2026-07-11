@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using Wholesome_Inventory_Manager.Managers.CharacterSheet;
+using Wholesome_Inventory_Manager.Managers.Roll;
 using static WAEEnums;
 
 namespace Wholesome_Inventory_Manager.Settings
@@ -46,6 +47,8 @@ namespace Wholesome_Inventory_Manager.Settings
             // Group loot
             AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
             AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
+            LootPriority.ItemsSource = Enum.GetNames(typeof(LootPriority));
+            LootPriority.SelectedItem = AutoEquipSettings.CurrentSettings.LootPriority.ToString();
 
             // Misc
             RestackItems.IsChecked = AutoEquipSettings.CurrentSettings.RestackItems;
@@ -114,6 +117,15 @@ namespace Wholesome_Inventory_Manager.Settings
         private void AlwaysGreedChanged(object sender, RoutedEventArgs e)
         {
             AutoEquipSettings.CurrentSettings.AlwaysGreed = (bool)AlwaysGreed.IsChecked;
+            AutoEquipSettings.CurrentSettings.Save();
+        }
+
+        private void LootPriorityChanged(object sender, RoutedEventArgs e)
+        {
+            if (LootPriority.SelectedItem == null)
+                return;
+
+            AutoEquipSettings.CurrentSettings.LootPriority = (LootPriority)Enum.Parse(typeof(LootPriority), LootPriority.SelectedItem.ToString());
             AutoEquipSettings.CurrentSettings.Save();
         }
 
