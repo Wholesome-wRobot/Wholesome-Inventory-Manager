@@ -61,7 +61,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
     // Group roll
     public bool AlwaysGreed { get; set; }
     public bool AlwaysPass { get; set; }
-    public LootPriorityRole LootPriority { get; set; }
+    public LootPriority LootPriority { get; set; }
     // MISC
     public bool RestackItems { get; set; }
     public bool UseScrolls { get; set; }
@@ -125,7 +125,7 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
         // Group roll
         AlwaysGreed = false;
         AlwaysPass = false;
-        LootPriority = LootPriorityRole.Normal;
+        LootPriority = LootPriority.Normal;
 
         RestackItems = true;
         UseScrolls = true;
@@ -207,8 +207,8 @@ public class AutoEquipSettings : robotManager.Helpful.Settings
             if (File.Exists(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName)))
             {
                 CurrentSettings = Load<AutoEquipSettings>(AdviserFilePathAndName("AutoEquipSettings", ObjectManager.Me.Name + "." + Usefuls.RealmName));
-                if (!Enum.IsDefined(typeof(LootPriorityRole), CurrentSettings.LootPriority))
-                    CurrentSettings.LootPriority = LootPriorityRole.Normal;
+                if (!Enum.IsDefined(typeof(LootPriority), CurrentSettings.LootPriority))
+                    CurrentSettings.LootPriority = LootPriority.Normal;
                 return true;
             }
             CurrentSettings = new AutoEquipSettings();

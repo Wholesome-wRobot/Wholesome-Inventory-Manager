@@ -118,7 +118,7 @@
     <Compile Include="Managers\Quest\QuestRewardManager.cs" />
     <Compile Include="Managers\Roll\IRollManager.cs" />
     <Compile Include="Managers\Roll\LootPriorityCoordinator.cs" />
-    <Compile Include="Managers\Roll\LootPriorityRole.cs" />
+    <Compile Include="Managers\Roll\LootPriority.cs" />
     <Compile Include="Managers\Roll\LootRollIntent.cs" />
     <Compile Include="Managers\CharacterSheet\ISheetSlot.cs" />
     <Compile Include="Managers\CharacterSheet\ISkillsManager.cs" />

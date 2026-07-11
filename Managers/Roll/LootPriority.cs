@@ -1,6 +1,6 @@
 namespace Wholesome_Inventory_Manager.Managers.Roll
 {
-    public enum LootPriorityRole
+    public enum LootPriority
     {
         Normal = 1,
         High = 2,

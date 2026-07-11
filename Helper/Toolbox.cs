@@ -1,5 +1,7 @@
 ﻿using robotManager.Products;
 using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 using WholesomeToolbox;
 using wManager.Wow.Helpers;
@@ -60,6 +62,24 @@ public class ToolBox
     public static void PrintLuaTime(string suffix)
     {
         Lua.LuaDoString($@"DEFAULT_CHAT_FRAME:AddMessage(""{suffix} "" .. date(""%H:%M:%S""));");
+    }
+
+    public static void TryDelete(string filePath)
+    {
+        try
+        {
+            File.Delete(filePath);
+        }
+        catch (System.Exception e)
+        {
+            Logger.LogError("ToolBox > TryDelete(): " + e.Message);
+        }
+    }
+
+    public static string SafeFileName(string value)
+    {
+        string safe = Regex.Replace(value ?? "Unknown", @"[^\w\.-]", "_");
+        return string.IsNullOrEmpty(safe) ? "Unknown" : safe;
     }
 
     public static void LUASetup()

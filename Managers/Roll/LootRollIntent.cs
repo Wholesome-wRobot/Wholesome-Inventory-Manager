@@ -5,7 +5,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
     public class LootRollIntent
     {
         public int RollId { get; set; }
-        public LootPriorityRole Role { get; set; }
+        public LootPriority Priority { get; set; }
         public DateTime CreatedAtUtc { get; set; }
     }
 }

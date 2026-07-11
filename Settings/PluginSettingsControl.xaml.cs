@@ -47,7 +47,7 @@ namespace Wholesome_Inventory_Manager.Settings
             // Group loot
             AlwaysGreed.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysGreed;
             AlwaysPass.IsChecked = AutoEquipSettings.CurrentSettings.AlwaysPass;
-            LootPriority.ItemsSource = Enum.GetNames(typeof(LootPriorityRole));
+            LootPriority.ItemsSource = Enum.GetNames(typeof(LootPriority));
             LootPriority.SelectedItem = AutoEquipSettings.CurrentSettings.LootPriority.ToString();
 
             // Misc
@@ -125,7 +125,7 @@ namespace Wholesome_Inventory_Manager.Settings
             if (LootPriority.SelectedItem == null)
                 return;
 
-            AutoEquipSettings.CurrentSettings.LootPriority = (LootPriorityRole)Enum.Parse(typeof(LootPriorityRole), LootPriority.SelectedItem.ToString());
+            AutoEquipSettings.CurrentSettings.LootPriority = (LootPriority)Enum.Parse(typeof(LootPriority), LootPriority.SelectedItem.ToString());
             AutoEquipSettings.CurrentSettings.Save();
         }
 

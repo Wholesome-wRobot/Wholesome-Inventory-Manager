@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using wManager.Wow.ObjectManager;
 
@@ -20,7 +19,7 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             "WholesomeInventoryManager",
             "LootRollCache");
 
-        public bool TryWriteIntent(int rollId, LootPriorityRole role)
+        public bool TryWriteIntent(int rollId, LootPriority priority)
         {
             try
             {
@@ -30,11 +29,11 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
                 LootRollIntent intent = new LootRollIntent
                 {
                     RollId = rollId,
-                    Role = role,
+                    Priority = priority,
                     CreatedAtUtc = DateTime.UtcNow
                 };
 
-                string fileName = $"{SafeFileName(ObjectManager.Me.Name)}_{rollId}.json";
+                string fileName = $"{ToolBox.SafeFileName(ObjectManager.Me.Name)}_{rollId}.json";
                 string finalPath = Path.Combine(CacheDirectory, fileName);
                 string tempPath = finalPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
 
@@ -53,18 +52,18 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             }
         }
 
-        public bool SomeoneHasHigherPriorityNeed(int rollId, LootPriorityRole currentRole)
+        public bool SomeoneHasHigherLootPriority(int rollId, LootPriority currentPriority)
         {
             try
             {
                 CleanupOldIntents();
 
                 return ReadValidIntents(rollId)
-                    .Any(intent => intent.Role > currentRole);
+                    .Any(intent => intent.Priority > currentPriority);
             }
             catch (Exception e)
             {
-                Logger.LogError("LootPriorityCoordinator > SomeoneHasHigherPriorityNeed(): " + e.Message);
+                Logger.LogError("LootPriorityCoordinator > SomeoneHasHigherLootPriority(): " + e.Message);
                 return false;
             }
         }
@@ -117,31 +116,13 @@ namespace Wholesome_Inventory_Manager.Managers.Roll
             {
                 LootRollIntent intent = ReadIntent(filePath);
                 if (intent == null || intent.CreatedAtUtc < oldestValidDate)
-                    TryDelete(filePath);
+                    ToolBox.TryDelete(filePath);
             }
 
             foreach (string filePath in Directory.GetFiles(CacheDirectory, "*.tmp"))
             {
-                TryDelete(filePath);
+                ToolBox.TryDelete(filePath);
             }
-        }
-
-        private void TryDelete(string filePath)
-        {
-            try
-            {
-                File.Delete(filePath);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("LootPriorityCoordinator > TryDelete(): " + e.Message);
-            }
-        }
-
-        private string SafeFileName(string value)
-        {
-            string safe = Regex.Replace(value ?? "Unknown", @"[^\w\.-]", "_");
-            return string.IsNullOrEmpty(safe) ? "Unknown" : safe;
         }
     }
 }
